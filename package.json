@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "./dist/index.js",
+    "dev": "nodemon ./dist/index.js"
   },
   "keywords": [],
   "author": "",
