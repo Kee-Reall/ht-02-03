@@ -1,5 +1,5 @@
 import express, {Request, Response} from 'express'
-import { httpStatus } from './enums/httpStatus'
+import { httpStatus } from './enums/httpEnum'
 import { apiRouter } from './routes/apiRouter'
 
 const app = express()
