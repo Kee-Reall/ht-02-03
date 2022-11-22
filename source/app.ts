@@ -1,19 +1,11 @@
 import express, {Request, Response} from 'express'
+import { httpStatus } from './enums/httpStatus'
+import { apiRouter } from './routes/apiRouter'
 
 const app = express()
 
 app.use(express.json())
 
-app.get('/',(req,res) =>{
-    res.status(400).json({'test':'jest'})
-})
-
-app.post('/',(req,res) => {
-    res.json(...req.body)
-})
-
-app.patch('/',(req:Request, res: Response) => {
-    res.json({'patch':true})
-})
+app.use(apiRouter)
 
 export default app
