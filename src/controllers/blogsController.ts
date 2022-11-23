@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { store } from "../dataLayer/store";
+import {httpStatus} from "../enums/httpEnum";
 
 class BlogsController {
 
@@ -12,11 +13,12 @@ class BlogsController {
 
     async getOne(req: Request, res: Response) {
         console.log('one', req.path)
-        res.status(200).json({getOne:'Blog'})
+        res.status(httpStatus.ok).json(store.getBlog(req.params.id))
     }
 
     async createBlog(req: Request, res: Response) {
-        res.status(400).json({create:'Blog'})
+        const result = store.createBlog(req.body)
+        res.status(201).json(result)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {
