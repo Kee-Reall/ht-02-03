@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-
+import { store } from "../dataLayer/store";
 
 class BlogsController {
 
@@ -7,8 +7,7 @@ class BlogsController {
     constructor(){}
 
     async getAll(req: Request, res: Response) {
-        console.log('all', req.path)
-        res.status(200).json({getAll:'Blog'})
+        res.status(200).json(store.getAllBlogs())
     }
 
     async getOne(req: Request, res: Response) {

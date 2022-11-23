@@ -1,14 +1,12 @@
 import { Router } from "express";
+import postsController from "../controllers/blogsController";
+export const postsRouter = Router()
+const root = '/'
+const param = root + ':id'
 
-const postsRouter = Router()
-
-const rootString = '/'
-
-postsRouter.get(rootString,()=>{})
-postsRouter.get(`${rootString}:id`,()=>{})
-postsRouter.post(rootString,()=>{})
-postsRouter.put(`${rootString}:id`,()=>{})
-postsRouter.patch(`${rootString}:id`,()=>{})
-postsRouter.delete(`${rootString}:id`,()=>{})
-
-export {postsRouter}
+postsRouter.get(root    ,postsController.getAll)
+postsRouter.get(param   ,postsController.getOne)
+postsRouter.post(root   ,postsController.createBlog)
+postsRouter.put(param   ,postsController.updateBlogUsingId)
+postsRouter.patch(root  ,postsController.deprecated)
+postsRouter.delete(param,postsController.deleteBlogUsingId)

@@ -1,8 +1,8 @@
 import {config} from 'dotenv'
-import path from 'path';
+import * as path from "path";
 
 config({
-    path: path.resolve('config')
+    path: path.resolve('config.txt')
 })
 
 const dbRemote = process.env.dbRemote

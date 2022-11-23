@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import {store} from "../dataLayer/store";
 
 
 class PostsController {
@@ -17,7 +18,8 @@ class PostsController {
     }
 
     async createBlog(req: Request, res: Response) {
-        res.status(400).json({create:'Post'})
+        const result = store.createBlog(req.body)
+        res.status(201).json(result)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {
