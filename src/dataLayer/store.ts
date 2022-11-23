@@ -23,12 +23,15 @@ class Store {
     }
 
     updateBlog(id: string,blog: blogInputModel) {
+        let result
         this.blogs = this.blogs.map(el =>{
            if (el.id === id) {
-               return {id: el.id,...blog}
+               result = {id: el.id,...blog}
+               return result
            }
            return el
         })
+        return result
     }
 
     delete(id: string) {

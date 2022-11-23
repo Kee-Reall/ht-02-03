@@ -8,21 +8,26 @@ class BlogsController {
     constructor(){}
 
     async getAll(req: Request, res: Response) {
-        res.status(200).json(store.getAllBlogs())
+        res.status(httpStatus.ok).json(store.getAllBlogs())
     }
 
     async getOne(req: Request, res: Response) {
-        console.log('one', req.path)
-        res.status(httpStatus.ok).json(store.getBlog(req.params.id))
+        const result = store.getBlog(req.params.id)
+        if(result) {
+            res.status(httpStatus.ok).json(result)
+            return
+        }
+        res.sendStatus(httpStatus.notFound)
     }
 
     async createBlog(req: Request, res: Response) {
         const result = store.createBlog(req.body)
-        res.status(201).json(result)
+        res.status(httpStatus.created).json(result)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {
-        res.status(200).json({update:'Blog'})
+        const result = store.updateBlog(req.params.id,req.body)
+        res.status(httpStatus.noContent).json(result)
     }
 
     async deleteBlogUsingId(req: Request, res: Response) {
