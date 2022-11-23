@@ -8,5 +8,5 @@ export const apiRouter = Router()
 apiRouter.use(basicAuth)
 
 
-apiRouter.all('/blogs',blogsRouter)
-apiRouter.all('/posts',postsRouter)
+apiRouter.use('/blogs',blogsRouter)
+apiRouter.use('/posts',postsRouter)

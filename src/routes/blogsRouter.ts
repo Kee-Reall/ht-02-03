@@ -3,13 +3,14 @@ import blogsController from "../controllers/blogsController";
 
 const blogsRouter = Router()
 
-const rootString = '/'
+const root = '/'
+const param = root + ':id'
 
-blogsRouter.get("/blogs",blogsController.getAll)
-blogsRouter.get("/blogs/:id",blogsController.getOne)
-blogsRouter.post(rootString,blogsController.createBlog)
-blogsRouter.put(`${rootString}:id`,blogsController.updateBlogUsingId)
-blogsRouter.patch(`${rootString}:id`,blogsController.deprecated)
-blogsRouter.delete(`${rootString}:id`,blogsController.deleteBlogUsingId)
+blogsRouter.get(   root , blogsController.getAll)
+blogsRouter.get(   param, blogsController.getOne)
+blogsRouter.post(  root , blogsController.createBlog)
+blogsRouter.put(   param, blogsController.updateBlogUsingId)
+blogsRouter.patch( root , blogsController.deprecated)
+blogsRouter.delete(param, blogsController.deleteBlogUsingId)
 
-export {blogsRouter}
+export { blogsRouter }
