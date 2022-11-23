@@ -1,4 +1,4 @@
-export declare enum httpMethod {
+export enum httpMethod {
     get = "GET",
     post = "POST",
     put = "PUT",
@@ -6,8 +6,9 @@ export declare enum httpMethod {
     del = "DELETE"
 }
 
-export declare enum httpStatus {
+export enum httpStatus {
     ok = 200,
+    noContent=204,
     badRequest = 400,
     notAuthorized = 401,
     notFound = 404,
