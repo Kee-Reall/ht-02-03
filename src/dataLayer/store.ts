@@ -7,6 +7,10 @@ class Store {
         public posts: postViewModel[]
     ) {}
 
+    generateId(string: "blog" | "post") {
+        return string + Math.ceil(Math.random() * (10 ** 15)).toString(36)
+    }
+
     getAllBlogs(): blogViewModel[] {
         return this.blogs
     }
@@ -17,7 +21,7 @@ class Store {
 
     createBlog(blog: blogInputModel): blogViewModel | undefined {
         const id: string = Date.now().toString(36)
-        const toPush = {id,...blog}
+        const toPush = {id: this.generateId('blog'),...blog}
         this.blogs.push(toPush)
         return toPush
     }
