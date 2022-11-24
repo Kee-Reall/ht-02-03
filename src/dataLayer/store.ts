@@ -17,7 +17,7 @@ class Store {
 
     createBlog(blog: blogInputModel): blogViewModel | undefined {
         const id: string = Date.now().toString(36)
-        const toPush = {...blog,id}
+        const toPush = {id,...blog}
         this.blogs.push(toPush)
         return toPush
     }
