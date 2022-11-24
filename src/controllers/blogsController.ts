@@ -4,7 +4,6 @@ import {httpStatus} from "../enums/httpEnum";
 
 class BlogsController {
 
-
     constructor(){}
 
     async getAll(req: Request, res: Response) {
@@ -14,8 +13,7 @@ class BlogsController {
     async getOne(req: Request, res: Response) {
         const result = store.getBlog(req.params.id)
         if(result) {
-            res.status(httpStatus.ok).json(result)
-            return
+           return res.status(httpStatus.ok).json(result) 
         }
         res.sendStatus(httpStatus.notFound)
     }
@@ -27,17 +25,23 @@ class BlogsController {
 
     async updateBlogUsingId(req: Request,res: Response) {
         const result = store.updateBlog(req.params.id,req.body)
-        res.status(httpStatus.noContent).json(result)
+        if(result) {
+            return res.sendStatus(httpStatus.noContent) 
+        }
+        res.sendStatus(httpStatus.notFound)
     }
 
     async deleteBlogUsingId(req: Request, res: Response) {
-        res.status(402).json({delete:'blog'})
+        const result = store.delete(req.params.id)
+        if(result) {
+            return res.sendStatus(httpStatus.noContent)
+        }
+        res.sendStatus(httpStatus.notFound)
     }
 
     deprecated(_: Request, res:Response) {
-        res.sendStatus(405)
+        res.sendStatus(httpStatus.deprecated)
     }
-
 }
 
 export default new BlogsController()
