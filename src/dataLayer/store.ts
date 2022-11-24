@@ -20,7 +20,6 @@ class Store {
     }
 
     createBlog(blog: blogInputModel): blogViewModel | undefined {
-        const id: string = Date.now().toString(36)
         const toPush = {id: this.generateId('blog'),...blog}
         this.blogs.push(toPush)
         return toPush
@@ -38,7 +37,7 @@ class Store {
         return flag
     }
 
-    delete(id: string): boolean {
+    deleteBlog(id: string): boolean {
         let flag: boolean = false
         if(this.getBlog(id)) {
             flag = true
@@ -46,6 +45,24 @@ class Store {
         } 
         return flag
     }
+
+    getAllPosts(): postViewModel[] {
+        return this.posts
+    }
+
+    getPost(id:string): postViewModel | undefined {
+        return this.posts.find( el => el.id === id)
+    }
+
+    createPost(post: postInputModel) {
+        const id = this.generateId("post")
+        const blog = this.getBlog(post.blogId)
+        const toPut = {id,...post, blogName: blog!.name}
+        this.posts.push(toPut)
+        return toPut
+    }
+
+
 }
 
 const store = new Store([],[])

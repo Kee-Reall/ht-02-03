@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import {store} from "../dataLayer/store";
+import { store } from "../dataLayer/store";
+import { httpStatus } from "../enums/httpEnum";
 
 
 class PostsController {
@@ -8,25 +9,24 @@ class PostsController {
     constructor(){}
 
     async getAll(req: Request, res: Response) {
-        console.log('all', req.path)
-        res.status(200).json({getAll:'Post'})
+        res.status(httpStatus.ok).json(store.getAllPosts())
     }
 
     async getOne(req: Request, res: Response) {
         console.log('one', req.path)
-        res.status(200).json({getOne:'Post'})
+        res.status(httpStatus.ok).json({getOne:'Post'})
     }
 
-    async createBlog(req: Request, res: Response) {
-        const result = store.createBlog(req.body)
+    async createPost(req: Request, res: Response) {
+        const result = store.createPost(req.body)
         res.status(201).json(result)
     }
 
-    async updateBlogUsingId(req: Request,res: Response) {
+    async updatePostUsingId(req: Request,res: Response) {
         res.status(200).json({update:'Post'})
     }
 
-    async deleteBlogUsingId(req: Request, res: Response) {
+    async deletePostUsingId(req: Request, res: Response) {
         res.status(402).json({delete:'Post'})
     }
 
@@ -35,5 +35,5 @@ class PostsController {
     }
 
 }
-
-export default new PostsController()
+const postsController = new PostsController()
+export { postsController }

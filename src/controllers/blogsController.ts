@@ -32,7 +32,7 @@ class BlogsController {
     }
 
     async deleteBlogUsingId(req: Request, res: Response) {
-        const result = store.delete(req.params.id)
+        const result = store.deleteBlog(req.params.id)
         if(result) {
             return res.sendStatus(httpStatus.noContent)
         }

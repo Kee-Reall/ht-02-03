@@ -9,14 +9,14 @@ export const blogMiddlewares = [
         .trim()
         .withMessage(message.invalidType)
         .isLength({min:1,max:15})
-        .withMessage(message.lengh),
+        .withMessage(message.length),
 
     body('description').exists()
         .withMessage(message.requireField)
         .isString()
         .trim()
         .isLength({min:1,max:500})
-        .withMessage(message.lengh),
+        .withMessage(message.length),
 
     body('websiteUrl').exists()
         .withMessage(message.requireField)
