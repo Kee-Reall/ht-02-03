@@ -21,8 +21,10 @@ export const blogMiddlewares = [
     body('websiteUrl').exists()
         .withMessage(message.requireField)
         .isString()
+        .withMessage("not string")
         .trim()
-        .isLength({min:1,max:15})
+        .isLength({min:1,max:100})
+        .withMessage("need to change length")
         .isURL()
         .withMessage(message.notUrl),
 
