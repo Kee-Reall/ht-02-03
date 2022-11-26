@@ -10,10 +10,6 @@ class TestingController {
         store.clearStore()
         res.sendStatus(httpStatus.noContent)
     }
-
-    async deprecated(req: Request, res: Response){
-        res.sendStatus(httpStatus.deprecated)
-    }
 }
 
 const testingController = new TestingController()
