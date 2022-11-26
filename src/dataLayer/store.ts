@@ -30,7 +30,10 @@ class Store {
         this.blogs = this.blogs.map(el =>{
            if (el.id === id) {
                flag = true
-               return {id: el.id,...blog}
+               return {
+                   id: el.id,
+                   ...blog
+               }
            }
            return el
         })
@@ -60,6 +63,34 @@ class Store {
         const toPut = {id,...post, blogName: blog!.name}
         this.posts.push(toPut)
         return toPut
+    }
+
+    updatePost(id: string,post: postInputModel): boolean {
+        let flag = false
+        this.posts = this.posts.map((el) => {
+            if(el.id === id) {
+                const blogName = this.getBlog(el.blogId)!.name
+                if(!blogName) {
+                    return el
+                }
+                flag = true
+                return {
+                    id: el.id,
+                    blogName,
+                    ...post
+                }
+            } return el
+        })
+        return flag
+    }
+
+    deletePost(id: string): boolean {
+        let flag: boolean = false
+        if(this.getPost(id)) {
+            flag = true
+            this.posts = this.posts.filter(el=> el.id !== id)
+        }
+        return flag
     }
 
 

@@ -19,11 +19,15 @@ class PostsController {
 
     async createPost(req: Request, res: Response) {
         const result = store.createPost(req.body)
-        res.status(201).json(result)
+        res.status(httpStatus.created).json(result)
     }
 
     async updatePostUsingId(req: Request,res: Response) {
-        res.status(200).json({update:'Post'})
+        const result = store.updatePost(req.params.id,req.body)
+        if(result) {
+            res.sendStatus(httpStatus.noContent)
+        }
+        res.sendStatus(httpStatus.notFound)
     }
 
     async deletePostUsingId(req: Request, res: Response) {
@@ -31,7 +35,7 @@ class PostsController {
     }
 
     deprecated(_: Request, res:Response) {
-        res.sendStatus(405)
+        res.sendStatus(httpStatus.deprecated)
     }
 
 }
