@@ -1,4 +1,4 @@
 import app from "./app";
-const port = process.env.port ?? 3000
+import { port } from "./helpers/config";
 
-app.listen(port,() => console.info('Server is running on port\n' + port))
+app.listen(port,() => console.log('Server is running on port\n' + port))
