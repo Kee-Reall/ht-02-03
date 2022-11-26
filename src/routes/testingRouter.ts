@@ -3,4 +3,3 @@ import { testingController} from "../controllers/testingController";
 export const testingRouter = Router()
 
 testingRouter.delete('all-data',  testingController.clearAll)
-testingRouter.all('*', testingController.deprecated)
