@@ -5,7 +5,7 @@ config({
     path: path.resolve('config.txt')
 })
 
-const dbRemote = process.env.dbRemote
+const dbRemote = process.env.dbRemote ?? undefined
 
 const dbHost = process.env.dbHost ?? 'localhost'
 const dbPort = process.env.dbPort ?? '27017'
