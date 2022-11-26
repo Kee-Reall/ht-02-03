@@ -8,7 +8,7 @@ export const errorHas = (req: Request, res: Response, next: NextFunction) => {
         return next()
     }
     const errorsMessages = error.array()
-        .map(el=> el.msg)
+        .map(el=> el.param)
         .filter((el,i,ar)=> ar.indexOf(el)===i)
         .map(el=>{
         return {
