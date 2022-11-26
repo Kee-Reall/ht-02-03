@@ -19,7 +19,6 @@ export const postMiddlewares = [
         .isLength({min:1,max:1000}),
 
     body('blogId').exists()
-        .isString()
         .trim()
         .custom((value) => {
         const result = store.getBlog(value)

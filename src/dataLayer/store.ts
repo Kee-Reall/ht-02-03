@@ -1,10 +1,11 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postViewModel, postInputModel} from "../models/postsModel";
+import {initialBlog} from "./initialStore";
 
 class Store {
     constructor(
-        public blogs: blogViewModel[],
-        public posts: postViewModel[]
+        public blogs: blogViewModel[] = [],
+        public posts: postViewModel[] = []
     ) {}
 
     generateId(string: "blog" | "post") {
@@ -57,7 +58,7 @@ class Store {
         return this.posts.find( el => el.id === id)
     }
 
-    createPost(post: postInputModel) {
+    createPost(post: postInputModel): postViewModel {
         const id = this.generateId("post")
         const blog = this.getBlog(post.blogId)
         const toPut = {id,...post, blogName: blog!.name}
@@ -93,8 +94,11 @@ class Store {
         return flag
     }
 
-
+    clearStore(): void {
+        this.posts = []
+        this.blogs = []
+    }
 }
 
-const store = new Store([],[])
+const store = new Store(initialBlog)
 export { store }

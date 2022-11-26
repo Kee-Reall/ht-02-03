@@ -13,7 +13,8 @@ class BlogsController {
     async getOne(req: Request, res: Response) {
         const result = store.getBlog(req.params.id)
         if(result) {
-           return res.status(httpStatus.ok).json(result) 
+            res.status(httpStatus.ok).json(result)
+            return
         }
         res.sendStatus(httpStatus.notFound)
     }

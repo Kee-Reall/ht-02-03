@@ -4,8 +4,12 @@ import { httpStatus } from "../enums/httpEnum";
 
 export const errorHas = (req: Request, res: Response, next: NextFunction) => {
     const error = validationResult(req)
-    if(error.isEmpty()) {
-      return next()  
+    if (error.isEmpty()) {
+        return next()
     }
-    return res.status(httpStatus.badRequest).json({errors: error.array()})    
+    const errorsMessages = error.array()
+        .map(({ msg: message, param: field }) => {
+            return {message, field}
+        })
+    return res.status(httpStatus.badRequest).json({errorsMessages})
 }
