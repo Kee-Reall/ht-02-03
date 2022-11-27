@@ -10,8 +10,8 @@ class Store {
         return string + Math.ceil(Math.random() * (10 ** 15)).toString(36)
     }
 
-    async getAllBlogs(): Collection<blogViewModel> {
-        const res = blogs.find({});
+    async getAllBlogs(): Promise<blogViewModel[]> {
+        return await blogs.find({}).toArray();
     }
 
 
