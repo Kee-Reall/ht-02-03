@@ -11,41 +11,47 @@ class Store {
     }
 
     async getAllBlogs(): Promise<blogViewModel[]> {
-        return await blogs.find({}).toArray();
+        const found = await blogs.find({}).toArray();
+        found.forEach(el=>{
+            //@ts-ignore
+            delete el._id
+        })
+        return found
     }
 
 
-    async getBlog(id:string): Promise<blogViewModel | undefined> {
-        return await blogs.findOne( {id: id})
+    async getBlog(id:string): Promise<blogViewModel | null> {
+        const found = await blogs.findOne( {id: id})
+        if(found) {
+            // @ts-ignore
+            delete found._id
+        }
+        return found
     }
 
     async createBlog(blog: blogInputModel): Promise <blogViewModel | undefined> {
         const toPush = {id: this.generateId('blog'),...blog}
-        this.blogs.push(toPush)
-        return toPush
+        try {
+            await blogs.insertOne(toPush)
+            return toPush
+        }catch (e) {
+            return undefined
+        }
     }
 
     async updateBlog(id: string,blog: blogInputModel): Promise<boolean> {
-        let flag = false
-        this.blogs = this.blogs.map(el =>{
-            if (el.id === id) {
-                flag = true
-                return {
-                    id: el.id,
-                    ...blog
-                }
-            }
-            return el
-        })
-        return flag
+        try {
+            await blogs.updateOne({id: id},{$set:{...blog}})
+            return true
+        } catch (e) {
+            return false
+        }
+
     }
 
     async deleteBlog(id: string): Promise<boolean> {
-        let flag: boolean = false
-        if(await this.getBlog(id)) {
-            flag = true
-          //  this.blogs = this.blogs.filter(el=> el.id !== id)
-        }
+        let flag: boolean
+        await blogs.deleteOne({id: id})
         return flag
     }
 
