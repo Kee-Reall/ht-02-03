@@ -16,9 +16,9 @@ export const errorHas = (req: Request, res: Response, next: NextFunction) => {
             field: el
         }
     })
-    //const
-        // .map(({ msg: message, param: field }) => {
-        //     return {message, field}
-        // })
+    // const errorsMessages = error.array()
+    //     .map(({ msg: message, param: field }) => {
+    //         return {message, field}
+    //     })
     return res.status(httpStatus.badRequest).json({errorsMessages})
 }

@@ -11,9 +11,9 @@ export const basicAuth = (req: Request, res: Response, next: NextFunction) => {
         return
     }
     const [type,auth64] = auth
-    console.log(type,auth64)
     const [login,password] = Buffer.from(auth64 ?? '', 'base64').toString('ascii').split(':')
-    if(login === 'admin' && password === 'qwerty' && type === 'Basic') {
+    const [adminLogin, adminPassword] = [process.env.LOGIN ?? 'admin', process.env.PASSWORD ?? 'qwerty']
+    if(login === adminLogin && password === adminPassword && type === 'Basic') {
         return next()
     }
     res.sendStatus(httpStatus.notAuthorized)
