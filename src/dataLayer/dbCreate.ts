@@ -3,9 +3,7 @@ import {postViewModel} from "../models/postsModel";
 import {blogViewModel} from "../models/blogModel";
 
 const dbUri = process.env.MONGO_URI ?? "mongodb://127.0.0.1:27017"
-
 export const client = new MongoClient(dbUri)
-
 export const db = client.db('ht-03')
 
 async function createCollections(): Promise<boolean> {
@@ -23,7 +21,6 @@ async function createCollections(): Promise<boolean> {
         console.log('something went wrong from db create')
         return false
     }
-
 }
 
 export const posts = db.collection<postViewModel>('posts')

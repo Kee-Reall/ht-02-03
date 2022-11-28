@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { store } from "../dataLayer/store";
+import { dbStore as store } from "../dataLayer/dbStore";
 import { httpStatus } from "../enums/httpEnum";
 
 
@@ -8,11 +8,11 @@ class PostsController {
     constructor(){}
 
     async getAll(req: Request, res: Response) {
-        res.status(httpStatus.ok).json(store.getAllPosts())
+        res.status(httpStatus.ok).json( await store.getAllPosts())
     }
 
     async getOne(req: Request, res: Response) {
-        const result = store.getPost(req.params.id)
+        const result = await store.getPost(req.params.id)
         if(result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -21,12 +21,12 @@ class PostsController {
     }
 
     async createPost(req: Request, res: Response) {
-        const result = store.createPost(req.body)
+        const result = await store.createPost(req.body)
         res.status(httpStatus.created).json(result)
     }
 
     async updatePostUsingId(req: Request,res: Response) {
-        const result = store.updatePost(req.params.id,req.body)
+        const result = await store.updatePost(req.params.id,req.body)
         if(result) {
             res.sendStatus(httpStatus.noContent)
             return
@@ -35,7 +35,7 @@ class PostsController {
     }
 
     async deletePostUsingId(req: Request, res: Response) {
-        const result = store.deletePost(req.params.id)
+        const result = await store.deletePost(req.params.id)
         if(result) {
             res.sendStatus(httpStatus.noContent)
             return
