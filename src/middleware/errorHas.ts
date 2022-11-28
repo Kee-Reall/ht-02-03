@@ -7,18 +7,12 @@ export const errorHas = (req: Request, res: Response, next: NextFunction) => {
     if (error.isEmpty()) {
         return next()
     }
-    const errorsMessages = error.array()
-        .map(el=> el.param)
-        .filter((el,i,ar)=> ar.indexOf(el)===i)
-        .map(el=>{
-        return {
-            message: 'Check next fields',
-            field: el
-        }
-    })
-    // const errorsMessages = error.array()
-    //     .map(({ msg: message, param: field }) => {
-    //         return {message, field}
-    //     })
+
+     const errorsMessages = error.array({
+         onlyFirstError:true
+     })
+         .map(({ msg: message, param: field }) => {
+             return {message, field}
+         })
     return res.status(httpStatus.badRequest).json({errorsMessages})
 }

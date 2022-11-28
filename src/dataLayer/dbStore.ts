@@ -1,28 +1,25 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
-import {postViewModel, postInputModel, postDbModel} from "../models/postsModel";
+import {postInputModel, postViewModel} from "../models/postsModel";
 import {blogs, posts} from "./dbCreate";
 
 class Store {
     constructor() {}
 
     generateId(string: "blog" | "post"): string {
-        return string + Math.ceil(Math.random() * (10 ** 15)).toString(36)
+        return string + Math.ceil(Math.random() * (10 ** 16)).toString(36)
     }
 
     async getAllBlogs(): Promise<blogViewModel[] | null> {
         try {
-            const found = await blogs.find({},{projection:{_id:false}}).toArray();
-            return found
+            return await blogs.find({}, {projection: {_id: false}}).toArray()
         } catch (e) {
             return null
         }
     }
 
-
     async getBlog(id:string): Promise<blogViewModel | null> {
         try {
-            const found = await blogs.findOne({id},{projection:{_id:false}})
-            return found
+            return await blogs.findOne({id}, {projection: {_id: false}})
         }
         catch(e) {
             return null
@@ -65,8 +62,7 @@ class Store {
 
     async getAllPosts(): Promise<postViewModel[] | null> {
         try {
-            const found = await posts.find({},{projection:{_id:false}}).toArray();
-            return found
+            return await posts.find({}, {projection: {_id: false}}).toArray()
         } catch (e) {
             return null
         }
@@ -74,8 +70,7 @@ class Store {
 
     async getPost(id:string): Promise<postViewModel | null> {
         try {
-            const found = await posts.findOne({id},{projection:{_id:false}})
-            return found
+            return await posts.findOne({id}, {projection: {_id: false}})
         }
         catch(e) {
             return null

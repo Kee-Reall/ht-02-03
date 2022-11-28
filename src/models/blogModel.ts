@@ -1,6 +1,6 @@
 import {ObjectId} from "mongodb";
 
-export interface blogViewModel {
+export interface blogViewModel  {
     id: string
     name: string
     description: string

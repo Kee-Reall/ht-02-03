@@ -5,7 +5,7 @@ export const initialBlog: Array<blogViewModel> = [
         "id": "blogone",
         "name": "one",
         "description": "one",
-        "websiteUrl": "deepdark.su"
+        "websiteUrl": "royalguard.gov.su"
     },
     {
         "id": "blogtwo",
