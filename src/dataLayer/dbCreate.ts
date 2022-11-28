@@ -17,7 +17,7 @@ async function createCollections(): Promise<boolean> {
             await db.createCollection('blogs')
         }
         return true
-    } catch (e){
+    } catch (e) {
         console.log('something went wrong from db create')
         return false
     }
