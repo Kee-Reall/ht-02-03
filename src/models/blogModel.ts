@@ -5,6 +5,7 @@ export interface blogViewModel {
     name: string
     description: string
     websiteUrl: string
+    createdAt: string
 }
 
 export interface blogDbModel extends blogViewModel {
