@@ -1,6 +1,6 @@
 import { body } from "express-validator"
 import { errorHas } from "./errorHas"
-import { store } from "../dataLayer/store";
+import { dbStore as store} from "../dataLayer/dbStore";
 
 export const postMiddlewares = [
     body('title').exists()
@@ -20,8 +20,8 @@ export const postMiddlewares = [
 
     body('blogId').exists()
         .trim()
-        .custom((value) => {
-        const result = store.getBlog(value)
+        .custom(async (value) => {
+        const result = await store.getBlog(value)
         if(!result) {
             throw new Error('blogId does not exist')
         }

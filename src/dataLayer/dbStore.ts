@@ -1,11 +1,11 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
-import {postViewModel, postInputModel} from "../models/postsModel";
+import {postViewModel, postInputModel, postDbModel} from "../models/postsModel";
 import {blogs, posts} from "./dbCreate";
 
 class Store {
     constructor() {}
 
-    generateId(string: "blog" | "post") {
+    generateId(string: "blog" | "post"): string {
         return string + Math.ceil(Math.random() * (10 ** 15)).toString(36)
     }
 
@@ -109,7 +109,9 @@ class Store {
                 createdAt: new Date(Date.now()).toISOString()
             }
             await posts.insertOne(toPut)
-            return toPut  
+            //@ts-ignore
+            delete toPut._id
+            return toPut
         }
         catch(e) {
             return null
@@ -123,7 +125,7 @@ class Store {
             if(!blogName?.name) {
                 return false
             }
-            posts.updateOne({id},{
+            await posts.updateOne({id},{
                 $set: {
                     blogName: blogName!.name,
                     ...post
@@ -146,8 +148,9 @@ class Store {
         }
     }
 
-    clearStore(): void {
-
+    async clearStore(): Promise<void> {
+        await posts.deleteMany({})
+        await blogs.deleteMany({})
     }
 }
 

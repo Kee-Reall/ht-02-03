@@ -1,3 +1,5 @@
+import {ObjectId} from "mongodb";
+
 export interface postViewModel {
     id: string
     title: string
@@ -5,6 +7,10 @@ export interface postViewModel {
     content: string
     blogId: string
     blogName: string
+}
+
+export interface postDbModel extends postViewModel{
+    _id: ObjectId
 }
 
 export interface postInputModel {
