@@ -11,11 +11,7 @@ class Store {
 
     async getAllBlogs(): Promise<blogViewModel[] | null> {
         try {
-            const found = await blogs.find({}).toArray();
-            found.forEach(el=>{
-                //@ts-ignore
-                delete el._id
-            })
+            const found = await blogs.find({},{projection:{_id:false}}).toArray();
             return found
         } catch (e) {
             return null
@@ -25,11 +21,7 @@ class Store {
 
     async getBlog(id:string): Promise<blogViewModel | null> {
         try {
-            const found = await blogs.findOne({id})
-            if(found) {
-                // @ts-ignore
-                delete found._id
-            }
+            const found = await blogs.findOne({id},{projection:{_id:false}})
             return found
         }
         catch(e) {
@@ -73,11 +65,7 @@ class Store {
 
     async getAllPosts(): Promise<postViewModel[] | null> {
         try {
-            const found = await posts.find({}).toArray();
-            found.forEach(el=>{
-                //@ts-ignore
-                delete el._id
-            })
+            const found = await posts.find({},{projection:{_id:false}}).toArray();
             return found
         } catch (e) {
             return null
@@ -86,11 +74,7 @@ class Store {
 
     async getPost(id:string): Promise<postViewModel | null> {
         try {
-            const found = await posts.findOne({id})
-            if(found) {
-                // @ts-ignore
-                delete found._id
-            }
+            const found = await posts.findOne({id},{projection:{_id:false}})
             return found
         }
         catch(e) {
