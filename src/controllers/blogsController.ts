@@ -20,8 +20,12 @@ class BlogsController {
     }
 
     async createBlog(req: Request, res: Response) {
-        const result = await store.createBlog(req.body)
-        res.status(httpStatus.created).json(result)
+        try {
+            const result = await store.createBlog(req.body)
+            res.status(httpStatus.created).json(await store.getBlog(result!.id))
+        } catch(e) {
+            res.sendStatus(httpStatus.teapot)
+        }
     }
 
     async updateBlogUsingId(req: Request,res: Response) {

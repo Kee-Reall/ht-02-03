@@ -38,7 +38,11 @@ class Store {
     }
 
     async createBlog(blog: blogInputModel): Promise <blogViewModel | null> {
-        const toPush = {id: this.generateId('blog'),...blog}
+        const toPush = {
+            id: this.generateId('blog'),
+            ...blog,
+            createdAt: new Date(Date.now()).toISOString()
+        }
         try {
             await blogs.insertOne(toPush)
             return toPush
@@ -98,7 +102,12 @@ class Store {
         try {
             const id = this.generateId("post")
             const blog = await this.getBlog(post.blogId)
-            const toPut = {id,...post, blogName: blog!.name}
+            const toPut = {
+                id,
+                ...post,
+                blogName: blog!.name,
+                createdAt: new Date(Date.now()).toISOString()
+            }
             await posts.insertOne(toPut)
             return toPut  
         }
