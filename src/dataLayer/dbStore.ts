@@ -52,8 +52,8 @@ class Store {
 
     async deleteBlog(id: string): Promise<boolean> {
         try {
-            await blogs.deleteOne({id})
-            return true
+            const {deletedCount} =  await blogs.deleteOne({id})
+            return deletedCount > 0
         } 
         catch (e) {
             return false
@@ -119,8 +119,8 @@ class Store {
 
     async deletePost(id: string):Promise<boolean> {
         try {
-            await blogs.deleteOne({id})
-            return true
+            const {deletedCount} =  await blogs.deleteOne({id})
+            return deletedCount > 0
         } 
         catch (e) {
             return false
