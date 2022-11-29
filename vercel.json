@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "name": "ht02-incubator",
+  "builds": [
+    { "src": "src/index.ts", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "src/index.ts" }
+  ]
+}
