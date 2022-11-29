@@ -1,7 +1,7 @@
-import app from "./app";
 import * as dotenv from 'dotenv'
-import { runDb } from "./dataLayer/dbCreate";
 dotenv.config()
+import app from "./app";
+import { runDb } from "./dataLayer/dbCreate";
 
 const port = process.env.PORT ?? 8000;
 

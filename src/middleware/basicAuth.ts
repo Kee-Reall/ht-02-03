@@ -12,7 +12,7 @@ export const basicAuth = (req: Request, res: Response, next: NextFunction) => {
     }
     const [type,auth64] = auth
     const [login,password] = Buffer.from(auth64 ?? '', 'base64').toString('ascii').split(':')
-    const [adminLogin, adminPassword] = [process.env.LOGIN ?? 'admin', process.env.PASSWORD ?? 'qwerty']
+    const [adminLogin, adminPassword] = [process.env.LOGIN, process.env.PASSWORD]
     if(login === adminLogin && password === adminPassword && type === 'Basic') {
         return next()
     }
