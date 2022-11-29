@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "name": "ht02-incubator",
   "builds": [
     { "src": "src/index.ts", "use": "@vercel/node" }
