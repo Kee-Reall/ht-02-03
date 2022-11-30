@@ -42,8 +42,8 @@ class Store {
 
     async updateBlog(id: string,blog: blogInputModel): Promise<boolean> {
         try {
-            await blogs.updateOne({id},{$set:{...blog}})
-            return true
+            const {modifiedCount} = await blogs.updateOne({id},{$set:{...blog}})
+            return modifiedCount > 0
         } catch (e) {
             return false
         }
@@ -87,7 +87,7 @@ class Store {
                 blogName: blog!.name,
                 createdAt: new Date(Date.now()).toISOString()
             }
-            await posts.insertOne(toPut)
+            await posts.insertOne(toPut,{})
             //@ts-ignore
             delete toPut._id
             return toPut
@@ -104,13 +104,13 @@ class Store {
             if(!blogName?.name) {
                 return false
             }
-            await posts.updateOne({id},{
+            const {modifiedCount} = await posts.updateOne({id},{
                 $set: {
                     blogName: blogName!.name,
                     ...post
                 }
             })
-            return true
+            return modifiedCount > 0
         }
         catch (e) {
             return false
