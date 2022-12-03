@@ -27,9 +27,10 @@ class Store {
     }
 
     async createBlog(blog: blogInputModel): Promise <blogViewModel | null> {
+        const {description,websiteUrl,name} = blog
         const toPush = {
             id: this.generateId('blog'),
-            ...blog,
+            description, websiteUrl, name,
             createdAt: new Date(Date.now()).toISOString()
         }
         try {
@@ -42,7 +43,14 @@ class Store {
 
     async updateBlog(id: string,blog: blogInputModel): Promise<boolean> {
         try {
-            const {modifiedCount} = await blogs.updateOne({id},{$set:{...blog}})
+            const {description,websiteUrl,name} = blog
+            const {modifiedCount} = await blogs.updateOne({id},{
+                $set:{
+                    description,
+                    websiteUrl,
+                    name,
+                }
+            })
             return modifiedCount > 0
         } catch (e) {
             return false
@@ -79,18 +87,17 @@ class Store {
 
     async createPost(post: postInputModel): Promise<postViewModel | null> {
         try {
+            const {blogId, content, shortDescription, title} = post
             const id = this.generateId("post")
             const blog = await this.getBlog(post.blogId)
             const toPut = {
                 id,
-                ...post,
+                blogId, content, shortDescription , title,
                 blogName: blog!.name,
                 createdAt: new Date(Date.now()).toISOString()
             }
-            await posts.insertOne(toPut,{})
-            //@ts-ignore
-            delete toPut._id
-            return toPut
+            await posts.insertOne(toPut)
+            return await this.getPost(toPut.id)
         }
         catch(e) {
             return null
@@ -100,14 +107,16 @@ class Store {
 
     async updatePost(id: string,post: postInputModel): Promise<boolean> {
         try {
-            const blogName = await this.getBlog(post.blogId)
+            const {blogId, content, shortDescription, title} = post
+            const blogName = await this.getBlog(blogId)
+
             if(!blogName?.name) {
                 return false
             }
             const {modifiedCount} = await posts.updateOne({id},{
                 $set: {
                     blogName: blogName!.name,
-                    ...post
+                    blogId, content, shortDescription , title
                 }
             })
             return modifiedCount > 0
