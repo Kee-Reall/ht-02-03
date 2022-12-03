@@ -6,8 +6,8 @@ export const blogMiddlewares = [
     body('name').exists()
         .withMessage(message.requireField)
         .isString()
-        .trim()
         .withMessage(message.invalidType)
+        .trim()
         .isLength({min:1,max:15})
         .withMessage(message.length),
 
