@@ -1,9 +1,10 @@
-import { blogViewModel } from "../models/blogModel";
-import { postViewModel } from "../models/postsModel";
-import { blogs, posts } from "./connectorCreater";
+import {blogViewModel} from "../models/blogModel";
+import {postViewModel} from "../models/postsModel";
+import {blogs, posts} from "./connectorCreater";
+import {blogSearchModel} from "../models/searchModel";
 
 class QueryRepository {
-    private readonly noHiddenId = {projection: {_id:false}};
+    private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
 
     async getAllBlogs(): Promise<blogViewModel[] | null> {
@@ -15,7 +16,7 @@ class QueryRepository {
         }
     }
 
-    async getBlogsCount(): Promise<number> {
+    async getAllBlogsCount(): Promise<number> {
         try {
             return await blogs.countDocuments()
         }
@@ -24,10 +25,30 @@ class QueryRepository {
         }
     }
 
-    async getWithPagination(skip: number, limit: number, configuration: any): Promise<blogViewModel[] | null>{
+    async getBlogsCount(filter: any): Promise<number> {
         try {
-            return await blogs.find(configuration)
-                .sort({})
+            const res = await blogs.estimatedDocumentCount()
+            console.log(res)
+            return res
+        }
+        catch (e) {
+            return 0
+        }
+    }
+
+    async getBlogWithPagination(
+        skip: number, limit: number,
+        {searchNameTerm, sortBy, sortDirection}: blogSearchModel
+    ): Promise<blogViewModel[] | null> {
+        const filter = {
+            name:{
+                $regex: searchNameTerm,
+                $options: "i"
+            }
+        }
+        try {
+            return await blogs.find(filter, this.noHiddenId)
+                .sort({[sortBy]: sortDirection})
                 .skip(skip)
                 .limit(limit)
                 .toArray()
@@ -37,11 +58,11 @@ class QueryRepository {
         }
     }
 
-    async getBlogById(id:string): Promise<blogViewModel | null> {
+    async getBlogById(id: string): Promise<blogViewModel | null> {
         try {
             return await blogs.findOne({id}, this.noHiddenId)
         }
-        catch(e) {
+        catch (e) {
             return null
         }
     }
@@ -55,11 +76,11 @@ class QueryRepository {
         }
     }
 
-    async getPost(id:string): Promise<postViewModel | null> {
+    async getPost(id: string): Promise<postViewModel | null> {
         try {
             return await posts.findOne({id}, this.noHiddenId)
         }
-        catch(e) {
+        catch (e) {
             return null
         }
     }

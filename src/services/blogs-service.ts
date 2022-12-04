@@ -2,6 +2,7 @@ import { queryRepository } from "../repositories/queryRepository";
 import {blogInputModel, blog, blogs, blogFilters} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
+import {blogSearchModel} from "../models/searchModel";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
@@ -10,10 +11,19 @@ class BlogsService {
 
     async getBlogs(params: blogFilters) {
         const shouldSkip: number = params.pageSize! * (params.pageNumber! - 1 )
-        const total = await queryRepository.getBlogsCount()
+        const searchConfig: blogSearchModel = {
+            searchNameTerm : params.searchNameTerm!,
+            sortBy : params.sortBy!,
+            sortDirection: params.sortDirection! === "asc" ? 1 : -1
+        }
+        const totalCount = await queryRepository.getBlogsCount(searchConfig.searchNameTerm)
+        const blogGot = await queryRepository.getBlogWithPagination(shouldSkip,params.pageSize!,searchConfig)
         return {
-            pagesCount: Math.ceil(total / params.pageSize!)
-
+            pagesCount: Math.ceil(blogGot?.length! / params.pageSize!),
+            page: params.pageNumber,
+            pageSize: params.pageSize,
+            totalCount,
+            items: blogGot
         }
     }
 

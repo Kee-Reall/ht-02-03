@@ -21,7 +21,7 @@ export interface blogInputModel {
 export type blog = blogViewModel | null
 export type blogs = Array<blogViewModel> | null
 export type blogFilters = {
-    searchNameTerms?:string
+    searchNameTerm?:string
     pageNumber?: number
     pageSize?: number
     sortBy?: keyof blogViewModel,

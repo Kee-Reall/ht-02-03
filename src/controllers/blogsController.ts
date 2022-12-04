@@ -12,9 +12,9 @@ class BlogsController {
     }
 
     async getBlogs(req: customRequest<blogFilters>, res: getBlogResponse) {
-        console.log(req.query)
-        //@ts-ignore
-        res.status(httpStatus.ok).json(await blogsService.getBlogs())
+        const result = await blogsService.getBlogs(req.query)
+        // @ts-ignore
+        res.status(httpStatus.ok).json(result)
     }
 
     async getOne(req: Request, res: Response) {
