@@ -5,6 +5,7 @@ export interface blogViewModel  {
     name: string
     description: string
     websiteUrl: string
+    createdAt: string
 }
 
 export interface blogDbModel extends blogViewModel {
@@ -19,3 +20,10 @@ export interface blogInputModel {
 
 export type blog = blogViewModel | null
 export type blogs = Array<blogViewModel> | null
+export type blogFilters = {
+    searchNameTerms?:string
+    pageNumber?: number
+    pageSize?: number
+    sortBy?: keyof blogViewModel,
+    sortDirection?: 'asc' | 'desc'
+}

@@ -15,6 +15,28 @@ class QueryRepository {
         }
     }
 
+    async getBlogsCount(): Promise<number> {
+        try {
+            return await blogs.countDocuments()
+        }
+        catch (e) {
+            return 0
+        }
+    }
+
+    async getWithPagination(skip: number, limit: number, configuration: any): Promise<blogViewModel[] | null>{
+        try {
+            return await blogs.find(configuration)
+                .sort({})
+                .skip(skip)
+                .limit(limit)
+                .toArray()
+        }
+        catch (e) {
+            return null
+        }
+    }
+
     async getBlogById(id:string): Promise<blogViewModel | null> {
         try {
             return await blogs.findOne({id}, this.noHiddenId)

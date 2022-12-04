@@ -1,11 +1,20 @@
 import { queryRepository } from "../repositories/queryRepository";
-import { blogInputModel, blog, blogs } from "../models/blogModel";
+import {blogInputModel, blog, blogs, blogFilters} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
         return await queryRepository.getAllBlogs()
+    }
+
+    async getBlogs(params: blogFilters) {
+        const shouldSkip: number = params.pageSize! * (params.pageNumber! - 1 )
+        const total = await queryRepository.getBlogsCount()
+        return {
+            pagesCount: Math.ceil(total / params.pageSize!)
+
+        }
     }
 
     async getBlog(id: string): Promise<blog> {

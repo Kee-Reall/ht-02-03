@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
 import { httpStatus } from "../enums/httpEnum";
 import { blogsService } from "../services/blogs-service";
-import { blog } from "../models/blogModel";
+import {blog, blogFilters} from "../models/blogModel";
+import {customRequest} from "../models/RequestModel";
+import {getBlogResponse} from "../models/ResponseModel";
 
 class BlogsController {
 
     async getAll(req: Request, res: Response) {
         res.status(httpStatus.ok).json(await blogsService.getAllBlogs())
+    }
+
+    async getBlogs(req: customRequest<blogFilters>, res: getBlogResponse) {
+        console.log(req.query)
+        //@ts-ignore
+        res.status(httpStatus.ok).json(await blogsService.getBlogs())
     }
 
     async getOne(req: Request, res: Response) {

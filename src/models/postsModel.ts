@@ -7,6 +7,7 @@ export interface postViewModel {
     content: string
     blogId: string
     blogName: string
+    createdAt: string
 }
 
 export interface postDbModel extends postViewModel{
