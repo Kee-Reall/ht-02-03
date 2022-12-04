@@ -19,3 +19,6 @@ export interface postInputModel {
     content: string
     blogId: string
 }
+
+export type post = postViewModel | null
+export type posts = Array<postViewModel> | null

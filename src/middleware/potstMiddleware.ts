@@ -1,7 +1,7 @@
 import { body } from "express-validator"
 import { errorHas } from "./errorHas"
-import { dbStore as store} from "../dataLayer/dbStore";
 import {message} from "../enums/messageEnum";
+import {checkForExistingBlog} from "../helpers/checkForExistingBlog";
 
 export const postMiddlewares = [
     body('title').exists()
@@ -31,15 +31,7 @@ export const postMiddlewares = [
     body('blogId').exists()
         .withMessage(message.requireField)
         .trim()
-        .custom(async (value) => {
-            const result = await store.getBlog(value)
-            if(!result) {
-                throw new Error('blogId does not exist')
-            }
-            else {
-                return true
-            }
-        })
+        .custom(checkForExistingBlog)
         .withMessage(message.notExist),
     errorHas
 ]

@@ -16,3 +16,6 @@ export interface blogInputModel {
     description: string
     websiteUrl: string
 }
+
+export type blog = blogViewModel | null
+export type blogs = Array<blogViewModel> | null

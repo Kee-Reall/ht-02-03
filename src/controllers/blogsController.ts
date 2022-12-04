@@ -1,17 +1,16 @@
 import { Request, Response } from "express";
-import { dbStore as store } from "../dataLayer/dbStore";
-import {httpStatus} from "../enums/httpEnum";
+import { httpStatus } from "../enums/httpEnum";
+import { blogsService } from "../services/blogs-service";
+import { blog } from "../models/blogModel";
 
 class BlogsController {
 
-    constructor(){}
-
     async getAll(req: Request, res: Response) {
-        res.status(httpStatus.ok).json(await store.getAllBlogs())
+        res.status(httpStatus.ok).json(await blogsService.getAllBlogs())
     }
 
     async getOne(req: Request, res: Response) {
-        const result = await store.getBlog(req.params.id)
+        const result: blog = await blogsService.getBlog(req.params.id)
         if(result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -20,28 +19,24 @@ class BlogsController {
     }
 
     async createBlog(req: Request, res: Response) {
-        try {
-            const result = await store.createBlog(req.body)
-            res.status(httpStatus.created).json(await store.getBlog(result!.id))
-        } catch(e) {
-            res.sendStatus(httpStatus.teapot)
+        const result: blog = await blogsService.createBlog(req.body)
+        if(result) {
+            res.status(httpStatus.created).json(result)
+            return
         }
+        res.sendStatus(httpStatus.teapot)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {
-        const result = await store.updateBlog(req.params.id,req.body)
-        if(result) {
-            return res.sendStatus(httpStatus.noContent) 
-        }
-        res.sendStatus(httpStatus.notFound)
+        const result: boolean = await blogsService.updateBlog(req.params.id,req.body)
+        const status: number = result ? httpStatus.noContent : httpStatus.notFound
+        res.sendStatus(status)
     }
 
     async deleteBlogUsingId(req: Request, res: Response) {
-        const result = await store.deleteBlog(req.params.id)
-        if(result) {
-            return res.sendStatus(httpStatus.noContent)
-        }
-        res.sendStatus(httpStatus.notFound)
+        const result: boolean = await blogsService.deleteBlog(req.params.id)
+        const status: number = result ? httpStatus.noContent : httpStatus.notFound
+        res.sendStatus(status)
     }
 
     deprecated(_: Request, res:Response) {

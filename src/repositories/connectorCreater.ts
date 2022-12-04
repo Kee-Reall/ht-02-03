@@ -16,7 +16,6 @@ export async function runDb(): Promise<void> {
     try {
         await client.connect()
         await client.db('test').command({ping: 1})
-        await client.db()
         console.log('db Connection success\n Creating required collections')
     }
     catch (error) {
