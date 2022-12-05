@@ -84,6 +84,20 @@ class QueryRepository {
             return null
         }
     }
+
+    async getPostsByFilter(config: any): Promise<postViewModel[] | null> {
+        try {
+            const sorter: any = {[config.sortBy] : config.sortDirection === 'asc' ? 1 : -1}
+            return await posts.find(config.filter)
+                .sort(sorter)
+                .skip(config.shouldSkip)
+                .limit(config.limit)
+                .toArray()
+        }
+        catch (e) {
+            return null
+        }
+    }
 }
 
 export const queryRepository = new QueryRepository()

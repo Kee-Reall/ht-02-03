@@ -47,6 +47,11 @@ class BlogsController {
         res.sendStatus(status)
     }
 
+    async getBlogsPost(req: Request, res: Response) {
+        const result = await(blogsService.getBlogPosts(req.params.id, req.query))
+        res.json({ok:'OK'})
+    }
+
     deprecated(_: Request, res:Response) {
         res.sendStatus(httpStatus.deprecated)
     }

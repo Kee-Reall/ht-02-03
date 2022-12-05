@@ -3,6 +3,7 @@ import {blogInputModel, blog, blogs, blogFilters} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogSearchModel} from "../models/searchModel";
+import { config } from "dotenv";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
@@ -29,6 +30,27 @@ class BlogsService {
 
     async getBlog(id: string): Promise<blog> {
         return await queryRepository.getBlogById(id)
+    }
+
+    async getBlogPosts(blogId: string, params: any) {
+        const config = {
+            filter: {
+                blogId
+            },
+            sortBy: params.sortBy,
+            shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
+            limit: params.pageSize,
+            sortDirection: params.sortDirection
+        }
+        const blogGot = await queryRepository.getPosts(config)
+
+        return {
+            pagesCount: Math.ceil(blogGot?.length! / params.pageSize!),
+            page: params.pageNumber,
+            pageSize: params.pageSize,
+            totalCount,
+            items: blogGot
+        }
     }
 
     async createBlog(blogInput: blogInputModel): Promise<blog> {
