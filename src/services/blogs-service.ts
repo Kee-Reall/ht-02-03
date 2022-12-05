@@ -1,9 +1,9 @@
 import { queryRepository } from "../repositories/queryRepository";
-import {blogInputModel, blog, blogs, blogFilters} from "../models/blogModel";
+import {blogInputModel, blog, blogs} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogSearchModel} from "../models/searchModel";
-import { config } from "dotenv";
+import {blogFilters} from "../models/filtersModel";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
@@ -45,7 +45,7 @@ class BlogsService {
         const blogGot = await queryRepository.getPostsByFilter(config)
         const totalCount = await queryRepository.getPostsCount(config.filter)
         return {
-            pagesCount: Math.ceil(blogGot?.length! / params.pageSize!),
+            pagesCount: Math.ceil(totalCount / params.pageSize!),
             page: params.pageNumber,
             pageSize: params.pageSize,
             totalCount,

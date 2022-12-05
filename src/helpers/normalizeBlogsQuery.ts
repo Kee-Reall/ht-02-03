@@ -1,4 +1,4 @@
-import {blogFilters} from "../models/blogModel";
+import {blogFilters} from "../models/filtersModel";
 
 export function normalizeBlogsQuery(query: blogFilters):blogFilters {
     const directions: any[] = ['asc','desc']

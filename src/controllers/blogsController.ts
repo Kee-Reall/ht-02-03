@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { httpStatus } from "../enums/httpEnum";
 import { blogsService } from "../services/blogs-service";
-import {blog, blogFilters} from "../models/blogModel";
+import {blog} from "../models/blogModel";
 import {customRequest} from "../models/RequestModel";
 import {getBlogResponse} from "../models/ResponseModel";
+import {blogFilters} from "../models/filtersModel";
 
 class BlogsController {
 
