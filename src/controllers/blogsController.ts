@@ -49,7 +49,7 @@ class BlogsController {
 
     async getBlogsPost(req: Request, res: Response) {
         const result = await(blogsService.getBlogPosts(req.params.id, req.query))
-        res.json({ok:'OK'})
+        res.json(result)
     }
 
     deprecated(_: Request, res:Response) {

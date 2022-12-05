@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from "express";
-import {normalizeQuery} from "../helpers/normalizeQuery";
+import {normalizeBlogsQuery} from "../helpers/normalizeBlogsQuery";
 
 export const configureGetQuery = (req: Request, res: Response, next: NextFunction) => {
     //@ts-ignore
-    req.query = normalizeQuery(req.query)
+    req.query = normalizeBlogsQuery(req.query)
     next()
 }

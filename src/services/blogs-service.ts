@@ -42,8 +42,8 @@ class BlogsService {
             limit: params.pageSize,
             sortDirection: params.sortDirection
         }
-        const blogGot = await queryRepository.getPosts(config)
-
+        const blogGot = await queryRepository.getPostsByFilter(config)
+        const totalCount = await queryRepository.getPostsCount(config.filter)
         return {
             pagesCount: Math.ceil(blogGot?.length! / params.pageSize!),
             page: params.pageNumber,
