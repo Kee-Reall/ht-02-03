@@ -1,20 +1,16 @@
-import {query} from "express-validator";
+import {query, param} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {errorHas} from "./errorHas";
-import {configureGetQuery} from "./configureGetQuery";
+import {configureGetBlogsQuery} from "./configureGetBlogsQuery";
+import {checkForExistingBlog} from "../helpers/checkForExistingBlog";
 
-export const getBlogsMiddleware = [
-    query('searchNameTerm').exists()
-        .withMessage(message.requireField)
-        .trim()
-        .isLength({min:1,max:500})
-        .withMessage(message.length),
-
+export const getPostsByBlogMiddleware = [
     query('sortBy').exists()
         .withMessage(message.requireField)
         .trim()
         .isLength({min:1,max:500})
         .withMessage(message.length),
 
-    errorHas, configureGetQuery
+    param('id').custom(checkForExistingBlog),
+    errorHas, configureGetBlogsQuery
 ]
