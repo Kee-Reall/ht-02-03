@@ -5,6 +5,7 @@ import {blog} from "../models/blogModel";
 import {customRequest} from "../models/RequestModel";
 import {getBlogResponse} from "../models/ResponseModel";
 import {blogFilters} from "../models/filtersModel";
+import {post} from "../models/postsModel";
 
 class BlogsController {
 
@@ -14,7 +15,7 @@ class BlogsController {
 
     async getBlogs(req: customRequest<blogFilters>, res: getBlogResponse) {
         const result = await blogsService.getBlogs(req.query)
-        // @ts-ignore
+        //@ts-ignore
         res.status(httpStatus.ok).json(result)
     }
 
@@ -34,6 +35,10 @@ class BlogsController {
             return
         }
         res.sendStatus(httpStatus.teapot)
+    }
+
+    async createPostForThisBlog(req: Request, res: Response) {
+        //const result: post = await blogsService.createPostForBlogs(id,)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {

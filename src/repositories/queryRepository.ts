@@ -7,35 +7,38 @@ class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
 
-    async getAllBlogs(): Promise<blogViewModel[] | null> {
+    async getAllBlogs(filter:any = this.all): Promise<blogViewModel[] | null> {
         try {
-            return await blogs.find(this.all, this.noHiddenId).toArray()
+            const filt = {name: {$regex: filter.searchNameTerm,$options: "i"}}
+            return await blogs.find(filt, this.noHiddenId).toArray()
         } catch (e) {
             return null
         }
     }
 
-    async getAllBlogsCount(): Promise<number> {
+    async getAllBlogsCount(filter:any): Promise<number> {
         try {
-            return await blogs.countDocuments()
+            return await blogs.count(filter)
         } catch (e) {
             return 0
         }
     }
 
-    async getBlogsCount(filter: any): Promise<number> {
+    async getBlogsCount(filter: string): Promise<number> {
         try {
-            const res = await blogs.find(filter).toArray()
-            return res.length
+            return  await blogs.count({
+                name: new RegExp(filter,'ig')
+            })
         } catch (e) {
-            return 0
+            return -1
         }
     }
 
     async getPostsCount(filter: any): Promise<number> {
         try {
-            const res = await posts.find(filter).toArray()
-            return res.length
+            console.log(filter)
+            const res = await posts.count(filter)
+            return res
         } catch (e) {
             return 0
         }
