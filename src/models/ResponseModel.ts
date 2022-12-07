@@ -1,7 +1,7 @@
 import {Response} from "express";
 import {blogViewModel} from "./blogModel";
 
-type output = {
+export type getOutput = {
     pagesCount: number,
     page: number,
     pageSize: number,
@@ -9,6 +9,6 @@ type output = {
     items: Array<blogViewModel>
 }
 
-type customResponse<T> = Response<T>
+export type customResponse<T> = Response<T>
 
-export type getBlogResponse = customResponse<output>
+export type getBlogResponse = customResponse<getOutput>

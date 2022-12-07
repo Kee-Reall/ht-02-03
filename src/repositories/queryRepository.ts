@@ -1,13 +1,13 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
 import {blogs, posts} from "./connectorCreater";
-import {blogSearchModel} from "../models/searchModel";
+import {SearchConfiguration} from "../models/searchConfiguration";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
 
-    async getAllBlogs(filter:any = this.all): Promise<blogViewModel[] | null> {
+    async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
         try {
             const filt = {name: {$regex: filter.searchNameTerm,$options: "i"}}
             return await blogs.find(filt, this.noHiddenId).toArray()
@@ -44,21 +44,19 @@ class QueryRepository {
         }
     }
 
-    async getBlogWithPagination(
-        skip: number, limit: number,
-        {searchNameTerm, sortBy, sortDirection}: blogSearchModel
-    ): Promise<blogViewModel[] | null> {
+    async getBlogWithPagination(config: SearchConfiguration): Promise<blogViewModel[] | null> {
         const filter = {
             name: {
-                $regex: searchNameTerm,
+                $regex: config.filter.name,
                 $options: "i"
             }
         }
+        const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
             return await blogs.find(filter, this.noHiddenId)
-                .sort({[sortBy]: sortDirection})
-                .skip(skip)
-                .limit(limit)
+                .sort({[config.sortBy]: direction})
+                .skip(config.shouldSkip)
+                .limit(config.limit)
                 .toArray()
         } catch (e) {
             return null

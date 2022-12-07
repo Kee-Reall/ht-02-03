@@ -1,7 +1,6 @@
 import {query} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {errorHas} from "./errorHas";
-import {configureGetBlogsQuery} from "./configureGetBlogsQuery";
 
 export const getBlogsMiddleware = [
     query('searchNameTerm').exists()
@@ -16,5 +15,5 @@ export const getBlogsMiddleware = [
         .isLength({min:1,max:500})
         .withMessage(message.length),
 
-    errorHas, configureGetBlogsQuery
+    errorHas
 ]

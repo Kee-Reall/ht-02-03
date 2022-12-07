@@ -11,7 +11,7 @@ const postsByThis = param + '/posts'
 blogsRouter.get(root, ...getBlogsMiddleware, blogsController.getBlogs)
 blogsRouter.get(param, blogsController.getOne)
 blogsRouter.get(postsByThis,...getPostsByBlogMiddleware, blogsController.getBlogsPost)
-blogsRouter.post(postsByThis, blogsController.)
+blogsRouter.post(postsByThis, blogsController.createPostForThisBlog)
 blogsRouter.post(root, ...blogMiddlewares , blogsController.createBlog)
 blogsRouter.put(param, ...blogMiddlewares, blogsController.updateBlogUsingId)
 blogsRouter.delete(param, blogsController.deleteBlogUsingId)

@@ -2,29 +2,34 @@ import { queryRepository } from "../repositories/queryRepository";
 import {blogInputModel, blog, blogs} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
-import {blogSearchModel} from "../models/searchModel";
 import {blogFilters} from "../models/filtersModel";
+import {getOutput} from "../models/ResponseModel";
+import {SearchConfiguration} from "../models/searchConfiguration";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
         return await queryRepository.getAllBlogs()
     }
 
-    async getBlogs(params: blogFilters) {
-        const shouldSkip: number = params.pageSize! * (params.pageNumber! - 1 )
-        const searchConfig: blogSearchModel = {
-            searchNameTerm : params.searchNameTerm!,
+    async getBlogs(params: blogFilters): Promise<getOutput> {
+        const searchConfig:SearchConfiguration = {
+            filter: {
+                name: params.searchNameTerm!
+            },
             sortBy : params.sortBy!,
-            sortDirection: params.sortDirection! === "asc" ? 1 : -1
+            sortDirection: params.sortDirection!,
+            shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
+            limit: params.pageSize!
         }
-        const totalCount = await queryRepository.getBlogsCount(searchConfig.searchNameTerm)
-        const blogGot = await queryRepository.getBlogWithPagination(shouldSkip,params.pageSize!,searchConfig)
+        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter.name)
+        const pagesCount = Math.ceil(totalCount / params.pageSize!)
+        const items = await queryRepository.getBlogWithPagination(searchConfig) || []
         return {
-            pagesCount: Math.ceil(totalCount / params.pageSize!),
-            page: params.pageNumber,
-            pageSize: params.pageSize,
+            pagesCount,
+            page: params.pageNumber!,
+            pageSize: params.pageSize!,
             totalCount,
-            items: blogGot
+            items
         }
     }
 
@@ -33,7 +38,7 @@ class BlogsService {
     }
 
     async getBlogPosts(blogId: string, params: any) {
-        const config = {
+        const config:SearchConfiguration = {
             filter: {
                 blogId
             },
