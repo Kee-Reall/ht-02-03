@@ -5,6 +5,8 @@ import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {getOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
+import { postInputThrowBlog, postInputModel } from "../models/postsModel";
+import { postsService } from "./posts-service";
 
 class BlogsService {
     async getAllBlogs(): Promise<blogs> {
@@ -56,6 +58,16 @@ class BlogsService {
             totalCount,
             items: blogGot
         }
+    }
+
+    async createPostForBlog(id:string,inputData: postInputThrowBlog) {
+        const post: postInputModel = {
+            title: inputData.title,
+            shortDescription: inputData.shortDescription,
+            content: inputData.content,
+            blogId: id,
+        }
+        return postsService.createPost(post)
     }
 
     async createBlog(blogInput: blogInputModel): Promise<blog> {

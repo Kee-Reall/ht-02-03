@@ -7,6 +7,7 @@ import {getBlogResponse} from "../models/ResponseModel";
 import {blogFilters} from "../models/filtersModel";
 import {normalizeBlogsQuery} from "../helpers/normalizeBlogsQuery";
 import {normalizePostsByBlogsQuery} from "../helpers/normalizePostsByBlogsQuery";
+import { post } from "../models/postsModel";
 
 class BlogsController {
 
@@ -16,7 +17,6 @@ class BlogsController {
 
     async getBlogs(req: customRequest<blogFilters>, res: getBlogResponse) {
         const result = await blogsService.getBlogs(normalizeBlogsQuery(req.query))
-        //@ts-ignore
         res.status(httpStatus.ok).json(result)
     }
 
@@ -39,7 +39,12 @@ class BlogsController {
     }
 
     async createPostForThisBlog(req: Request, res: Response) {
-        //const result: post = await blogsService.createPostForBlogs(id,)
+        const result: post = await blogsService.createPostForBlog(req.params.id,req.body)
+        if(result) {
+            res.status(httpStatus.created).json(result)
+            return
+        }
+        res.sendStatus(httpStatus.teapot)
     }
 
     async updateBlogUsingId(req: Request,res: Response) {

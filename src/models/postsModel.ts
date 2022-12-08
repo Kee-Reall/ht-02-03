@@ -14,6 +14,12 @@ export interface postDbModel extends postViewModel{
     _id: ObjectId
 }
 
+export interface postInputThrowBlog {
+    title: string
+    shortDescription: string
+    content: string
+}
+
 export interface postInputModel {
     title: string
     shortDescription: string
