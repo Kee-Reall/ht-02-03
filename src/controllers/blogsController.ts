@@ -6,7 +6,7 @@ import {customRequest} from "../models/RequestModel";
 import {getBlogResponse} from "../models/ResponseModel";
 import {blogFilters} from "../models/filtersModel";
 import {normalizeBlogsQuery} from "../helpers/normalizeBlogsQuery";
-import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
+import {normalizePostsByBlogsQuery} from "../helpers/normalizePostsByBlogsQuery";
 import { post } from "../models/postsModel";
 
 class BlogsController {
@@ -60,7 +60,7 @@ class BlogsController {
     }
 
     async getBlogsPost(req: Request, res: Response) {
-        const query = normalizePostsQuery(req.query)
+        const query = normalizePostsByBlogsQuery(req.query)
         const result = await(blogsService.getBlogPosts(req.params.id, query))
         res.json(result)
     }

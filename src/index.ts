@@ -5,13 +5,7 @@ import { runDb } from "./repositories/connectorCreater";
 
 const port = process.env.PORT ?? 8000;
 
-async function start() {
-    const res = await runDb()
-    if(res) {
-        app.listen(port,() => console.log('Server is running on port\n' + port))
-    } else {
-        throw new Error("failed to connect database")
-    }
-}
-
-start()
+(async function() {
+    await runDb()
+    app.listen(port,() => console.log('Server is running on port\n' + port))
+})()

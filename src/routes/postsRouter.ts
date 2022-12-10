@@ -5,7 +5,7 @@ export const postsRouter = Router()
 const root = '/'
 const param = root + ':id'
 
-postsRouter.get(root, postsController.getPosts)
+postsRouter.get(root, postsController.getAll)
 postsRouter.get(param, postsController.getOne)
 postsRouter.post(root, ...postMiddlewares, postsController.createPost)
 postsRouter.put(param, ...postMiddlewares, postsController.updatePostUsingId)

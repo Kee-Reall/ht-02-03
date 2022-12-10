@@ -3,8 +3,6 @@ import { post, posts, postInputModel } from "../models/postsModel";
 import { blog } from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
-import {blogFilters} from "../models/filtersModel";
-import {SearchConfiguration} from "../models/searchConfiguration";
 
 class PostsService {
     async getAllPosts(): Promise<posts> {
@@ -13,26 +11,6 @@ class PostsService {
 
     async getPost(id:string): Promise<post> {
         return await queryRepository.getPost(id)
-    }
-
-    async getPostsWithPagination(params: blogFilters) {
-        const searchConfig: SearchConfiguration = {
-            sortBy: params.sortBy!,
-            sortDirection: params.sortDirection!,
-            shouldSkip: params.pageSize! * (params.pageNumber! - 1),
-            limit: params.pageSize!
-        }
-        const totalCount = await queryRepository.getPostsCount()
-        const pagesCount = Math.ceil(totalCount / params.pageSize!)
-        const items = await queryRepository.getPostsWithPagination(searchConfig) || []
-        return {
-            pagesCount,
-            page: params.pageNumber!,
-            pageSize: params.pageSize!,
-            totalCount,
-            items
-        }
-
     }
 
     async createPost(postInput: postInputModel): Promise<post> {

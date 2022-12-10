@@ -1,13 +1,12 @@
 import {Response} from "express";
 import {blogViewModel} from "./blogModel";
-import {postViewModel} from "./postsModel";
 
 export type getOutput = {
     pagesCount: number,
     page: number,
     pageSize: number,
     totalCount: number,
-    items: Array<blogViewModel | postViewModel>
+    items: Array<blogViewModel>
 }
 
 export type customResponse<T> = Response<T>

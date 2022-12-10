@@ -1,6 +1,6 @@
 import {blogFilters} from "../models/filtersModel";
 
-export function normalizePostsQuery(query: blogFilters):blogFilters {
+export function normalizePostsByBlogsQuery(query: blogFilters):blogFilters {
     const directions: any[] = ['asc','desc']
     let sortDirection: 'desc' | 'asc' = 'desc'
     if(directions.includes(query.sortDirection)){

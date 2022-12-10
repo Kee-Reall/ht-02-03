@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { httpStatus } from "../enums/httpEnum";
 import { postsService } from "../services/posts-service";
 import { post } from "../models/postsModel";
-import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
 
 
 class PostsController {
@@ -18,12 +17,6 @@ class PostsController {
             return
         }
         res.sendStatus(httpStatus.notFound)
-    }
-
-    async getPosts(req: Request, res: Response) {
-        const query = normalizePostsQuery(req.query)
-        const result = await(postsService.getPostsWithPagination(query))
-        res.status(httpStatus.ok).json(result)
     }
 
     async createPost(req: Request, res: Response) {
