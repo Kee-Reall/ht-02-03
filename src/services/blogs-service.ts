@@ -23,7 +23,7 @@ class BlogsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize!
         }
-        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter.name)
+        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter!.name)
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
         const items = await queryRepository.getBlogWithPagination(searchConfig) || []
         return {

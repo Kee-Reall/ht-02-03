@@ -12,14 +12,16 @@ export const db = client.db('ht-03')
 export const posts = db.collection<postViewModel>('posts')
 export const blogs = db.collection<blogViewModel>('blogs')
 
-export async function runDb(): Promise<void> {
+export async function runDb(): Promise<boolean> {
     try {
         await client.connect()
         await client.db('test').command({ping: 1})
         console.log('db Connection success\n Creating required collections')
+        return true
     }
     catch (error) {
         console.log('Cannot connect to db \n' + error)
         await client.close()
+        return false
     }
 }
