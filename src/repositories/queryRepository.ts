@@ -88,7 +88,7 @@ class QueryRepository {
     async getPostsWithPagination(config: SearchConfiguration) {
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
-            return await blogs.find(this.all, this.noHiddenId)
+            return await posts.find(this.all, this.noHiddenId)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
