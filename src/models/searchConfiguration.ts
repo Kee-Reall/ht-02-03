@@ -1,5 +1,5 @@
 export interface SearchConfiguration {
-    filter:{
+    filter?:{
         [key: string] : string
     }
     sortBy: string

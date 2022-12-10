@@ -9,8 +9,8 @@ class QueryRepository {
 
     async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
         try {
-            const filt = {name: {$regex: filter.searchNameTerm,$options: "i"}}
-            return await blogs.find(filt, this.noHiddenId).toArray()
+            const reg = {name: {$regex: filter.searchNameTerm,$options: "i"}}
+            return await blogs.find(reg, this.noHiddenId).toArray()
         } catch (e) {
             return null
         }
@@ -34,11 +34,9 @@ class QueryRepository {
         }
     }
 
-    async getPostsCount(filter: any): Promise<number> {
+    async getPostsCount(filter: any = this.all): Promise<number> {
         try {
-            console.log(filter)
-            const res = await posts.count(filter)
-            return res
+            return await posts.count(filter)
         } catch (e) {
             return 0
         }
@@ -47,7 +45,7 @@ class QueryRepository {
     async getBlogWithPagination(config: SearchConfiguration): Promise<blogViewModel[] | null> {
         const filter = {
             name: {
-                $regex: config.filter.name,
+                $regex: config.filter!.name,
                 $options: "i"
             }
         }
@@ -87,10 +85,23 @@ class QueryRepository {
         }
     }
 
-    async getPostsByFilter(config: any): Promise<postViewModel[] | null> {
+    async getPostsWithPagination(config: SearchConfiguration) {
+        const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
+        try {
+            return await blogs.find(this.all, this.noHiddenId)
+                .sort({[config.sortBy]: direction})
+                .skip(config.shouldSkip)
+                .limit(config.limit)
+                .toArray()
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getPostsByFilter(config: SearchConfiguration): Promise<postViewModel[] | null> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            return await posts.find(config.filter)
+            return await posts.find(config.filter!)
                 .sort(sorter)
                 .skip(config.shouldSkip)
                 .limit(config.limit)
