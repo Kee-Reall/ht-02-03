@@ -2,7 +2,6 @@ import { Router } from "express";
 import blogsController from "../controllers/blogsController";
 import { blogMiddlewares } from "../middleware/blogsMiddleware";
 import { createPostForBlogMiddleware } from "../middleware/createPostForBlog";
-import {getBlogsMiddleware} from "../middleware/getBlogsMiddleware";
 import {getPostsByBlogMiddleware} from "../middleware/postsFromBlogs";
 export const blogsRouter = Router()
 const root = '/'
