@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { httpStatus } from "../enums/httpEnum";
+import { httpMethod, httpStatus } from "../enums/httpEnum";
 
-export const basicAuth = (req: Request, res: Response, next: NextFunction) => {
+export const basicAuthWithoutGet = (req: Request, res: Response, next: NextFunction) => {
+    if(req.method === httpMethod.get) {
+        return next()
+    }
     const auth = req.headers.authorization?.split(' ')
     if(!Array.isArray(auth)){
         res.sendStatus(httpStatus.notAuthorized)
