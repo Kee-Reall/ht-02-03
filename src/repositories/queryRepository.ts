@@ -101,7 +101,7 @@ class QueryRepository {
     async getPostsByFilter(config: SearchConfiguration): Promise<postViewModel[] | null> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            return await posts.find(config.filter!)
+            return await posts.find(config.filter!,this.noHiddenId)
                 .sort(sorter)
                 .skip(config.shouldSkip)
                 .limit(config.limit)
