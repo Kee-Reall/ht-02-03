@@ -9,7 +9,7 @@ const root = '/'
 const param = root + ':id'
 const postsByThis = param + '/posts'
 
-blogsRouter.get(root, ...getBlogsMiddleware, blogsController.getBlogs)
+blogsRouter.get(root, blogsController.getBlogs)
 blogsRouter.get(param, blogsController.getOne)
 blogsRouter.get(postsByThis,...getPostsByBlogMiddleware, blogsController.getBlogsPost)
 blogsRouter.post(postsByThis,...createPostForBlogMiddleware, blogsController.createPostForThisBlog)
