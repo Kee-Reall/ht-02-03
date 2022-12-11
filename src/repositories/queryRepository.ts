@@ -132,6 +132,14 @@ class QueryRepository {
             return null
         }
     }
+
+    async getUserById(id: string): Promise<userViewModel | null> {
+        try {
+            return await users.findOne({id},this.userProjection)
+        } catch (e) {
+            return null
+        }
+    }
 }
 
 export const queryRepository = new QueryRepository()

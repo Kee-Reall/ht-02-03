@@ -1,6 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {blogs, posts} from "./connectorCreater";
+import {blogs, posts, users} from "./connectorCreater";
+import {userLogicModel} from "../models/userModel";
 
 class CommandRepository {
 
@@ -60,6 +61,15 @@ class CommandRepository {
             return deletedCount > 0
         }
         catch (e) {
+            return false
+        }
+    }
+
+    async createUser(user: userLogicModel): Promise<boolean> {
+        try {
+            const result = await users.insertOne(user)
+            return result.acknowledged
+        } catch (e) {
             return false
         }
     }

@@ -1,7 +1,10 @@
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {userViewModel} from "../models/userModel";
+import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
+import {genSalt, hash}  from 'bcrypt'
+import {commandRepository} from "../repositories/commandRepository";
+import generateId from "../helpers/generateId";
 
 class UsersService {
     async getUsers(params: usersFilters): Promise<getOutput> {
@@ -28,6 +31,25 @@ class UsersService {
             totalCount,
             items
         }
+    }
+
+
+    async createUser(input: userInputModel): Promise<userViewModel | null> {
+        const createdAt: string = new Date(Date.now()).toISOString()
+        const salt = await genSalt(10)
+        const hashedPas = await hash(salt,input.password)
+        const id = generateId("user")
+        const user: userLogicModel = {
+            login: input.login,
+            email: input.email,
+            hash: hashedPas,
+            createdAt, salt, id
+        }
+        const result = await commandRepository.createUser(user)
+        if(result) {
+            return await queryRepository.getUserById(id)
+        }
+        return null
     }
 
 }
