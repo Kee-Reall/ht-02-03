@@ -7,7 +7,7 @@ export function normalizeBlogsQuery(query: blogFilters):blogFilters {
         sortDirection = query.sortDirection!
     }
     return {
-        searchNameTerm: query.searchNameTerm ?? '',
+        searchNameTerm: query.searchNameTerm ?? '[*]*',
         pageNumber: +query.pageNumber! || 1,
         pageSize: +query.pageSize! || 10,
         sortBy: query.sortBy ?? 'createdAt',
