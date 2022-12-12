@@ -140,6 +140,22 @@ class QueryRepository {
             return null
         }
     }
+
+    async getUserByLogin(login: string): Promise<userViewModel | null> {
+        try {
+            return await users.findOne({login},this.userProjection)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByEmail(email: string): Promise<userViewModel | null> {
+        try {
+            return await users.findOne({email},this.userProjection)
+        } catch (e) {
+            return null
+        }
+    }
 }
 
 export const queryRepository = new QueryRepository()

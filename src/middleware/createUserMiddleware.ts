@@ -1,6 +1,7 @@
 import {body} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {errorHas} from "./errorHas";
+import {queryRepository} from "../repositories/queryRepository";
 
 export const createUserMiddleware = [
     body('login').exists()
@@ -11,7 +12,15 @@ export const createUserMiddleware = [
         .isLength({min:3,max:10})
         .withMessage(message.length)
         .matches(/^[a-zA-Z0-9_-]*$/)
-        .withMessage(message.symbols),
+        .withMessage(message.symbols)
+        .custom(async (value: string)=>{
+            const checker = await queryRepository.getUserByLogin(value)
+            if(checker){
+                throw new Error('Login already exists')
+            } else {
+                return true
+            }
+        }),
 
     body('password').exists()
         .withMessage(message.requireField)
@@ -27,7 +36,15 @@ export const createUserMiddleware = [
         .withMessage(message.invalidType)
         .trim()
         .isEmail()
-        .withMessage(message.invalidType),
+        .withMessage(message.invalidType)
+        .custom(async (value: string)=>{
+            const checker = await queryRepository.getUserByEmail(value)
+            if(checker){
+                throw new Error('email already in use')
+            } else {
+                return true
+            }
+        }),
 
     errorHas
 ]
