@@ -6,13 +6,15 @@ import {usersService} from "../services/users-service";
 
 class UsersController {
     async getUsers(req: Request, res: Response) {
-        const params = normalizeUsersQuery(req.query)
+        const {query: inputParams} = req
+        const params = normalizeUsersQuery(inputParams)
         const result: getOutput = await usersService.getUsers(params)
         res.status(httpStatus.ok).json(result)
     }
 
     async createUser(req: Request, res: Response) {
-        const result = await usersService.createUser(req.body)
+        const {body: data} = req
+        const result = await usersService.createUser(data)
         if(result) {
             res.status(httpStatus.created).json(result)
             return
@@ -21,7 +23,9 @@ class UsersController {
     }
 
     async deleteUser(req: Request, res: Response) {
-
+        const { params: { id }} = req
+        const result = await usersService.deleteUser(id)
+        res.sendStatus(result ? httpStatus.noContent : httpStatus.notFound)
     }
 
 }

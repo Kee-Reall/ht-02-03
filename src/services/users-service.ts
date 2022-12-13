@@ -52,6 +52,11 @@ class UsersService {
         return null
     }
 
+    async deleteUser(id:string): Promise<boolean> {
+        const result = await commandRepository.deleteUser(id)
+        return result
+   }
+
 }
 
 export const usersService = new UsersService()

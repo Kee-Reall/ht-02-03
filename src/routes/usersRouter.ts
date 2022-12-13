@@ -6,4 +6,4 @@ export const usersRouter = Router()
 const root = '/'
 usersRouter.get(root, usersController.getUsers)
 usersRouter.post(root, ...createUserMiddleware, usersController.createUser)
-usersRouter.delete(root)
+usersRouter.delete(root, usersController.deleteUser)

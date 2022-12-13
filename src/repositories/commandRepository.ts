@@ -74,6 +74,15 @@ class CommandRepository {
         }
     }
 
+    async deleteUser(id:string): Promise<boolean> {
+        try {
+            const result = await users.deleteOne({id})
+            return result.deletedCount !== 0
+        } catch(e) {
+            return false
+        }     
+    }
+
     async clearStore(): Promise<void> {
         await posts.deleteMany({})
         await blogs.deleteMany({})
