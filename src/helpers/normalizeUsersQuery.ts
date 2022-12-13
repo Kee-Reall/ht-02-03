@@ -1,9 +1,9 @@
 import {usersFilters} from "../models/filtersModel";
 
 export function normalizeUsersQuery(query: usersFilters):usersFilters {
-    const directions: any[] = ['asc','desc']
+    const directions: string[] = ['asc','desc']
     let sortDirection: 'desc' | 'asc' = 'desc'
-    if(directions.includes(query.sortDirection)){
+    if(directions.includes(query.sortDirection!)) {
         sortDirection = query.sortDirection!
     }
 

@@ -1,5 +1,5 @@
 import { queryRepository } from "../repositories/queryRepository";
-import { post, posts, postInputModel } from "../models/postsModel";
+import {post, posts, postInputModel, postViewModel} from "../models/postsModel";
 import { blog } from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
@@ -16,7 +16,7 @@ class PostsService {
     }
 
     async getPostsWithPagination(params: blogFilters) {
-        const searchConfig: SearchConfiguration = {
+        const searchConfig: SearchConfiguration<postViewModel> = {
             sortBy: params.sortBy!,
             sortDirection: params.sortDirection!,
             shouldSkip: params.pageSize! * (params.pageNumber! - 1),

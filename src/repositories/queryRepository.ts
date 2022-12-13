@@ -2,7 +2,11 @@ import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
 import {blogs, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {userViewModel} from "../models/userModel";
+import {userLogicModel, userViewModel} from "../models/userModel";
+
+interface Inter {
+    name: string
+}
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -43,13 +47,8 @@ class QueryRepository {
         }
     }
 
-    async getBlogWithPagination(config: SearchConfiguration): Promise<blogViewModel[] | null> {
-        const filter = {
-            name: {
-                $regex: config.filter!.name,
-                $options: "i"
-            }
-        }
+    async getBlogWithPagination(config: SearchConfiguration<blogViewModel>): Promise<blogViewModel[] | null> {
+        const filter = config.filter!.name ? { name: new RegExp(config.filter!.name as string,'i') } : {}
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
             return await blogs.find(filter, this.noHiddenId)
@@ -86,7 +85,7 @@ class QueryRepository {
         }
     }
 
-    async getPostsWithPagination(config: SearchConfiguration) {
+    async getPostsWithPagination(config: SearchConfiguration<postViewModel>) {
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
             return await posts.find(this.all, this.noHiddenId)
@@ -99,7 +98,7 @@ class QueryRepository {
         }
     }
 
-    async getPostsByFilter(config: SearchConfiguration): Promise<postViewModel[] | null> {
+    async getPostsByFilter(config: SearchConfiguration<postViewModel>): Promise<postViewModel[] | null> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
             return await posts.find(config.filter!,this.noHiddenId)
@@ -152,6 +151,19 @@ class QueryRepository {
     async getUserByEmail(email: string): Promise<userViewModel | null> {
         try {
             return await users.findOne({email},this.userProjection)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByLoginOrEmail(loginOrEmail: string): Promise<userLogicModel | null> {
+        try {
+            const result = await users.findOne({
+                $or:[
+                    {login: loginOrEmail},
+                    {email: loginOrEmail}
+                ]},this.noHiddenId)
+            return result
         } catch (e) {
             return null
         }

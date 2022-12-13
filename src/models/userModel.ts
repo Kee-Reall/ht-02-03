@@ -23,5 +23,5 @@ export interface userLogicModel {
 }
 
 export interface userDbModel extends userLogicModel {
-    _id: ObjectId
+    _id?: ObjectId
 }

@@ -1,11 +1,11 @@
 import { queryRepository } from "../repositories/queryRepository";
-import {blogInputModel, blog, blogs} from "../models/blogModel";
+import {blogInputModel, blog, blogs, blogViewModel} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {getOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import { postInputThrowBlog, postInputModel } from "../models/postsModel";
+import {postInputThrowBlog, postInputModel, postViewModel} from "../models/postsModel";
 import { postsService } from "./posts-service";
 
 class BlogsService {
@@ -14,7 +14,7 @@ class BlogsService {
     }
 
     async getBlogs(params: blogFilters): Promise<getOutput> {
-        const searchConfig:SearchConfiguration = {
+        const searchConfig:SearchConfiguration<blogViewModel> = {
             filter: {
                 name: params.searchNameTerm!
             },
@@ -23,7 +23,7 @@ class BlogsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize!
         }
-        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter!.name)
+        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter!.name as string)
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
         const items = await queryRepository.getBlogWithPagination(searchConfig) || []
         return {
@@ -40,7 +40,7 @@ class BlogsService {
     }
 
     async getBlogPosts(blogId: string, params: any) {
-        const config:SearchConfiguration = {
+        const config:SearchConfiguration<postViewModel> = {
             filter: {
                 blogId
             },
