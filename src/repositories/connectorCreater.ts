@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb"
-import {postDbModel, postViewModel} from "../models/postsModel";
-import {blogDbModel, blogViewModel} from "../models/blogModel";
+import {postViewModel} from "../models/postsModel";
+import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
 
 const dbUri: string = process.env.MONGO_URI!
@@ -12,7 +12,7 @@ export const client = new MongoClient(dbUri)
 export const db = client.db('ht-03')
 export const posts = db.collection<postViewModel>('posts')
 export const blogs = db.collection<blogViewModel>('blogs')
-export const users = db.collection<userDbModel>('posts')
+export const users = db.collection<userDbModel>('users')
 export async function runDb(): Promise<boolean> {
     try {
         await client.connect()
