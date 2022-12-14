@@ -2,7 +2,7 @@ import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
 import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
-import bcrypt  from 'bcrypt'
+import bcrypt from 'bcrypt'
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 
@@ -12,8 +12,8 @@ class UsersService {
         const searchConfig = {
             filter: {
                 $and: [
-                    {login: new RegExp(params.searchLoginTerm!,'i')},
-                    {email: new RegExp(params.searchEmailTerm!,'i')}
+                    {login: new RegExp(params.searchLoginTerm!,'ig')},
+                    {email: new RegExp(params.searchEmailTerm!,'ig')}
                 ]
             },
             sortDirection: params.sortDirection,
@@ -52,8 +52,7 @@ class UsersService {
     }
 
     async deleteUser(id:string): Promise<boolean> {
-        const result = await commandRepository.deleteUser(id)
-        return result
+        return await commandRepository.deleteUser(id)
    }
 
 }
