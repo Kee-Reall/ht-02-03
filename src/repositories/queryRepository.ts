@@ -4,10 +4,6 @@ import {blogs, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 
-interface Inter {
-    name: string
-}
-
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
@@ -122,7 +118,7 @@ class QueryRepository {
     async getUsers(config: any): Promise<userViewModel[] | null> {
         try {
             const direction : 1 | -1 = config.sortDirection === 'asc' ? 1 : -1
-            return await users.find(config.filter)
+            return await users.find(config.filter,this.userProjection)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)

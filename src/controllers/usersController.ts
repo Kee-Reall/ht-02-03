@@ -6,15 +6,13 @@ import {usersService} from "../services/users-service";
 
 class UsersController {
     async getUsers(req: Request, res: Response) {
-        const {query: inputParams} = req
-        const params = normalizeUsersQuery(inputParams)
+        const params = normalizeUsersQuery(req.query)
         const result: getOutput = await usersService.getUsers(params)
         res.status(httpStatus.ok).json(result)
     }
 
     async createUser(req: Request, res: Response) {
-        const {body: data} = req
-        const result = await usersService.createUser(data)
+        const result = await usersService.createUser(req.body)
         if(result) {
             res.status(httpStatus.created).json(result)
             return

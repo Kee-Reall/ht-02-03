@@ -6,13 +6,13 @@ export function normalizeUsersQuery(query: usersFilters):usersFilters {
     if(directions.includes(query.sortDirection!)) {
         sortDirection = query.sortDirection!
     }
-
-    return {
-        pageNumber: +query.pageNumber! ?? 1,
-        pageSize: +query.pageSize! ?? 10,
+    const filter = {
+        pageNumber: +query.pageNumber! || 1,
+        pageSize: +query.pageSize! || 10,
         sortBy: query.sortBy || 'createdAt',
         sortDirection,
         searchLoginTerm: query.searchLoginTerm || '[*]*',
         searchEmailTerm: query.searchEmailTerm || '[*]*'
     }
+    return filter
 }
