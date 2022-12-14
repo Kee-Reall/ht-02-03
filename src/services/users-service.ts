@@ -11,7 +11,7 @@ class UsersService {
 
         const searchConfig = {
             filter: {
-                $and: [
+                $or: [
                     {login: new RegExp(params.searchLoginTerm!,'ig')},
                     {email: new RegExp(params.searchEmailTerm!,'ig')}
                 ]
