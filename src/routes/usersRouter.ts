@@ -4,6 +4,7 @@ import {createUserMiddleware} from "../middleware/createUserMiddleware";
 
 export const usersRouter = Router()
 const root = '/'
+const param = root + ':id'
 usersRouter.get(root, usersController.getUsers)
 usersRouter.post(root, ...createUserMiddleware, usersController.createUser)
-usersRouter.delete(root, usersController.deleteUser)
+usersRouter.delete(param, usersController.deleteUser)
