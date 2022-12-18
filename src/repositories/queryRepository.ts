@@ -154,12 +154,12 @@ class QueryRepository {
 
     async getUserByLoginOrEmail(loginOrEmail: string): Promise<userLogicModel | null> {
         try {
-            const result = await users.findOne({
-                $or:[
+            return await users.findOne({
+                $or: [
                     {login: loginOrEmail},
                     {email: loginOrEmail}
-                ]},this.noHiddenId)
-            return result
+                ]
+            }, this.noHiddenId)
         } catch (e) {
             return null
         }
