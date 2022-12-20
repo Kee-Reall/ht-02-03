@@ -4,13 +4,13 @@ import {userLogicModel} from "../models/userModel";
 
 class AuthService {
 
-    async login(loginOrEmail: string, password: string): Promise<boolean> {
+    async login(loginOrEmail: string, password: string): Promise< userLogicModel | null> {
         const user: userLogicModel | null = await queryRepository.getUserByLoginOrEmail(loginOrEmail)
         if (user === null) {
-            return false
+            return user
         }
         const {hash, salt} = user
-        return  await toHash(password, salt) === hash
+        return  await toHash(password, salt) === hash ? user : null
     }
 }
 

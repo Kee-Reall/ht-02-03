@@ -7,7 +7,8 @@ const port = process.env.PORT ?? 8000;
 
 async function start() {
     const res = await runDb()
-    if(res) {
+    const secret = process.env.JWT_SECRET && true
+    if(res && secret) {
         app.listen(port,() => console.log('Server is running on port\n' + port))
     } else {
         throw new Error("failed to connect database")
