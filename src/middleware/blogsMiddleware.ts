@@ -1,6 +1,7 @@
 import { body } from "express-validator"
-import { errorHas } from "./errorHas"
+import { hasError } from "./hasError"
 import { message } from "../enums/messageEnum"
+import {httpStatus} from "../enums/httpEnum";
 
 export const blogMiddlewares = [
     body('name').exists()
@@ -28,5 +29,5 @@ export const blogMiddlewares = [
         .isURL()
         .withMessage(message.notUrl),
 
-    errorHas
+    hasError(httpStatus.badRequest)
 ]

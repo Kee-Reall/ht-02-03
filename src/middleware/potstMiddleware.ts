@@ -1,8 +1,9 @@
 import { body } from "express-validator"
-import { errorHas } from "./errorHas"
+import { hasError } from "./hasError"
 import {message} from "../enums/messageEnum";
 import {checkForExistingBlog} from "../helpers/checkForExistingBlog";
 import { postInputValidator } from "../helpers/postInputValidator";
+import {httpStatus} from "../enums/httpEnum";
 
 export const postMiddlewares = [
     ...postInputValidator,
@@ -13,5 +14,5 @@ export const postMiddlewares = [
         .custom(checkForExistingBlog)
         .withMessage(message.notExist),
         
-    errorHas
+    hasError(httpStatus.badRequest)
 ]

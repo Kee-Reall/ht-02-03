@@ -1,7 +1,8 @@
 import {body} from "express-validator";
 import {message} from "../enums/messageEnum";
-import {errorHas} from "./errorHas";
+import {hasError} from "./hasError";
 import {queryRepository} from "../repositories/queryRepository";
+import {httpStatus} from "../enums/httpEnum";
 
 export const createUserMiddleware = [
     body('login').exists()
@@ -46,5 +47,5 @@ export const createUserMiddleware = [
             }
         }),
 
-    errorHas
+    hasError(httpStatus.badRequest)
 ]

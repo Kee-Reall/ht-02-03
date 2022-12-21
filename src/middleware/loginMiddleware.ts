@@ -1,6 +1,7 @@
 import {body} from "express-validator";
 import {message} from "../enums/messageEnum";
-import {errorHas} from "./errorHas";
+import {hasError} from "./hasError";
+import {httpStatus} from "../enums/httpEnum";
 
 export const loginMiddleware = [
     body('loginOrEmail').exists()
@@ -19,5 +20,5 @@ export const loginMiddleware = [
         .isLength({min:1, max:100})
         .withMessage(message.length),
 
-    errorHas
+    hasError(httpStatus.badRequest)
 ]
