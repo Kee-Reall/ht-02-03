@@ -1,8 +1,9 @@
 import {param} from "express-validator";
 import {checkForExistingBlog} from "../helpers/checkForExistingBlog";
-import {idErrorHas} from "../helpers/idErrorHas";
+import {hasError} from "./hasError";
+import {httpStatus} from "../enums/httpEnum";
 
 export const getPostsByBlogMiddleware = [
     param('id').custom(checkForExistingBlog),
-    idErrorHas
+    hasError(httpStatus.notFound,false)
 ]

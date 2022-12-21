@@ -3,7 +3,6 @@ import {hasError} from "./hasError"
 import {message} from "../enums/messageEnum";
 import {checkForExistingBlog} from "../helpers/checkForExistingBlog";
 import {postInputValidator} from "../helpers/postInputValidator";
-import {idErrorHas} from "../helpers/idErrorHas";
 import {httpStatus} from "../enums/httpEnum";
 
 export const createPostForBlogMiddleware = [
