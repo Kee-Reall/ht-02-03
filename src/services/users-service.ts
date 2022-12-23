@@ -55,6 +55,10 @@ class UsersService {
         return await commandRepository.deleteUser(id)
    }
 
+   async getUserById(id: string): Promise<userViewModel | null> {
+        return queryRepository.getUserById(id)
+   }
+
 }
 
 export const usersService = new UsersService()

@@ -17,7 +17,9 @@ class AuthController {
     }
 
     async getUserByJWT(req: Request, res: Response) {
-        console.log('test1')
+        const { headers:{authorization}} = req
+        const token = jwt // work here
+        return await jwtService.getUserByToken(token)
     }
 }
 
