@@ -17,7 +17,7 @@ class AuthController {
     }
 
     async getUserByJWT(req: Request, res: Response) {
-        
+        console.log('test')
     }
 }
 
