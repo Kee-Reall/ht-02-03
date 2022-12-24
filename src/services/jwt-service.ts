@@ -22,8 +22,8 @@ class JwtService {
 
     private async verify(token: string): Promise<string | null> {
         try {
-            const res: any = jwt.verify(token, this.getJwtSecret())
-            return res.userId
+            const payload: any = jwt.verify(token, this.getJwtSecret())
+            return payload.userId
         } catch (e) {
             return null
         }

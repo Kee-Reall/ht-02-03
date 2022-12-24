@@ -12,14 +12,13 @@ class AuthController {
             res.sendStatus(httpStatus.notAuthorized)
             return
         }
-        const accessToken = jwtService.createToken(loginResult.id)
-        res.status(httpStatus.ok).send({accessToken})
+        const accessToken = await jwtService.createToken(loginResult.id)
+        res.status(httpStatus.ok).json({accessToken})
     }
 
     async getUserByJWT(req: Request, res: Response) {
-        const { headers:{authorization}} = req
-        const token = jwt // work here
-        return await jwtService.getUserByToken(token)
+        const {login,email,id: userId} = req.user!
+        res.status(httpStatus.ok).json({login,email,userId})
     }
 }
 
