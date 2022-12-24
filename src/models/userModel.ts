@@ -25,3 +25,8 @@ export interface userLogicModel {
 export interface userDbModel extends userLogicModel {
     _id?: ObjectId
 }
+
+export interface userForCommentsModel {
+    userLogin: string,
+    userId: string
+}

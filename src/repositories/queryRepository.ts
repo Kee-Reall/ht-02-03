@@ -1,8 +1,9 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
+import {CommentsViewModel} from "../models/commentsModel";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -160,6 +161,14 @@ class QueryRepository {
                     {email: loginOrEmail}
                 ]
             }, this.noHiddenId)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getCommentById(id: string): Promise<CommentsViewModel | null> {
+        try {
+            return await comments.findOne({id},this.noHiddenId)
         } catch (e) {
             return null
         }
