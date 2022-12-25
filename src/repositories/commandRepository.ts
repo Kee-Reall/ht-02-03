@@ -1,6 +1,6 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {blogs, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "./connectorCreater";
 import {userLogicModel} from "../models/userModel";
 
 class CommandRepository {
@@ -85,6 +85,24 @@ class CommandRepository {
             blogs.deleteMany(this.emptyObject),
             users.deleteMany(this.emptyObject)
         ])
+    }
+
+    async updateComment(id: string, content: string): Promise<boolean> {
+        try {
+            const { acknowledged: flag } = await comments.updateOne({id},{content})
+            return flag
+        } catch (e) {
+            return false
+        }
+    }
+
+    async deleteComment(id: string): Promise<boolean> {
+        try {
+            const { deletedCount } = await comments.deleteOne({id})
+            return deletedCount > 0
+        } catch (e) {
+            return false
+        }
     }
 }
 

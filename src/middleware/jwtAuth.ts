@@ -7,7 +7,7 @@ export const jwtAuth = async (req: Request, res: Response, next: NextFunction ) 
         return res.sendStatus(httpStatus.notAuthorized)
     }
     const [authType, token] = req.headers.authorization.split(' ')
-    if(authType !== 'Bearer'){
+    if(authType !== 'Bearer') {
         return res.sendStatus(httpStatus.notAuthorized)
     }
     const user = await jwtService.getUserByToken(token)

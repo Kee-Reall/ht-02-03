@@ -43,7 +43,17 @@ class PostsController {
         res.sendStatus(status)
     }
 
-    deprecated(_: Request, res:Response) {
+    async getCommentsForPost(req: Request, res: Response) {
+
+    }
+
+
+
+    async createCommentForPost(req: Request, res: Response) {
+
+    }
+
+    async deprecated(_: Request, res:Response) {
         res.sendStatus(httpStatus.deprecated)
     }
 

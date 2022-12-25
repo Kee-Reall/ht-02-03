@@ -8,6 +8,8 @@ export interface CommentsInputModel {
 export interface CommentsViewModel extends userForCommentsModel{
     id: string,
     content: string,
+    userId: string,
+    userLogin: string
     createdAt: string
 }
 
