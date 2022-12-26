@@ -1,4 +1,4 @@
-import {userForCommentsModel} from "./userModel";
+import {userForCommentsModel, userViewModel} from "./userModel";
 import {ObjectId} from "mongodb";
 
 export interface CommentsInputModel {
@@ -6,13 +6,21 @@ export interface CommentsInputModel {
 }
 
 export interface CommentsViewModel extends userForCommentsModel{
-    id: string,
     content: string,
     userId: string,
     userLogin: string
     createdAt: string
 }
 
-export interface CommentsDbModel extends CommentsViewModel {
-    _id: ObjectId
+export interface CommentsDbModel {
+    id: string
+    comment: CommentsViewModel
+    postId: string
+    _id?: ObjectId
+}
+
+export interface CommentCreationModel {
+    postId: string,
+    content: string,
+    user: userViewModel
 }

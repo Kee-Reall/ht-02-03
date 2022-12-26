@@ -1,1 +1,1 @@
-export default (string: "blog" | "post" | "user"): string => string + Math.ceil(Math.random() * (10 ** 16)).toString(36) + Math.ceil(Math.random() * (10 ** 16)).toString(36)
+export default (string: "blog" | "post" | "user" | "comment"): string => string + Math.ceil(Math.random() * (10 ** 16)).toString(36) + Math.ceil(Math.random() * (10 ** 16)).toString(36)

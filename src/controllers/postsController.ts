@@ -50,7 +50,7 @@ class PostsController {
 
 
     async createCommentForPost(req: Request, res: Response) {
-
+        const result = await postsService.createComment(req.user, req.body)
     }
 
     async deprecated(_: Request, res:Response) {

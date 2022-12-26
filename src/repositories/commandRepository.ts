@@ -2,6 +2,7 @@ import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "./connectorCreater";
 import {userLogicModel} from "../models/userModel";
+import {CommentsDbModel} from "../models/commentsModel";
 
 class CommandRepository {
 
@@ -87,9 +88,18 @@ class CommandRepository {
         ])
     }
 
+    async createComment(commentDb: CommentsDbModel): Promise<boolean> {
+        try {
+            const {acknowledged} = await comments.insertOne(commentDb)
+            return acknowledged
+        } catch (e) {
+            return false
+        }
+    }
+
     async updateComment(id: string, content: string): Promise<boolean> {
         try {
-            const { acknowledged: flag } = await comments.updateOne({id},{content})
+            const { acknowledged: flag } = await comments.updateOne({id},{comment:{$set:{content}}})
             return flag
         } catch (e) {
             return false

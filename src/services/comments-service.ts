@@ -1,20 +1,24 @@
-import {userForCommentsModel, userViewModel} from "../models/userModel";
-import {CommentsInputModel, CommentsViewModel} from "../models/commentsModel";
+import {CommentsViewModel, CommentCreationModel, CommentsDbModel} from "../models/commentsModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {commentUpdateResult} from "../models/mixedModels";
 import {commandRepository} from "../repositories/commandRepository";
-import {comments} from "../repositories/connectorCreater";
+import generateId from "../helpers/generateId";
 
 class CommentsService {
 
-    async createComment (postId: string,input: CommentsInputModel,owner:userForCommentsModel) {
-
+    async createComment (input: CommentCreationModel) {
+        const createdAt = new Date(Date.now()).toISOString()
+        const { content, user: { id: userId, login: userLogin }, postId} = input
+        const id = generateId("comment")
+        const comment: CommentsViewModel = {createdAt,content, userId , userLogin}
+        const toPut: CommentsDbModel = {id,postId, comment}
+        const result = await commandRepository.createComment(toPut)
+        //const userId = input.user.id
     }
 
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
         return await queryRepository.getCommentById(id)
     }
-    async updateCommentAfterMiddleware(comment: CommentsViewModel,content: string): Promise<boolean> {
+    async updateCommentAfterMiddleware(comment: CommentsDbModel,content: string): Promise<boolean> {
         return  await commandRepository.updateComment(comment.id,content)
     }
 
