@@ -5,11 +5,15 @@ export interface CommentsInputModel {
     content: string
 }
 
-export interface CommentsViewModel extends userForCommentsModel{
+export interface CommentsViewModel extends userForCommentsModel {
     content: string,
     userId: string,
     userLogin: string
     createdAt: string
+}
+
+export interface CommentsOutputModel extends CommentsViewModel {
+    id: string
 }
 
 export interface CommentsDbModel {

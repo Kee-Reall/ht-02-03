@@ -2,6 +2,8 @@ import {CommentsViewModel, CommentCreationModel, CommentsDbModel} from "../model
 import {queryRepository} from "../repositories/queryRepository";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
+import {config} from "dotenv";
+import {SearchConfiguration} from "../models/searchConfiguration";
 
 class CommentsService {
 
@@ -26,8 +28,8 @@ class CommentsService {
         return await commandRepository.deleteComment(id)
     }
 
-    async getCommentsByPost(postId: string) {
-
+    async getCommentsByPost(postId: string, config: SearchConfiguration<CommentsDbModel>) {
+        queryRepository.getCommentsByPostId(postId,config)
     }
 }
 

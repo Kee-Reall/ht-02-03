@@ -6,8 +6,9 @@ import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userViewModel} from "../models/userModel";
-import {CommentCreationModel, CommentsInputModel} from "../models/commentsModel";
+import {CommentCreationModel, CommentsDbModel, CommentsInputModel} from "../models/commentsModel";
 import {commentsService} from "./comments-service";
+import {config} from "dotenv";
 
 class PostsService {
     async getAllPosts(): Promise<posts> {
@@ -67,6 +68,10 @@ class PostsService {
 
     async createComment(input: CommentCreationModel) {
         return commentsService.createComment(input)
+    }
+
+    async getCommentForPost(id: string, config: SearchConfiguration<CommentsDbModel>) {
+        return await commentsService.getCommentsByPost(id, config)
     }
 
     async deletePost(id:string): Promise<boolean> {
