@@ -32,7 +32,7 @@ class CommentsService {
     }
 
     async getCommentsByPost(postId: string, config: SearchConfiguration<CommentsDbModel>) {
-        queryRepository.getCommentsByPostId(postId,config)
+       return await queryRepository.getCommentsByPostId(postId,config)
     }
 }
 

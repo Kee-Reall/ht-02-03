@@ -4,7 +4,6 @@ import {blogs, comments, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsViewModel} from "../models/commentsModel";
-import {commentProjection} from "../helpers/commentProjection";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -170,7 +169,7 @@ class QueryRepository {
 
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
         try {
-            return commentProjection(await comments.findOne({id},this.commentProjection))
+            return await comments.findOne({id},this.commentProjection)
         } catch (e) {
             return null
         }
