@@ -2,19 +2,22 @@ import {CommentsViewModel, CommentCreationModel, CommentsDbModel} from "../model
 import {queryRepository} from "../repositories/queryRepository";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
-import {config} from "dotenv";
 import {SearchConfiguration} from "../models/searchConfiguration";
+import { eternityId } from "../models/mixedModels";
 
 class CommentsService {
 
-    async createComment (input: CommentCreationModel) {
+    constructor(
+        public generateId: (arg: eternityId) => string
+        ) {}
+
+    async createComment (input: CommentCreationModel): Promise<boolean> {
         const createdAt = new Date(Date.now()).toISOString()
         const { content, user: { id: userId, login: userLogin }, postId} = input
-        const id = generateId("comment")
-        const comment: CommentsViewModel = {createdAt,content, userId , userLogin}
-        const toPut: CommentsDbModel = {id,postId, comment}
-        const result = await commandRepository.createComment(toPut)
-        //const userId = input.user.id
+        const id = this.generateId("comment")
+        const comment: CommentsViewModel = {createdAt, content, userId , userLogin}
+        const toPut: CommentsDbModel = {id,postId, ...comment}
+        return await commandRepository.createComment(toPut)
     }
 
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
@@ -33,4 +36,4 @@ class CommentsService {
     }
 }
 
-export const commentsService = new CommentsService()
+export const commentsService = new CommentsService(generateId)

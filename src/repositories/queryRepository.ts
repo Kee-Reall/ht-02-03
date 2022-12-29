@@ -9,6 +9,7 @@ import {commentProjection} from "../helpers/commentProjection";
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
+    private readonly commentProjection = {projection:{_id: false,postId: false}}
     private readonly userProjection = {projection: {_id: false, hash: false, salt: false}}
     async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
         try {
@@ -169,13 +170,13 @@ class QueryRepository {
 
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
         try {
-            return commentProjection(await comments.findOne({id},this.noHiddenId))
+            return commentProjection(await comments.findOne({id},this.commentProjection))
         } catch (e) {
             return null
         }
     }
 
-    async getCommentsByPost(postId: string, config: SearchConfiguration<CommentsDbModel>) {
+    async getCommentsByPostId(postId: string, config: SearchConfiguration<CommentsDbModel>) {
         try {
 
         } catch (e) {

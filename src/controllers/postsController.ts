@@ -12,7 +12,8 @@ class PostsController {
     }
 
     async getOne(req: Request, res: Response) {
-        const result = await postsService.getPost(req.params.id)
+        const { params: { id }} = req
+        const result = await postsService.getPost(id)
         if(result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -50,7 +51,9 @@ class PostsController {
 
 
     async createCommentForPost(req: Request, res: Response) {
-        const result = await postsService.createComment(req.user, req.body)
+        const { body:{ content }, params:{ id: postId }, user } = req
+        const result: boolean = await postsService.createComment({content,postId,user})
+        res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }
 
     async deprecated(_: Request, res:Response) {

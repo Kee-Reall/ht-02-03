@@ -67,7 +67,7 @@ class PostsService {
     }
 
     async createComment(input: CommentCreationModel) {
-        return commentsService.createComment(input)
+        return await commentsService.createComment(input)
     }
 
     async getCommentForPost(id: string, config: SearchConfiguration<CommentsDbModel>) {

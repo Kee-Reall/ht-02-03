@@ -18,7 +18,10 @@ export interface CommentsOutputModel extends CommentsViewModel {
 
 export interface CommentsDbModel {
     id: string
-    comment: CommentsViewModel
+    content: string,
+    userId: string,
+    userLogin: string
+    createdAt: string
     postId: string
     _id?: ObjectId
 }

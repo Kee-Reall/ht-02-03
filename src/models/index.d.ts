@@ -4,7 +4,7 @@ import {CommentsDbModel} from "./commentsModel";
 declare global {
     declare namespace Express {
         export interface Request {
-            user: userViewModel | userLogicModel | null
+            user: userViewModel
             comment: CommentsDbModel
         }
     }
