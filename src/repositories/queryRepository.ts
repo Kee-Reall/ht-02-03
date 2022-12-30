@@ -176,7 +176,7 @@ class QueryRepository {
         }
     }
 
-    async countCommentsByPostId(postId): Promise<number> {
+    async countCommentsByPostId(postId: string): Promise<number> {
         try {
             return await comments.count({postId})
         } catch(e) {
