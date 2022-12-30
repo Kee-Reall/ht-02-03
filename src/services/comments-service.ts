@@ -1,10 +1,11 @@
-import {CommentsViewModel, CommentCreationModel, CommentsDbModel} from "../models/commentsModel";
+import {CommentsViewModel, CommentCreationModel, CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {queryRepository} from "../repositories/queryRepository";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import { eternityId, sortingDirection } from "../models/mixedModels";
 import { commentsFilter } from "../models/filtersModel";
+import { getOutput } from "../models/ResponseModel";
 
 class CommentsService {
 
@@ -32,7 +33,7 @@ class CommentsService {
         return await commandRepository.deleteComment(id)
     }
 
-    async getCommentsByPost(params: commentsFilter) {
+    async getCommentsByPost(params: commentsFilter): Promise<getOutput> {
         const searchConfig: SearchConfiguration<CommentsDbModel> = {
             filter: {
                 postId: params.searchId
@@ -41,8 +42,16 @@ class CommentsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1),
             sortBy: params.sortBy as string,
             limit: params.pageSize as number
-        } 
-       return await queryRepository.getCommentsByPostId(searchConfig)
+        }
+        const totalCount = await queryRepository.countCommentsByPostId(params.searchId as string)
+        const items: CommentsOutputModel[] = await queryRepository.getCommentsByPostId(searchConfig) ?? []
+        return{
+            totalCount,
+            page: params.pageNumber!,
+            pageSize: params.pageSize!,
+            items,
+            pagesCount : Math.ceil(totalCount / params.pageSize!)
+        }
     }
 }
 

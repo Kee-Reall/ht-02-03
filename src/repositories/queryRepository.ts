@@ -3,8 +3,7 @@ import {postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
-import {CommentsDbModel, CommentsViewModel} from "../models/commentsModel";
-import { commentsFilter } from "../models/filtersModel"
+import {CommentsDbModel, CommentsViewModel, CommentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -184,12 +183,15 @@ class QueryRepository {
         }
     }
 
-    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsViewModel[] | null> {
+    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsOutputModel[] | null> {
         try {
-            const direction : 1 | -1 = config.sortDirection === 'asc' ? 1 : -1
-          
+            return await comments.find({postId : config.filter!.postId})
+                .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
+                .skip(config.shouldSkip)
+                .limit(config.limit)
+                .toArray()         
         } catch (e) {
-
+            return null
         }
     }
 }
