@@ -3,7 +3,8 @@ import {queryRepository} from "../repositories/queryRepository";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import { eternityId } from "../models/mixedModels";
+import { eternityId, sortingDirection } from "../models/mixedModels";
+import { commentsFilter } from "../models/filtersModel";
 
 class CommentsService {
 
@@ -31,8 +32,17 @@ class CommentsService {
         return await commandRepository.deleteComment(id)
     }
 
-    async getCommentsByPost(postId: string, config: SearchConfiguration<CommentsDbModel>) {
-       return await queryRepository.getCommentsByPostId(postId,config)
+    async getCommentsByPost(params: commentsFilter) {
+        const searchConfig: SearchConfiguration<CommentsDbModel> = {
+            filter: {
+                postId: params.searchId
+            },
+            sortDirection: params.sortDirection as sortingDirection,
+            shouldSkip: params.pageSize! * (params.pageNumber! - 1),
+            sortBy: params.sortBy as string,
+            limit: params.pageSize as number
+        } 
+       return await queryRepository.getCommentsByPostId(searchConfig)
     }
 }
 

@@ -6,7 +6,7 @@ interface abstractFilter<T> {
     pageNumber?: number
     pageSize?: number
     sortBy?: keyof T
-    sortDirection: 'asc' | 'desc'
+    sortDirection?: 'asc' | 'desc'
 }
 
 export interface blogFilters extends abstractFilter<blogViewModel> {
@@ -19,5 +19,5 @@ export interface usersFilters extends abstractFilter<userViewModel> {
 }
 
 export interface commentsFilter extends abstractFilter<CommentsViewModel> {
- //write some here
+    searchId?:string
 }

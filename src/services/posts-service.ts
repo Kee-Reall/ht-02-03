@@ -5,10 +5,10 @@ import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {userViewModel} from "../models/userModel";
-import {CommentCreationModel, CommentsDbModel, CommentsInputModel} from "../models/commentsModel";
+import {CommentCreationModel} from "../models/commentsModel";
 import {commentsService} from "./comments-service";
-import {config} from "dotenv";
+import { commentsFilter } from "../models/filtersModel"
+
 
 class PostsService {
     async getAllPosts(): Promise<posts> {
@@ -70,8 +70,8 @@ class PostsService {
         return await commentsService.createComment(input)
     }
 
-    async getCommentForPost(id: string, config: SearchConfiguration<CommentsDbModel>) {
-        return await commentsService.getCommentsByPost(id, config)
+    async getCommentForPost(configuration: commentsFilter) {
+        return await commentsService.getCommentsByPost(configuration)
     }
 
     async deletePost(id:string): Promise<boolean> {

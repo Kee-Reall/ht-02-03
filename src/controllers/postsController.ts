@@ -3,6 +3,8 @@ import { httpStatus } from "../enums/httpEnum";
 import { postsService } from "../services/posts-service";
 import { post } from "../models/postsModel";
 import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
+import { normalizeCommentQuery } from "../helpers/normalizeComment";
+import { commentsFilter } from "../models/filtersModel";
 
 
 class PostsController {
@@ -45,7 +47,11 @@ class PostsController {
     }
 
     async getCommentsForPost(req: Request, res: Response) {
-
+        const query: commentsFilter = {
+            ...normalizeCommentQuery(req.query),
+            searchId: req.params.id as string
+        }
+        const result = await postsService.getCommentForPost(query)
     }
 
 

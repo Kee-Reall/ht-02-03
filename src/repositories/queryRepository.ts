@@ -4,6 +4,7 @@ import {blogs, comments, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsViewModel} from "../models/commentsModel";
+import { commentsFilter } from "../models/filtersModel"
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -175,9 +176,18 @@ class QueryRepository {
         }
     }
 
-    async getCommentsByPostId(postId: string, config: SearchConfiguration<CommentsDbModel>) {
+    async countCommentsByPostId(postId): Promise<number> {
         try {
+            return await comments.count({postId})
+        } catch(e) {
+            return 0
+        }
+    }
 
+    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsViewModel[] | null> {
+        try {
+            const direction : 1 | -1 = config.sortDirection === 'asc' ? 1 : -1
+          
         } catch (e) {
 
         }
