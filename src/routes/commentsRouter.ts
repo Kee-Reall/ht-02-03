@@ -2,7 +2,7 @@ import {Router} from "express";
 import {commentsController} from "../controllers/commentsController";
 import {jwtAuth} from "../middleware/jwtAuth";
 import {updateCommentMiddleware} from "../middleware/updateCommentMiddleware";
-import {isOwnerMiddleware} from "../models/isOwnerMiddleware";
+import {isOwnerMiddleware} from "../middleware/isOwnerMiddleware";
 
 export const commentsRouter = Router()
 const param = '/:id'
