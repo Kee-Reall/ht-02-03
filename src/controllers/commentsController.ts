@@ -16,7 +16,7 @@ class CommentsController {
     }
     async getCommentById(req: Request, res: Response){
         const comment = await commentsService.getCommentById(req.params.id)
-        if(comment === null) {
+        if(!comment) {
             res.sendStatus(httpStatus.notFound)
         } else {
             res.status(httpStatus.ok).json(comment)
