@@ -68,7 +68,7 @@ class PostsService {
     }
 
     async createComment(input: CommentCreationModel) {
-        return await commentsService.createComment(input)
+        return  await commentsService.createComment(input)
     }
 
     async getCommentForPost(configuration: commentsFilter): Promise<getOutput> {

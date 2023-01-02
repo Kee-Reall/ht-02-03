@@ -58,8 +58,11 @@ class PostsController {
 
     async createCommentForPost(req: Request, res: Response) {
         const { body:{ content }, params:{ id: postId }, user } = req
-        const result: boolean = await postsService.createComment({content,postId,user})
-        res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
+        const result = await postsService.createComment({content,postId,user})
+        if (result === null) {
+            return res.sendStatus(httpStatus.teapot)
+        }
+        res.status(httpStatus.created).json(result)
     }
 
     async deprecated(_: Request, res:Response) {

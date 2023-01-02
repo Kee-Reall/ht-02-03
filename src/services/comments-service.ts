@@ -13,13 +13,14 @@ class CommentsService {
         public generateId: (arg: eternityId) => string
         ) {}
 
-    async createComment (input: CommentCreationModel): Promise<boolean> {
+    async createComment (input: CommentCreationModel): Promise<CommentsViewModel | null> {
         const createdAt = new Date(Date.now()).toISOString()
         const { content, postId, user: { id: userId, login: userLogin }} = input
         const id = this.generateId("comment")
         const comment: CommentsViewModel = {createdAt, content, userId , userLogin}
         const toPut: CommentsDbModel = {id,postId, ...comment}
-        return await commandRepository.createComment(toPut)
+        const result = await commandRepository.createComment(toPut)
+        return result ? await this.getCommentById(id) : null
     }
 
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
