@@ -51,7 +51,7 @@ class PostsController {
             ...normalizeCommentQuery(req.query),
             searchId: req.params.id as string
         }
-        const result = await postsService.getCommentForPost(query)
+        res.status(httpStatus.ok).json(await postsService.getCommentForPost(query))
     }
 
 

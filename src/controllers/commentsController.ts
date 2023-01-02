@@ -4,7 +4,7 @@ import {httpStatus} from "../enums/httpEnum";
 
 class CommentsController {
     async updateComment(req: Request, res: Response) {
-        const {comment, body:{content}} = req
+        const { comment, body: { content }} = req
         const result: boolean = await commentsService.updateCommentAfterMiddleware(comment,content)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }

@@ -3,7 +3,7 @@ import {queryRepository} from "../repositories/queryRepository";
 import {httpStatus} from "../enums/httpEnum";
 
 export const isOwnerMiddleware = async (req: Request,res: Response, next: NextFunction) => {
-    const {user, params:{id}} = req
+    const { params:{ id }} = req
     const commentShouldChange = await queryRepository.getCommentById(id)
     if (commentShouldChange === null) {
         return res.sendStatus(httpStatus.notFound)

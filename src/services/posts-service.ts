@@ -8,6 +8,7 @@ import {SearchConfiguration} from "../models/searchConfiguration";
 import {CommentCreationModel} from "../models/commentsModel";
 import {commentsService} from "./comments-service";
 import { commentsFilter } from "../models/filtersModel"
+import {getOutput} from "../models/ResponseModel";
 
 
 class PostsService {
@@ -70,7 +71,7 @@ class PostsService {
         return await commentsService.createComment(input)
     }
 
-    async getCommentForPost(configuration: commentsFilter) {
+    async getCommentForPost(configuration: commentsFilter): Promise<getOutput> {
         return await commentsService.getCommentsByPost(configuration)
     }
 

@@ -15,7 +15,7 @@ class CommentsService {
 
     async createComment (input: CommentCreationModel): Promise<boolean> {
         const createdAt = new Date(Date.now()).toISOString()
-        const { content, user: { id: userId, login: userLogin }, postId} = input
+        const { content, postId, user: { id: userId, login: userLogin }} = input
         const id = this.generateId("comment")
         const comment: CommentsViewModel = {createdAt, content, userId , userLogin}
         const toPut: CommentsDbModel = {id,postId, ...comment}
@@ -25,8 +25,8 @@ class CommentsService {
     async getCommentById(id: string): Promise<CommentsViewModel | null> {
         return await queryRepository.getCommentById(id)
     }
-    async updateCommentAfterMiddleware(comment: CommentsDbModel,content: string): Promise<boolean> {
-        return  await commandRepository.updateComment(comment.id,content)
+    async updateCommentAfterMiddleware({ id }: CommentsOutputModel,content: string): Promise<boolean> {
+        return  await commandRepository.updateComment(id,content)
     }
 
     async deleteCommentAfterMiddleware(id: string) {
@@ -43,9 +43,9 @@ class CommentsService {
             sortBy: params.sortBy as string,
             limit: params.pageSize as number
         }
-        const totalCount = await queryRepository.countCommentsByPostId(params.searchId as string)
+        const totalCount = await queryRepository.countCommentsByPostId(searchConfig.filter!.postId as string)
         const items: CommentsOutputModel[] = await queryRepository.getCommentsByPostId(searchConfig) ?? []
-        return{
+        return {
             totalCount,
             page: params.pageNumber!,
             pageSize: params.pageSize!,

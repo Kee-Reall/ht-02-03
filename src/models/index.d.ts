@@ -1,11 +1,11 @@
-import {userLogicModel,userViewModel} from "./userModel";
-import {CommentsDbModel} from "./commentsModel";
+import {userViewModel} from "./userModel";
+import {CommentsOutputModel} from "./commentsModel";
 
 declare global {
     declare namespace Express {
         export interface Request {
             user: userViewModel
-            comment: CommentsDbModel
+            comment: CommentsOutputModel
         }
     }
 }

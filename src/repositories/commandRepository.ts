@@ -99,7 +99,7 @@ class CommandRepository {
 
     async updateComment(id: string, content: string): Promise<boolean> {
         try {
-            const { acknowledged: flag } = await comments.updateOne({id},{comment:{$set:{content}}})
+            const { acknowledged: flag } = await comments.updateOne({id},{$set:{content}})
             return flag
         } catch (e) {
             return false
@@ -117,4 +117,4 @@ class CommandRepository {
 }
 
 const commandRepository = new CommandRepository()
-export {commandRepository}
+export { commandRepository }

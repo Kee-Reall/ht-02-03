@@ -167,7 +167,7 @@ class QueryRepository {
         }
     }
 
-    async getCommentById(id: string): Promise<CommentsViewModel | null> {
+    async getCommentById(id: string): Promise<CommentsOutputModel | null> {
         try {
             return await comments.findOne({id},this.commentProjection)
         } catch (e) {
@@ -185,7 +185,7 @@ class QueryRepository {
 
     async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsOutputModel[] | null> {
         try {
-            return await comments.find({postId : config.filter!.postId})
+            return await comments.find({postId : config.filter!.postId},this.commentProjection)
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
