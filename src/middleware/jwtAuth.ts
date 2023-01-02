@@ -2,7 +2,8 @@ import {NextFunction, Request, Response} from "express";
 import {httpStatus} from "../enums/httpEnum";
 import {jwtService} from "../services/jwt-service";
 
-export const jwtAuth = async (req: Request, res: Response, next: NextFunction ) => {
+export async function jwtAuth (req: Request, res: Response, next: NextFunction ) {
+    console.log('inside auth Middleware')
     if(!req.headers.authorization) {
         return res.sendStatus(httpStatus.notAuthorized)
     }
@@ -16,7 +17,6 @@ export const jwtAuth = async (req: Request, res: Response, next: NextFunction ) 
         req.user = user
         console.log(4)
         next()
-        return
     } else {
         console.log('3')
         res.sendStatus(httpStatus.notAuthorized)

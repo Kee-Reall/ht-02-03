@@ -10,7 +10,7 @@ import {commentsRouter} from "./commentsRouter";
 const apiRouter = Router()
 
 apiRouter.use('/blogs',basicAuthWithoutGet,blogsRouter)
-apiRouter.use('/posts',basicAuthWithoutGet,postsRouter)
+apiRouter.use('/posts',postsRouter)
 apiRouter.use('/users',basicAuth,usersRouter)
 apiRouter.use('/auth',authRouter)
 apiRouter.use('/testing', testingRouter)
