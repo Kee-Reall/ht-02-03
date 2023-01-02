@@ -12,6 +12,7 @@ export enum httpStatus {
     noContent=204,
     badRequest = 400,
     notAuthorized = 401,
+    forbidden = 403,
     notFound = 404,
     deprecated=405,
     teapot = 418

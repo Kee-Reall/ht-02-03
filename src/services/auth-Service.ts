@@ -1,6 +1,7 @@
 import {queryRepository} from "../repositories/queryRepository";
 import {hash as toHash} from "bcrypt";
-import {userLogicModel} from "../models/userModel";
+import {userLogicModel, userViewModel} from "../models/userModel";
+import {usersService} from "./users-service";
 
 class AuthService {
 
@@ -11,6 +12,10 @@ class AuthService {
         }
         const {hash, salt} = user
         return  await toHash(password, salt) === hash ? user : null
+    }
+
+    async getUser(userId: string): Promise<userViewModel| null> {
+        return await usersService.getUserById(userId)
     }
 }
 

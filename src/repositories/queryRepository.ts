@@ -1,12 +1,14 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "./connectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
+import {CommentsDbModel, CommentsViewModel, CommentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
+    private readonly commentProjection = {projection:{_id: false,postId: false}}
     private readonly userProjection = {projection: {_id: false, hash: false, salt: false}}
     async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
         try {
@@ -160,6 +162,34 @@ class QueryRepository {
                     {email: loginOrEmail}
                 ]
             }, this.noHiddenId)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getCommentById(id: string): Promise<CommentsOutputModel | null> {
+        try {
+            return await comments.findOne({id},this.commentProjection)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async countCommentsByPostId(postId: string): Promise<number> {
+        try {
+            return await comments.count({postId})
+        } catch(e) {
+            return 0
+        }
+    }
+
+    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsOutputModel[] | null> {
+        try {
+            return await comments.find({postId : config.filter!.postId},this.commentProjection)
+                .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
+                .skip(config.shouldSkip)
+                .limit(config.limit)
+                .toArray()         
         } catch (e) {
             return null
         }

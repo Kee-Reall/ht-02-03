@@ -3,6 +3,8 @@ import { httpStatus } from "../enums/httpEnum";
 import { postsService } from "../services/posts-service";
 import { post } from "../models/postsModel";
 import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
+import { normalizeCommentQuery } from "../helpers/normalizeComment";
+import { commentsFilter } from "../models/filtersModel";
 
 
 class PostsController {
@@ -12,7 +14,8 @@ class PostsController {
     }
 
     async getOne(req: Request, res: Response) {
-        const result = await postsService.getPost(req.params.id)
+        const { params: { id }} = req
+        const result = await postsService.getPost(id)
         if(result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -43,7 +46,23 @@ class PostsController {
         res.sendStatus(status)
     }
 
-    deprecated(_: Request, res:Response) {
+    async getCommentsForPost(req: Request, res: Response) {
+        const query: commentsFilter = {
+            ...normalizeCommentQuery(req.query),
+            searchId: req.params.id as string
+        }
+        res.status(httpStatus.ok).json(await postsService.getCommentForPost(query))
+    }
+
+
+
+    async createCommentForPost(req: Request, res: Response) {
+        const { body:{ content }, params:{ id: postId }, user } = req
+        const result: boolean = await postsService.createComment({content,postId,user})
+        res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
+    }
+
+    async deprecated(_: Request, res:Response) {
         res.sendStatus(httpStatus.deprecated)
     }
 

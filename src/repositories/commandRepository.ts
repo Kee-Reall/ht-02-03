@@ -1,7 +1,8 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {blogs, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "./connectorCreater";
 import {userLogicModel} from "../models/userModel";
+import {CommentsDbModel} from "../models/commentsModel";
 
 class CommandRepository {
 
@@ -86,7 +87,34 @@ class CommandRepository {
             users.deleteMany(this.emptyObject)
         ])
     }
+
+    async createComment(commentDb: CommentsDbModel): Promise<boolean> {
+        try {
+            const {acknowledged} = await comments.insertOne(commentDb)
+            return acknowledged
+        } catch (e) {
+            return false
+        }
+    }
+
+    async updateComment(id: string, content: string): Promise<boolean> {
+        try {
+            const { acknowledged: flag } = await comments.updateOne({id},{$set:{content}})
+            return flag
+        } catch (e) {
+            return false
+        }
+    }
+
+    async deleteComment(id: string): Promise<boolean> {
+        try {
+            const { deletedCount } = await comments.deleteOne({id})
+            return deletedCount > 0
+        } catch (e) {
+            return false
+        }
+    }
 }
 
 const commandRepository = new CommandRepository()
-export {commandRepository}
+export { commandRepository }

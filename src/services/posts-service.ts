@@ -5,6 +5,11 @@ import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
+import {CommentCreationModel} from "../models/commentsModel";
+import {commentsService} from "./comments-service";
+import { commentsFilter } from "../models/filtersModel"
+import {getOutput} from "../models/ResponseModel";
+
 
 class PostsService {
     async getAllPosts(): Promise<posts> {
@@ -60,6 +65,14 @@ class PostsService {
         const {name: blogName} = blog
         const toUpdate = {blogId,content,shortDescription,title,blogName}
         return commandRepository.updatePost(id,toUpdate)
+    }
+
+    async createComment(input: CommentCreationModel) {
+        return await commentsService.createComment(input)
+    }
+
+    async getCommentForPost(configuration: commentsFilter): Promise<getOutput> {
+        return await commentsService.getCommentsByPost(configuration)
     }
 
     async deletePost(id:string): Promise<boolean> {

@@ -1,9 +1,9 @@
 import {blogFilters} from "../models/filtersModel";
 
 export function normalizePostsQuery(query: blogFilters):blogFilters {
-    const directions: any[] = ['asc','desc']
+    const directions: string[] = ['asc','desc']
     let sortDirection: 'desc' | 'asc' = 'desc'
-    if(directions.includes(query.sortDirection)){
+    if(directions.includes(query.sortDirection as string)){
         sortDirection = query.sortDirection!
     }
     return {

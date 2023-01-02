@@ -1,21 +1,41 @@
 import jwt, {SignOptions} from 'jsonwebtoken'
+import {userViewModel} from "../models/userModel";
+import {usersService} from "./users-service";
 
 class JwtService {
 
     private readonly normalTimeExpire: number = 3
 
-    getJwtSecret(): string {
+    private getJwtSecret(): string {
         return process.env.JWT_SECRET as string
     }
 
-    generateExpire(time: number = this.normalTimeExpire): SignOptions {
+    private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
             expiresIn: `${time}h`
         }
     }
 
-    async createToken(userId: string) {
-        return jwt.sign({userId: userId}, this.getJwtSecret(), this.generateExpire());
+    public async createToken(userId: string): Promise<string> {
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire());
+    }
+
+    private async verify(token: string): Promise<string | null> {
+        try {
+            const payload: any = jwt.verify(token, this.getJwtSecret())
+            return payload.userId
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByToken(token: string): Promise< userViewModel | null> {
+        const result: string | null = await this.verify(token)
+        if(result !== null) {
+            return await usersService.getUserById(result)
+        } else {
+            return null
+        }
     }
 }
 
