@@ -10,7 +10,8 @@ export const createCommentMiddlewares = [
         .isString()
         .withMessage(message.invalidType)
         .trim()
-        .isLength({min:20,max:600}),
+        .isLength({min:20,max:300})
+        .withMessage(message.length),
 
     hasError(httpStatus.badRequest),
 

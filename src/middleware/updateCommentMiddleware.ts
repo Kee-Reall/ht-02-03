@@ -9,7 +9,7 @@ export const updateCommentMiddleware = [
         .isString()
         .withMessage(message.invalidType)
         .trim()
-        .isLength({min:2, max:3})
+        .isLength({min:20, max:300})
         .withMessage(message.length),
 
     hasError(httpStatus.badRequest),
