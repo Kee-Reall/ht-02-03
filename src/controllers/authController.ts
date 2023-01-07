@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import { httpStatus } from "../enums/httpEnum"
+import {Request, Response} from "express"
+import {httpStatus} from "../enums/httpEnum"
 import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
 import {userLogicModel} from "../models/userModel";
@@ -16,9 +16,9 @@ class AuthController {
         res.status(httpStatus.ok).json({accessToken})
     }
 
-    async getUserByJWT(req: Request, res: Response) {
-        const {login,email,id: userId} = req.user!
-        res.status(httpStatus.ok).json({login,email,userId})
+    async getUserFromRequest(req: Request, res: Response) { // required jwt middleware
+        const {login, email, id: userId} = req.user!
+        res.status(httpStatus.ok).json({login, email, userId})
     }
 }
 

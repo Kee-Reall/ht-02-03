@@ -41,9 +41,7 @@ class BlogsService {
 
     async getBlogPosts(blogId: string, params: any) {
         const config:SearchConfiguration<postViewModel> = {
-            filter: {
-                blogId
-            },
+            filter: {blogId},
             sortBy: params.sortBy,
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize,

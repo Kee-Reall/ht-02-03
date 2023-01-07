@@ -5,7 +5,7 @@ import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {CommentCreationModel} from "../models/commentsModel";
+import {commentCreationModel} from "../models/commentsModel";
 import {commentsService} from "./comments-service";
 import { commentsFilter } from "../models/filtersModel"
 import {getOutput} from "../models/ResponseModel";
@@ -67,7 +67,7 @@ class PostsService {
         return commandRepository.updatePost(id,toUpdate)
     }
 
-    async createComment(input: CommentCreationModel) {
+    async createComment(input: commentCreationModel) {
         return  await commentsService.createComment(input)
     }
 

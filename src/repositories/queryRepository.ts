@@ -1,9 +1,9 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
-import {CommentsDbModel, CommentsViewModel, CommentsOutputModel} from "../models/commentsModel";
+import {commentsDbModel, commentsViewModel, commentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -167,7 +167,7 @@ class QueryRepository {
         }
     }
 
-    async getCommentById(id: string): Promise<CommentsOutputModel | null> {
+    async getCommentById(id: string): Promise<commentsOutputModel | null> {
         try {
             return await comments.findOne({id},this.commentProjection)
         } catch (e) {
@@ -183,7 +183,7 @@ class QueryRepository {
         }
     }
 
-    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsOutputModel[] | null> {
+    async getCommentsByPostId(config: SearchConfiguration<commentsDbModel>): Promise<commentsOutputModel[] | null> {
         try {
             return await comments.find({postId : config.filter!.postId},this.commentProjection)
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})

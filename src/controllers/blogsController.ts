@@ -3,7 +3,7 @@ import { httpStatus } from "../enums/httpEnum";
 import { blogsService } from "../services/blogs-service";
 import {blog} from "../models/blogModel";
 import {customRequest} from "../models/RequestModel";
-import {getBlogResponse} from "../models/ResponseModel";
+import {getItemsResponse} from "../models/ResponseModel";
 import {blogFilters} from "../models/filtersModel";
 import {normalizeBlogsQuery} from "../helpers/normalizeBlogsQuery";
 import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
@@ -11,11 +11,11 @@ import { post } from "../models/postsModel";
 
 class BlogsController {
 
-    async getAll(req: Request, res: Response) {
+    async getAll(req: Request, res: Response) { // is deprecated
         res.status(httpStatus.ok).json(await blogsService.getAllBlogs())
     }
 
-    async getBlogs(req: customRequest<blogFilters>, res: getBlogResponse) {
+    async getBlogs(req: customRequest<blogFilters>, res: getItemsResponse) {
         const result = await blogsService.getBlogs(normalizeBlogsQuery(req.query))
         res.status(httpStatus.ok).json(result)
     }

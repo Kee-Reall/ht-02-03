@@ -6,6 +6,6 @@ import {jwtAuth} from "../middleware/jwtAuth";
 const authRouter = Router()
 
 authRouter.post('/login',...loginMiddleware, authController.login)
-authRouter.get('/me', jwtAuth, authController.getUserByJWT)
+authRouter.get('/me', jwtAuth, authController.getUserFromRequest)
 
 export { authRouter }

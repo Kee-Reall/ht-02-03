@@ -2,7 +2,7 @@ import { MongoClient } from "mongodb"
 import {postViewModel} from "../models/postsModel";
 import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
-import {CommentsDbModel} from "../models/commentsModel";
+import {commentsDbModel} from "../models/commentsModel";
 
 const dbUri: string = process.env.MONGO_URI!
 if(!dbUri) {
@@ -14,7 +14,7 @@ export const db = client.db('ht-03')
 export const posts = db.collection<postViewModel>('posts')
 export const blogs = db.collection<blogViewModel>('blogs')
 export const users = db.collection<userDbModel>('users')
-export const comments = db.collection<CommentsDbModel>('comments')
+export const comments = db.collection<commentsDbModel>('comments')
 export async function runDb(): Promise<boolean> {
     try {
         await client.connect()

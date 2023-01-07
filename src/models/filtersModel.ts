@@ -1,5 +1,5 @@
 import {blogViewModel} from "./blogModel";
-import { CommentsViewModel } from "./commentsModel";
+import { commentsViewModel } from "./commentsModel";
 import {userViewModel} from "./userModel";
 
 interface abstractFilter<T> {
@@ -18,6 +18,6 @@ export interface usersFilters extends abstractFilter<userViewModel> {
     searchEmailTerm?: string
 }
 
-export interface commentsFilter extends abstractFilter<CommentsViewModel> {
+export interface commentsFilter extends abstractFilter<commentsViewModel> {
     searchId?:string
 }

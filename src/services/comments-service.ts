@@ -1,4 +1,4 @@
-import {CommentsViewModel, CommentCreationModel, CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
+import {commentsViewModel, commentCreationModel, commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 import {queryRepository} from "../repositories/queryRepository";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
@@ -13,20 +13,20 @@ class CommentsService {
         public generateId: (arg: eternityId) => string
         ) {}
 
-    async createComment (input: CommentCreationModel): Promise<CommentsViewModel | null> {
+    async createComment (input: commentCreationModel): Promise<commentsViewModel | null> {
         const createdAt = new Date(Date.now()).toISOString()
         const { content, postId, user: { id: userId, login: userLogin }} = input
         const id = this.generateId("comment")
-        const comment: CommentsViewModel = {createdAt, content, userId , userLogin}
-        const toPut: CommentsDbModel = {id,postId, ...comment}
+        const comment: commentsViewModel = {createdAt, content, userId , userLogin}
+        const toPut: commentsDbModel = {id,postId, ...comment}
         const result = await commandRepository.createComment(toPut)
         return result ? await this.getCommentById(id) : null
     }
 
-    async getCommentById(id: string): Promise<CommentsViewModel | null> {
+    async getCommentById(id: string): Promise<commentsViewModel | null> {
         return await queryRepository.getCommentById(id)
     }
-    async updateCommentAfterMiddleware({ id }: CommentsOutputModel,content: string): Promise<boolean> {
+    async updateCommentAfterMiddleware({ id }: commentsOutputModel, content: string): Promise<boolean> {
         return  await commandRepository.updateComment(id,content)
     }
 
@@ -35,7 +35,7 @@ class CommentsService {
     }
 
     async getCommentsByPost(params: commentsFilter): Promise<getOutput> {
-        const searchConfig: SearchConfiguration<CommentsDbModel> = {
+        const searchConfig: SearchConfiguration<commentsDbModel> = {
             filter: {
                 postId: params.searchId
             },
@@ -45,7 +45,7 @@ class CommentsService {
             limit: params.pageSize as number
         }
         const totalCount = await queryRepository.countCommentsByPostId(searchConfig.filter!.postId as string)
-        const items: CommentsOutputModel[] = await queryRepository.getCommentsByPostId(searchConfig) ?? []
+        const items: commentsOutputModel[] = await queryRepository.getCommentsByPostId(searchConfig) ?? []
         return {
             totalCount,
             page: params.pageNumber!,

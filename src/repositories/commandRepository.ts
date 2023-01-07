@@ -1,8 +1,8 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, users} from "./connectorCreater";
+import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
 import {userLogicModel} from "../models/userModel";
-import {CommentsDbModel} from "../models/commentsModel";
+import {commentsDbModel} from "../models/commentsModel";
 
 class CommandRepository {
 
@@ -88,7 +88,7 @@ class CommandRepository {
         ])
     }
 
-    async createComment(commentDb: CommentsDbModel): Promise<boolean> {
+    async createComment(commentDb: commentsDbModel): Promise<boolean> {
         try {
             const {acknowledged} = await comments.insertOne(commentDb)
             return acknowledged
