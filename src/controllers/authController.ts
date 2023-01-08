@@ -20,6 +20,14 @@ class AuthController {
         const {login, email, id: userId} = req.user!
         res.status(httpStatus.ok).json({login, email, userId})
     }
+
+    async registration(req: Request, res: Response) {
+
+    }
+
+    async conformation(req: Request, res: Response) {
+
+    }
 }
 
 export const authController = new AuthController()

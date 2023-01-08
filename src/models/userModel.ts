@@ -1,4 +1,5 @@
 import {ObjectId} from "mongodb";
+import type {v4} from "uuid/index";
 
 export interface userViewModel {
     id: string
@@ -25,7 +26,7 @@ export interface userLogicModel {
 
 export type confirmation = {
     isConfirmed: boolean
-    code: any
+    code: string | null
     confirmationDate: Date
 }
 

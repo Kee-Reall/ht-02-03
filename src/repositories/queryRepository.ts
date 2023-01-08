@@ -9,7 +9,7 @@ class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
     private readonly all = {};
     private readonly commentProjection = {projection:{_id: false,postId: false}}
-    private readonly userProjection = {projection: {_id: false, hash: false, salt: false}}
+    private readonly userProjection = {projection: {_id: false, hash: false, salt: false, confirmation: false}}
     async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
         try {
             const reg = {name: {$regex: filter.searchNameTerm,$options: "i"}}

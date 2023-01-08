@@ -1,7 +1,7 @@
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
+import {confirmation, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
 import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
@@ -43,7 +43,7 @@ class UsersService {
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(password,salt)
         const id = generateId("user")
-        const confirmation = this.generateConfirmData(true)
+        const confirmation = await this.generateConfirmData(true)
         confirmation.isConfirmed = true
         const user: userLogicModel = {
             login, email, id,
@@ -62,7 +62,7 @@ class UsersService {
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(password,salt)
         const id = generateId("user")
-        const confirmation = this.generateConfirmData(false)
+        const confirmation = await this.generateConfirmData(false)
         const user: userLogicModel = {login, email, hash, createdAt, salt, id, confirmation}
         const result = await commandRepository.createUser(user)
         if(!result) {
@@ -80,7 +80,7 @@ class UsersService {
         return queryRepository.getUserById(id)
    }
 
-   private generateConfirmData(isConfirmed: boolean = false) {
+   private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
         return {
             code: isConfirmed ? null : uniqueCode(),
             isConfirmed,
