@@ -23,19 +23,14 @@ class JwtService {
     private async verify(token: string): Promise<string | null> {
         try {
             const payload: any = jwt.verify(token, this.getJwtSecret())
-            return payload.userId
+            return payload.userId as string
         } catch (e) {
             return null
         }
     }
-
     async getUserByToken(token: string): Promise< userViewModel | null> {
-        const result: string | null = await this.verify(token)
-        if(result !== null) {
-            return await usersService.getUserById(result)
-        } else {
-            return null
-        }
+        const userId: string | null = await this.verify(token)
+        return userId ? await usersService.getUserById(userId) : userId as null
     }
 }
 

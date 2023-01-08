@@ -5,7 +5,7 @@ class MailWorker {
     constructor(
         private mainTransporter: Mail<SMTPTransport.SentMessageInfo> = mailAdapter
     ) {}
-    public async testingMessage() {
+    private async testingMessage() {
         return await this.mainTransporter.sendMail({
             from:`it-incubator Application <${process.env.MAIL_NAME}>`,
             to: ['kirill_bezrodny@mail.ru',"smolnikov.456@mail.ru","sauda@saf","alizast18@gmail.com"],
