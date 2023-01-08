@@ -20,6 +20,13 @@ export interface userLogicModel {
     createdAt: string
     hash:string
     salt: string
+    confirmation?:confirmation
+}
+
+export type confirmation = {
+    isConfirmed: boolean
+    code: any
+    confirmationDate: Date
 }
 
 export interface userDbModel extends userLogicModel {

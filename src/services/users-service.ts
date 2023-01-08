@@ -2,12 +2,15 @@ import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
 import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
-import bcrypt from 'bcrypt'
+import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
+import {v4 as uniqueCode} from "uuid"
+import add from "date-fns/add"
+import {mailWorker} from "../repositories/mailWorker";
 
 class UsersService {
-    async getUsers(params: usersFilters): Promise<getOutput> {
+    public async getUsers(params: usersFilters): Promise<getOutput> {
 
         const searchConfig = {
             filter: {
@@ -34,15 +37,17 @@ class UsersService {
     }
 
 
-    async createUser(input: userInputModel): Promise<userViewModel | null> {
+    public async adminCreatingUser(input: userInputModel): Promise<userViewModel | null> {
+        const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(input.password,salt)
+        const hash = await bcrypt.hash(password,salt)
         const id = generateId("user")
+        const confirmation = this.generateConfirmData(true)
+        confirmation.isConfirmed = true
         const user: userLogicModel = {
-            login: input.login,
-            email: input.email,
-            hash, createdAt, salt, id
+            login, email, id,
+            hash, createdAt, salt, confirmation
         }
         const result = await commandRepository.createUser(user)
         if(result) {
@@ -51,12 +56,36 @@ class UsersService {
         return null
     }
 
-    async deleteUser(id:string): Promise<boolean> {
+    public async createUser(input: userInputModel): Promise<boolean> {
+        const {password, email, login} = input
+        const createdAt: string = new Date(Date.now()).toISOString()
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password,salt)
+        const id = generateId("user")
+        const confirmation = this.generateConfirmData(false)
+        const user: userLogicModel = {login, email, hash, createdAt, salt, id, confirmation}
+        const result = await commandRepository.createUser(user)
+        if(!result) {
+            return false
+        }
+        const mailResult: boolean = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
+        return true
+    }
+
+    public async deleteUser(id:string): Promise<boolean> {
         return await commandRepository.deleteUser(id)
    }
 
-   async getUserById(id: string): Promise<userViewModel | null> {
+   public async getUserById(id: string): Promise<userViewModel | null> {
         return queryRepository.getUserById(id)
+   }
+
+   private generateConfirmData(isConfirmed: boolean = false) {
+        return {
+            code: isConfirmed ? null : uniqueCode(),
+            isConfirmed,
+            confirmationDate: add(new Date(),{minutes: 15})
+        }
    }
 
 }

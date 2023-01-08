@@ -11,11 +11,10 @@ class UsersController {
         res.status(httpStatus.ok).json(result)
     }
 
-    async createUser(req: Request, res: Response) {
-        const result = await usersService.createUser(req.body)
+    async createUser({body}: Request, res: Response) {
+        const result = await usersService.adminCreatingUser(body)
         if(result) {
-            res.status(httpStatus.created).json(result)
-            return
+            return res.status(httpStatus.created).json(result)
         }
         res.sendStatus(httpStatus.teapot)
     }
