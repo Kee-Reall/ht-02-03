@@ -3,7 +3,7 @@ import {postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
-import {commentsDbModel, commentsViewModel, commentsOutputModel} from "../models/commentsModel";
+import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
