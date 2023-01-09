@@ -1,6 +1,6 @@
 import {queryRepository} from "../repositories/queryRepository";
 import {hash as toHash} from "bcrypt";
-import {userLogicModel, userViewModel} from "../models/userModel";
+import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
 
 class AuthService {
@@ -16,6 +16,10 @@ class AuthService {
 
     async getUser(userId: string): Promise<userViewModel| null> {
         return await usersService.getUserById(userId)
+    }
+
+    async registration (input: userInputModel) {
+        return await usersService.createUser(input)
     }
 }
 

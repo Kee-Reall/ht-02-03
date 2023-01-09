@@ -7,7 +7,3 @@ export const conformationValidator = body('code')
     .trim()
     .isLength({min:1,max:100})
     .withMessage(message.length)
-    .custom((value)=>{
-// is code inside body exist or expired?
-    })
-    .withMessage(message.expired)

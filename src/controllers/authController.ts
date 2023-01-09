@@ -22,6 +22,7 @@ class AuthController {
     }
 
     async registration(req: Request, res: Response) {
+        const result = await authService.registration()
 
     }
 
