@@ -41,7 +41,8 @@ class AuthController {
     }
 
     async resending(req: Request,res: Response) {
-        const isResent = authService.resendEmail(req.body.email)
+        const isResent = await authService.resendEmail(req.body.email)
+        res.sendStatus(isResent ? httpStatus.noContent : httpStatus.teapot)
     }
 }
 

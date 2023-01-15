@@ -1,6 +1,8 @@
 import {body} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {queryRepository} from "../repositories/queryRepository";
+import {hasError} from "./hasError";
+import {httpStatus} from "../enums/httpEnum";
 
 export const resendValidator = [
     body('email')
@@ -16,6 +18,7 @@ export const resendValidator = [
             else {
                 return true
             }
-        })
+        }),
 
+    hasError(httpStatus.badRequest)
 ]
