@@ -22,8 +22,8 @@ class AuthService {
         return await usersService.createUser(input)
     }
 
-    async conformation (input: {code: string}): Promise<boolean> {
-        return await usersService.confirm(input)
+    async conformation (code: string): Promise<boolean> {
+        return await usersService.confirm(code)
     }
 
     async resendEmail(email: string) {

@@ -33,7 +33,7 @@ class AuthController {
     }
 
     async conformation(req: Request, res: Response) {
-        const confirmSuccess = await authService.conformation(req.body)
+        const confirmSuccess = await authService.conformation(req.body.code)
         if(!confirmSuccess){
             return res.status(httpStatus.badRequest).json(this.confirmCodeError)
         }

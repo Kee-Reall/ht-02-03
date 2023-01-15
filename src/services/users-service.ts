@@ -91,10 +91,11 @@ class UsersService {
         }
    }
 
-   public async confirm({code}: {code: string}): Promise<boolean> {
+   public async confirm(code: string): Promise<boolean> {
        const user = await queryRepository.getUserByConfirm(code)
-       if(!user || user.confirmation!.isConfirmed ) return false
-       const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate as Date)
+       if(!user) return false
+       if(user.confirmation!.isConfirmed) return false
+       const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
        if(isDataExpired) return false
        return await commandRepository.confirmUser(user.id)
    }
