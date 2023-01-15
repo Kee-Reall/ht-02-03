@@ -6,7 +6,7 @@ import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 import {v4 as uniqueCode} from "uuid"
-import add from "date-fns/add"
+import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
 
 class UsersService {
@@ -64,12 +64,15 @@ class UsersService {
         const id = generateId("user")
         const confirmation = await this.generateConfirmData(false)
         const user: userLogicModel = {login, email, hash, createdAt, salt, id, confirmation}
-        const result = await commandRepository.createUser(user)
-        if(!result) {
+        const isUserCreated: boolean = await commandRepository.createUser(user)
+        if(!isUserCreated) {
             return false
         }
-        const mailResult: boolean = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
-        return true
+        const isMailSent: boolean = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
+        if(!isMailSent) {
+            await commandRepository.deleteUser(id)
+        }
+        return isMailSent
     }
 
     public async deleteUser(id:string): Promise<boolean> {
@@ -82,10 +85,21 @@ class UsersService {
 
    private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
         return {
-            code: isConfirmed ? null : uniqueCode(),
+            code: uniqueCode(),
             isConfirmed,
             confirmationDate: add(new Date(),{minutes: 15})
         }
+   }
+
+   public async confirm({code}: {code: string}) {
+       const user = await queryRepository.getUserByConfirm(code)
+       if(!user || user.confirmation!.isConfirmed ) {
+           return false
+       }
+       const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate as Date)
+       if(isDataExpired) return false
+       const updated = await commandRepository.confirmUser(user.id)
+       return updated
    }
 
 }

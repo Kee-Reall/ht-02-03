@@ -2,7 +2,7 @@ import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {userLogicModel, userViewModel} from "../models/userModel";
+import {userDbModel, userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
@@ -146,9 +146,9 @@ class QueryRepository {
         }
     }
 
-    async getUserByEmail(email: string): Promise<userViewModel | null> {
+    async getUserByEmail(email: string): Promise<userLogicModel | null> {
         try {
-            return await users.findOne({email},this.userProjection)
+            return await users.findOne({email},this.noHiddenId)
         } catch (e) {
             return null
         }
@@ -162,6 +162,14 @@ class QueryRepository {
                     {email: loginOrEmail}
                 ]
             }, this.noHiddenId)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByConfirm(code: string): Promise<userLogicModel | null> {
+        try {
+            return await users.findOne({"confirmation.code": code},this.noHiddenId)
         } catch (e) {
             return null
         }

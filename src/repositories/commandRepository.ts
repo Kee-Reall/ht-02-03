@@ -80,6 +80,19 @@ class CommandRepository {
         }
     }
 
+    async confirmUser(id: string): Promise<boolean> {
+        try {
+            const {modifiedCount} = await users.updateOne({id},
+                {$set:{
+                    "confirmation.isConfirmed":true
+                }}
+            )
+            return modifiedCount > 0
+        } catch (e) {
+            return false
+        }
+    }
+
     async clearStore(): Promise<void> {
         await Promise.all([
             posts.deleteMany(this.emptyObject),

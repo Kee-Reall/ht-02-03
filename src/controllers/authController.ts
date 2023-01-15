@@ -5,6 +5,12 @@ import {jwtService} from "../services/jwt-service";
 import {userLogicModel} from "../models/userModel";
 
 class AuthController {
+    private readonly confirmCodeError = {"errorsMessages": [
+            {
+                "message": "If the confirmation code is expired or already been applied",
+                "field": "code"
+            }
+        ]}
     async login(req: Request, res: Response) {
         const {body: {loginOrEmail, password}} = req
         const loginResult: userLogicModel | null = await authService.login(loginOrEmail, password)
@@ -22,12 +28,16 @@ class AuthController {
     }
 
     async registration(req: Request, res: Response) {
-        const result = await authService.registration()
-
+        const result = await authService.registration(req.body)
+        res.sendStatus(result? httpStatus.noContent : httpStatus.teapot)
     }
 
     async conformation(req: Request, res: Response) {
-
+        const confirmSuccess = await authService.conformation(req.body)
+        if(!confirmSuccess){
+            return res.status(httpStatus.badRequest).json(this.confirmCodeError)
+        }
+        res.sendStatus(httpStatus.noContent)
     }
 }
 

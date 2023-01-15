@@ -21,6 +21,10 @@ class AuthService {
     async registration (input: userInputModel) {
         return await usersService.createUser(input)
     }
+
+    async conformation (input: {code: string}): Promise<boolean> {
+        return await usersService.confirm(input)
+    }
 }
 
 export const authService = new AuthService()
