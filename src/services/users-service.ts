@@ -91,15 +91,20 @@ class UsersService {
         }
    }
 
-   public async confirm({code}: {code: string}) {
+   public async confirm({code}: {code: string}): Promise<boolean> {
        const user = await queryRepository.getUserByConfirm(code)
-       if(!user || user.confirmation!.isConfirmed ) {
-           return false
-       }
+       if(!user || user.confirmation!.isConfirmed ) return false
        const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate as Date)
        if(isDataExpired) return false
-       const updated = await commandRepository.confirmUser(user.id)
-       return updated
+       return await commandRepository.confirmUser(user.id)
+   }
+
+   public async resend(email: string): Promise<boolean> {
+       const user = await queryRepository.getUserByEmail(email)
+       const confirmation = await this.generateConfirmData()
+       const mailSent = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
+       if(!mailSent) return false
+       return await commandRepository.changeConfirm(user!.id,confirmation)
    }
 
 }

@@ -23,7 +23,7 @@ class AuthController {
     }
 
     async getUserFromRequest(req: Request, res: Response) { // required jwt middleware
-        const {login, email, id: userId} = req.user!
+        const {user: {login, email, id: userId}} = req
         res.status(httpStatus.ok).json({login, email, userId})
     }
 
@@ -38,6 +38,10 @@ class AuthController {
             return res.status(httpStatus.badRequest).json(this.confirmCodeError)
         }
         res.sendStatus(httpStatus.noContent)
+    }
+
+    async resending(req: Request,res: Response) {
+        const isResent = authService.resendEmail(req.body.email)
     }
 }
 

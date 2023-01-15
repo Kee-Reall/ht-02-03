@@ -25,6 +25,10 @@ class AuthService {
     async conformation (input: {code: string}): Promise<boolean> {
         return await usersService.confirm(input)
     }
+
+    async resendEmail(email: string) {
+        return await usersService.resend(email)
+    }
 }
 
 export const authService = new AuthService()

@@ -11,7 +11,7 @@ const authRouter = Router()
 authRouter.post('/login',...loginMiddleware, authController.login)
 authRouter.post('/registration',...createUserMiddleware, authController.registration)
 authRouter.post('/registration-confirmation',...conformationValidator,authController.conformation)
-authRouter.post('/registration-email-resending',...resendValidator,)
+authRouter.post('/registration-email-resending',...resendValidator,authController.resending)
 authRouter.get('/me', jwtAuth, authController.getUserFromRequest)
 
 export { authRouter }

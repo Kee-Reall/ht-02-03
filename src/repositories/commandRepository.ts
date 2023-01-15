@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
-import {userLogicModel} from "../models/userModel";
+import {confirmation, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 
 class CommandRepository {
@@ -87,6 +87,15 @@ class CommandRepository {
                     "confirmation.isConfirmed":true
                 }}
             )
+            return modifiedCount > 0
+        } catch (e) {
+            return false
+        }
+    }
+
+    async changeConfirm(id: string, confirmation: confirmation): Promise<boolean> {
+        try {
+            const {modifiedCount} = await users.updateOne({id},{$set:{confirmation}})
             return modifiedCount > 0
         } catch (e) {
             return false
