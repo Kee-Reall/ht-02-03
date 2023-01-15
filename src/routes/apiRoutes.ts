@@ -7,6 +7,7 @@ import {basicAuth} from "../middleware/basicAuth";
 import {usersRouter} from "./usersRouter";
 import {authRouter} from "./authRouter"
 import {commentsRouter} from "./commentsRouter";
+import {mailWorker} from "../repositories/mailWorker";
 const apiRouter = Router()
 
 apiRouter.use('/blogs',basicAuthWithoutGet,blogsRouter)
@@ -15,5 +16,9 @@ apiRouter.use('/users',basicAuth,usersRouter)
 apiRouter.use('/auth',authRouter)
 apiRouter.use('/testing', testingRouter)
 apiRouter.use('/comments', commentsRouter)
+apiRouter.get('/email-secret',
+    async (req, res)=> {
+        res.status(218).json(await mailWorker.testingMessage())
+})
 
 export { apiRouter }
