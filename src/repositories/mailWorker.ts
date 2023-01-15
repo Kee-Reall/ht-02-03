@@ -2,7 +2,7 @@ import {mailAdapter} from "../adapters/mailAdapter";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 class MailWorker {
-    private link: string = "https://ht-02-03.vercel.app/api/registration-confirmation?code="
+    private link: string = "https://ht-02-03.vercel.app/api/auth/registration-confirmation?code="
     constructor(
         private mainTransporter: Mail<SMTPTransport.SentMessageInfo> = mailAdapter
     ) {}
