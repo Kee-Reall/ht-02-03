@@ -21,8 +21,7 @@ export async function runDb(): Promise<boolean> {
         await client.db('test').command({ping: 1})
         console.log('db Connection success\n Creating required collections')
         return true
-    }
-    catch (error) {
+    } catch (error) {
         console.log('Cannot connect to db \n' + error)
         await client.close()
         return false

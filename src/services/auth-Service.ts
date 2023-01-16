@@ -14,7 +14,7 @@ class AuthService {
         return  await toHash(password, salt) === hash ? user : null
     }
 
-    async getUser(userId: string): Promise<userViewModel| null> {
+    async getUser(userId: string): Promise<userViewModel| null> { // no usage
         return await usersService.getUserById(userId)
     }
 

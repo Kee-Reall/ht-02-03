@@ -30,7 +30,6 @@ class MailWorker {
             })
             return accepted.length > 0
         } catch (e) {
-            console.error(e)
             return false
         }
     }
