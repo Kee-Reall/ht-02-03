@@ -5,7 +5,7 @@ import {jwtService} from "../services/jwt-service";
 import {userLogicModel} from "../models/userModel";
 
 class AuthController {
-    private readonly confirmCodeError = {"errorsMessages": [
+    private confirmCodeError = {"errorsMessages": [
             {
                 "message": "If the confirmation code is expired or already been applied",
                 "field": "code"

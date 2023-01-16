@@ -26,7 +26,7 @@ export interface userLogicModel {
 
 export type confirmation = {
     isConfirmed: boolean
-    code: string | null
+    code: string
     confirmationDate: Date
 }
 

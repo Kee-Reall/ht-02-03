@@ -2,7 +2,7 @@ import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {userDbModel, userLogicModel, userViewModel} from "../models/userModel";
+import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 
 class QueryRepository {
