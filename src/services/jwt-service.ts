@@ -28,7 +28,7 @@ class JwtService {
             return null
         }
     }
-    async getUserByToken(token: string): Promise< userViewModel | null> {
+    public async getUserByToken(token: string): Promise< userViewModel | null> {
         const userId: string | null = await this.verify(token)
         return userId ? await usersService.getUserById(userId) : userId as null
     }
