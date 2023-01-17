@@ -1,5 +1,4 @@
 import {ObjectId} from "mongodb";
-import type {v4} from "uuid/index";
 
 export interface userViewModel {
     id: string
@@ -22,6 +21,18 @@ export interface userLogicModel {
     hash:string
     salt: string
     confirmation?:confirmation
+    refreshTokens: userTokensData
+}
+
+export type userTokensData = {
+    current: string
+    expired: Array<string>
+}
+
+export type userUpdateTokenModel = {
+    id: string
+    nextToken: string
+    previousToken: string
 }
 
 export type confirmation = {

@@ -9,11 +9,16 @@ class AuthController {
         const {body: {loginOrEmail, password}} = req
         const loginResult: userLogicModel | null = await authService.login(loginOrEmail, password)
         if (!loginResult) {
-            res.sendStatus(httpStatus.notAuthorized)
-            return
+            return res.sendStatus(httpStatus.notAuthorized)
         }
-        const accessToken = await jwtService.createToken(loginResult.id)
-        res.status(httpStatus.ok).json({accessToken})
+        const tokenPair = await jwtService.createTokenPair(loginResult.id,loginResult.refreshTokens)
+        if(!tokenPair){
+            return res.sendStatus(httpStatus.teapot)
+        }
+        const { refreshToken, accessToken} = tokenPair
+        res.status(httpStatus.ok)
+            .cookie('refreshToken', refreshToken, {httpOnly:true,secure: true} )
+            .json({accessToken})
     }
 
     async getUserFromRequest(req: Request, res: Response) { // required jwt middleware

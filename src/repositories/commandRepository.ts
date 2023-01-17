@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
-import {confirmation, userLogicModel} from "../models/userModel";
+import {confirmation, userLogicModel, userUpdateTokenModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 
 class CommandRepository {
@@ -87,6 +87,21 @@ class CommandRepository {
                     "confirmation.isConfirmed":true
                 }}
             )
+            return modifiedCount > 0
+        } catch (e) {
+            return false
+        }
+    }
+
+    async changeCurrentToken(dataSet: userUpdateTokenModel): Promise<boolean> {
+        try {
+            const {id, nextToken, previousToken} = dataSet
+            const {modifiedCount} = await users.updateOne({id},{
+                $set:{
+                    "refreshTokens.current" : nextToken
+                },
+                $push:{"refreshTokens.expired": previousToken}
+            })
             return modifiedCount > 0
         } catch (e) {
             return false

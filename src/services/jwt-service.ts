@@ -1,10 +1,12 @@
 import jwt, {SignOptions} from 'jsonwebtoken'
-import {userViewModel} from "../models/userModel";
+import {userTokensData, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
+import {tokenPair} from "../models/mixedModels";
+import {commandRepository} from "../repositories/commandRepository";
 
 class JwtService {
 
-    private readonly normalTimeExpire: number = 3
+    private readonly normalTimeExpire: number = 10
 
     private getJwtSecret(): string {
         return process.env.JWT_SECRET as string
@@ -12,12 +14,30 @@ class JwtService {
 
     private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
-            expiresIn: `${time}h`
+            expiresIn: `${time}s`
         }
     }
 
-    public async createToken(userId: string): Promise<string> {
+    public async createAccessToken(userId: string): Promise<string> {
         return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire());
+    }
+
+    private async createRefreshToken(userId: string): Promise<string> {
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(20));
+    }
+
+    public async createTokenPair(userId: string,userTokensData: userTokensData): Promise<tokenPair | null> {
+        const nextRefreshToken = await this.createRefreshToken(userId)
+        const tokensUpdated = await commandRepository.changeCurrentToken({
+            id: userId,
+            previousToken: userTokensData.current,
+            nextToken: nextRefreshToken
+        })
+        if(!tokensUpdated) return null
+        return {
+            accessToken: await this.createAccessToken(userId),
+            refreshToken: nextRefreshToken
+        }
     }
 
     private async verify(token: string): Promise<string | null> {
