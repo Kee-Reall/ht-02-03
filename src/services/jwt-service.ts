@@ -1,4 +1,4 @@
-import jwt, {SignOptions} from 'jsonwebtoken'
+import jwt, {JwtPayload, SignOptions} from 'jsonwebtoken'
 import {userTokensData, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
 import {tokenPair} from "../models/mixedModels";
@@ -51,6 +51,10 @@ class JwtService {
     public async getUserByToken(token: string): Promise< userViewModel | null> {
         const userId: string | null = await this.verify(token)
         return userId ? await usersService.getUserById(userId) : userId as null
+    }
+
+    public async getPayload(token: string): Promise<JwtPayload> {
+        return jwt.decode(token) as JwtPayload;
     }
 }
 

@@ -29,6 +29,10 @@ class AuthService {
     async resendEmail(email: string) {
         return await usersService.resend(email)
     }
+
+    async refresh(userId: string, refreshToken: string) {
+        return await usersService.refresh(userId,refreshToken)
+    }
 }
 
 export const authService = new AuthService()

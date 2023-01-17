@@ -48,6 +48,16 @@ class AuthController {
         const isResent = await authService.resendEmail(req.body.email)
         res.sendStatus(isResent ? httpStatus.noContent : httpStatus.teapot)
     }
+
+    async refresh(req: Request, res: Response) {
+        const {cookies:{refreshToken}} = req
+        const {userId} = await jwtService.getPayload(refreshToken)
+        if (!userId){
+            res.sendStatus(httpStatus.notAuthorized)
+        }
+        const isNotExpired = await authService.refresh(userId, refreshToken)
+
+    }
 }
 
 export const authController = new AuthController()

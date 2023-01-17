@@ -97,9 +97,7 @@ class CommandRepository {
         try {
             const {id, nextToken, previousToken} = dataSet
             const {modifiedCount} = await users.updateOne({id},{
-                $set:{
-                    "refreshTokens.current" : nextToken
-                },
+                $set:{"refreshTokens.current" : nextToken},
                 $push:{"refreshTokens.expired": previousToken}
             })
             return modifiedCount > 0
