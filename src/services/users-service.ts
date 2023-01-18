@@ -47,7 +47,8 @@ class UsersService {
         confirmation.isConfirmed = true
         const user: userLogicModel = {
             login, email, id,
-            hash, createdAt, salt, confirmation
+            hash, createdAt, salt, confirmation,
+            refreshTokens:{current:'', expired:[]}
         }
         const result = await commandRepository.createUser(user)
         if(result) {
@@ -63,7 +64,11 @@ class UsersService {
         const hash = await bcrypt.hash(password,salt)
         const id = generateId("user")
         const confirmation = await this.generateConfirmData(false)
-        const user: userLogicModel = {login, email, hash, createdAt, salt, id, confirmation}
+        const user: userLogicModel = {
+            login, email, hash, createdAt,
+            salt, id, confirmation,
+            refreshTokens: {current:'', expired:[]}
+        }
         const isUserCreated: boolean = await commandRepository.createUser(user)
         if(!isUserCreated) {
             return false
@@ -107,7 +112,6 @@ class UsersService {
        if(!mailSent) return false
        return await commandRepository.changeConfirm(user!.id,confirmation)
    }
-
 }
 
 export const usersService = new UsersService()
