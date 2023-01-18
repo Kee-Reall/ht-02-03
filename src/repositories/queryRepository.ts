@@ -140,6 +140,14 @@ class QueryRepository {
         }
     }
 
+    async getUserByIdWithLogic(id: string): Promise<userLogicModel | null> {
+        try {
+            return await users.findOne({id},this.noHiddenId)
+        } catch (e) {
+            return null
+        }
+    }
+
     async getUserByLogin(login: string): Promise<userViewModel | null> {
         try {
             return await users.findOne({login},this.userProjection)

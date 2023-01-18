@@ -3,6 +3,7 @@ import {httpStatus} from "../enums/httpEnum"
 import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
 import {userLogicModel} from "../models/userModel";
+import {tokenPair} from "../models/mixedModels";
 
 class AuthController {
     async login(req: Request, res: Response) {
@@ -11,7 +12,7 @@ class AuthController {
         if (!loginResult) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const tokenPair = await jwtService.createTokenPair(loginResult.id,loginResult.refreshTokens)
+        const tokenPair = await jwtService.createTokenPair(loginResult.id,loginResult.refreshTokens.current)
         if(!tokenPair){
             return res.sendStatus(httpStatus.teapot)
         }
@@ -53,10 +54,24 @@ class AuthController {
         const {cookies:{refreshToken}} = req
         const {userId} = await jwtService.getPayload(refreshToken)
         if (!userId){
-            res.sendStatus(httpStatus.notAuthorized)
+            return res.sendStatus(httpStatus.notAuthorized)
         }
-        const isNotExpired = await authService.refresh(userId, refreshToken)
+        const pair: tokenPair | null  = await authService.refresh(userId, refreshToken)
+        if(!pair) {
+            return res.sendStatus(httpStatus.notAuthorized)
+        }
+        res.status(httpStatus.ok)
+            .cookie('refreshToken', pair!.refreshToken)
+            .json({accessToken: pair!.accessToken})
+    }
 
+    async logout(req: Request, res: Response) {
+        const {cookies:{refreshToken}} = req
+        const {userId} = await jwtService.getPayload(refreshToken)
+        if (!userId){
+            return res.sendStatus(httpStatus.notAuthorized)
+        }
+        const result = await authService.logout(userId,refreshToken)
     }
 }
 

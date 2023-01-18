@@ -33,6 +33,10 @@ class AuthService {
     async refresh(userId: string, refreshToken: string) {
         return await usersService.refresh(userId,refreshToken)
     }
+
+    async logout(id: string,token: string): Promise<boolean> {
+        return await usersService.logout(id,token)
+    }
 }
 
 export const authService = new AuthService()

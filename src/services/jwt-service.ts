@@ -26,11 +26,11 @@ class JwtService {
         return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(20));
     }
 
-    public async createTokenPair(userId: string,userTokensData: userTokensData): Promise<tokenPair | null> {
+    public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> {
         const nextRefreshToken = await this.createRefreshToken(userId)
         const tokensUpdated = await commandRepository.changeCurrentToken({
             id: userId,
-            previousToken: userTokensData.current,
+            previousToken: current,
             nextToken: nextRefreshToken
         })
         if(!tokensUpdated) return null
@@ -40,7 +40,7 @@ class JwtService {
         }
     }
 
-    private async verify(token: string): Promise<string | null> {
+    private async _verify(token: string): Promise<string | null> {
         try {
             const payload: any = jwt.verify(token, this.getJwtSecret())
             return payload.userId as string
@@ -48,8 +48,17 @@ class JwtService {
             return null
         }
     }
+
+    public async verify(token: string): Promise<boolean> {
+        try {
+            const isVerified = jwt.verify(token,this.getJwtSecret())
+            return !!isVerified
+        } catch (e) {
+            return false
+        }
+    }
     public async getUserByToken(token: string): Promise< userViewModel | null> {
-        const userId: string | null = await this.verify(token)
+        const userId: string | null = await this._verify(token)
         return userId ? await usersService.getUserById(userId) : userId as null
     }
 

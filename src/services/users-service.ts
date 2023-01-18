@@ -8,6 +8,9 @@ import generateId from "../helpers/generateId";
 import {v4 as uniqueCode} from "uuid"
 import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
+import {tokenPair} from "../models/mixedModels";
+import {jwtService} from "./jwt-service";
+import jwt from "jsonwebtoken";
 
 class UsersService {
     public async getUsers(params: usersFilters): Promise<getOutput> {
@@ -111,6 +114,30 @@ class UsersService {
        const mailSent = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
        if(!mailSent) return false
        return await commandRepository.changeConfirm(user!.id,confirmation)
+   }
+
+   public async refresh(id: string, refreshToken: string): Promise<tokenPair | null> {
+       const user = await queryRepository.getUserByIdWithLogic(id)
+       if(!user || user.refreshTokens.expired.includes(refreshToken) ) {
+           return null
+       }
+       return  await jwtService.createTokenPair(id,refreshToken)
+   }
+
+   public async logout(id: string, token: string): Promise<boolean> {
+       const user = await queryRepository.getUserByIdWithLogic(id)
+       if(!user|| user.refreshTokens.expired.includes(token)) {
+           return false
+       }
+       const isVerify = jwtService.verify(token)
+       if(!isVerify) {
+           return false
+       }
+       return await commandRepository.changeCurrentToken({
+           id,
+           nextToken: '',
+           previousToken: user.refreshTokens.current
+       })
    }
 }
 
