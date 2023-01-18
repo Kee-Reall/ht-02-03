@@ -10,7 +10,6 @@ import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
 import {tokenPair} from "../models/mixedModels";
 import {jwtService} from "./jwt-service";
-import jwt from "jsonwebtoken";
 
 class UsersService {
     public async getUsers(params: usersFilters): Promise<getOutput> {
@@ -119,6 +118,10 @@ class UsersService {
    public async refresh(id: string, refreshToken: string): Promise<tokenPair | null> {
        const user = await queryRepository.getUserByIdWithLogic(id)
        if(!user || user.refreshTokens.expired.includes(refreshToken) ) {
+           return null
+       }
+       const isVerify = jwtService.verify(refreshToken)
+       if(!isVerify) {
            return null
        }
        return  await jwtService.createTokenPair(id,refreshToken)

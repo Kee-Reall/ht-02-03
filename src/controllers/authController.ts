@@ -2,13 +2,12 @@ import {Request, Response} from "express"
 import {httpStatus} from "../enums/httpEnum"
 import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
-import {userLogicModel} from "../models/userModel";
 import {tokenPair} from "../models/mixedModels";
 
 class AuthController {
     async login(req: Request, res: Response) {
         const {body: {loginOrEmail, password}} = req
-        const loginResult: userLogicModel | null = await authService.login(loginOrEmail, password)
+        const loginResult = await authService.login(loginOrEmail, password)
         if (!loginResult) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
@@ -61,7 +60,7 @@ class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair!.refreshToken)
+            .cookie('refreshToken', pair!.refreshToken,{httpOnly: true, secure: true})
             .json({accessToken: pair!.accessToken})
     }
 
