@@ -72,6 +72,7 @@ class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         const result = await authService.logout(userId,refreshToken)
+        res.sendStatus(result ? httpStatus.noContent : httpStatus.notAuthorized)
     }
 }
 
