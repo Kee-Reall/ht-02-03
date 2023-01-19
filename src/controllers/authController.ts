@@ -74,7 +74,7 @@ class AuthController {
         if(!result) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        res.cookie('refreshToken','').sendStatus(httpStatus.noContent)
+        res.cookie('refreshToken','',{httpOnly: true, secure: true}).sendStatus(httpStatus.noContent)
     }
 }
 

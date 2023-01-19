@@ -7,13 +7,13 @@ export const hasError = (errorStatus: number, shouldResponse: boolean = true): (
         if (error.isEmpty()) {
             return next()
         }
-        const errorsMessages = error
-            .array({onlyFirstError:true})
-            .map(({ msg: message, param: field }) => {
-                return {message, field}
-            })
         if(shouldResponse){
-            return res.status(errorStatus).json({errorsMessages})
+            return res.status(errorStatus).json({errorsMessages: error
+                    .array({onlyFirstError:true})
+                    .map(({ msg: message, param: field }) => {
+                        return {message, field}
+                    })
+            })
         } else {
             return res.sendStatus(errorStatus)
         }
