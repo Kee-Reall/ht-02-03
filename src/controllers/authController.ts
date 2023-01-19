@@ -66,11 +66,11 @@ class AuthController {
 
     async logout(req: Request, res: Response) {
         const {cookies:{refreshToken}} = req
-        const {userId} = await jwtService.getPayload(refreshToken)
-        if (!userId){
+        const user = await jwtService.getUserByToken(refreshToken)
+        if (!user) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const result = await authService.logout(userId,refreshToken)
+        const result = await authService.logout(user.id,refreshToken,user.refreshTokens)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.notAuthorized)
     }
 }

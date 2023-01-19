@@ -1,6 +1,6 @@
 import {queryRepository} from "../repositories/queryRepository";
 import {hash as toHash} from "bcrypt";
-import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
+import {userInputModel, userLogicModel, userTokensData, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
 
 class AuthService {
@@ -34,8 +34,8 @@ class AuthService {
         return await usersService.refresh(userId,refreshToken)
     }
 
-    async logout(id: string,token: string): Promise<boolean> {
-        return await usersService.logout(id,token)
+    async logout(id: string,token: string,tokensInfo: userTokensData): Promise<boolean> {
+        return await usersService.logout(id,token,tokensInfo)
     }
 }
 

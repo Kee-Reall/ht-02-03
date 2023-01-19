@@ -1,7 +1,7 @@
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {confirmation, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
+import {confirmation, userInputModel, userLogicModel, userTokensData, userViewModel} from "../models/userModel";
 import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
@@ -123,19 +123,14 @@ class UsersService {
        return  await jwtService.createTokenPair(id,refreshToken)
    }
 
-   public async logout(id: string, token: string): Promise<boolean> {
-       const user = await queryRepository.getUserByIdWithLogic(id)
-       if(!user|| user.refreshTokens.expired.includes(token)) {
-           return false
-       }
-       const isVerify = jwtService.verify(token)
-       if(!isVerify) {
+   public async logout(id: string, token: string,tokensInfo: userTokensData): Promise<boolean> {
+       if(tokensInfo.expired.includes(token)) {
            return false
        }
        return await commandRepository.changeCurrentToken({
            id,
            nextToken: '',
-           previousToken: user.refreshTokens.current
+           previousToken: token
        })
    }
 }
