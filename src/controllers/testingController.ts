@@ -3,8 +3,6 @@ import { Request, Response } from "express";
 import { httpStatus } from "../enums/httpEnum";
 
 class TestingController {
-    constructor() {
-    }
 
     async clearAll(req: Request, res: Response){
         commandRepository.clearStore().finally(() => res.sendStatus(httpStatus.noContent))

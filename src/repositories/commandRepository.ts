@@ -119,7 +119,8 @@ class CommandRepository {
         await Promise.all([
             posts.deleteMany(this.emptyObject),
             blogs.deleteMany(this.emptyObject),
-            users.deleteMany(this.emptyObject)
+            users.deleteMany(this.emptyObject),
+            comments.deleteMany(this.emptyObject)
         ])
     }
 
