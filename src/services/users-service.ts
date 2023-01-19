@@ -86,8 +86,8 @@ class UsersService {
         return await commandRepository.deleteUser(id)
    }
 
-   public async getUserById(id: string): Promise<userViewModel | null> {
-        return queryRepository.getUserById(id)
+   public async getUserById(id: string): Promise<userLogicModel | null> {
+        return queryRepository.getUserByIdWithLogic(id)
    }
 
    private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
@@ -118,10 +118,6 @@ class UsersService {
    public async refresh(id: string, refreshToken: string): Promise<tokenPair | null> {
        const user = await queryRepository.getUserByIdWithLogic(id)
        if(!user || user.refreshTokens.expired.includes(refreshToken) ) {
-           return null
-       }
-       const isVerify = jwtService.verify(refreshToken)
-       if(!isVerify) {
            return null
        }
        return  await jwtService.createTokenPair(id,refreshToken)

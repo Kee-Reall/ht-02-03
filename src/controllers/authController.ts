@@ -51,11 +51,11 @@ class AuthController {
 
     async refresh(req: Request, res: Response) {
         const {cookies:{refreshToken}} = req
-        const {userId} = await jwtService.getPayload(refreshToken)
-        if (!userId){
+        const user = await jwtService.getUserByToken(refreshToken)
+        if(!user) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const pair: tokenPair | null  = await authService.refresh(userId, refreshToken)
+        const pair: tokenPair | null  = await authService.refresh(user.id, refreshToken)
         if(!pair) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
