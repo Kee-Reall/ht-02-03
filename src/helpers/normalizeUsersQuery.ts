@@ -1,12 +1,9 @@
 import {usersFilters} from "../models/filtersModel";
+import {normalizeSortDirection} from "./normalizeSortDirection";
 
 export function normalizeUsersQuery(query: usersFilters):usersFilters {
-    const directions: string[] = ['asc','desc']
-    let sortDirection: 'desc' | 'asc' = 'desc'
-    if(directions.includes(query.sortDirection as string)) {
-        sortDirection = query.sortDirection!
-    }
-    const filter = {
+    const sortDirection = normalizeSortDirection(query.sortDirection)
+    return  {
         pageNumber: +query.pageNumber! || 1,
         pageSize: +query.pageSize! || 10,
         sortBy: query.sortBy || 'createdAt',
@@ -14,5 +11,4 @@ export function normalizeUsersQuery(query: usersFilters):usersFilters {
         searchLoginTerm: query.searchLoginTerm || '[*]*',
         searchEmailTerm: query.searchEmailTerm || '[*]*'
     }
-    return filter
 }

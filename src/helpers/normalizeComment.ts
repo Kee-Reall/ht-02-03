@@ -1,11 +1,8 @@
 import { commentsFilter } from "../models/filtersModel";
+import {normalizeSortDirection} from "./normalizeSortDirection";
 
 export function normalizeCommentQuery(query: commentsFilter):commentsFilter {
-    const directions: string[] = ['asc','desc']
-    let sortDirection: 'desc' | 'asc' = 'desc'
-    if(directions.includes(query.sortDirection as string)){
-        sortDirection = query.sortDirection!
-    }
+    const sortDirection = normalizeSortDirection(query.sortDirection)
     return {
         pageNumber: +query.pageNumber! || 1,
         pageSize: +query.pageSize! || 10,
