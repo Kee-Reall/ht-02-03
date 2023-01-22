@@ -4,7 +4,7 @@ import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 
-const dbUri: string = process.env.MONGO_URI!
+const dbUri: string = process.env.MONGO_URI as string
 if(!dbUri) {
     throw new Error('you should set a MONGO_URI in .env')
 }
