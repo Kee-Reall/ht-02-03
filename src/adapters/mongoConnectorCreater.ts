@@ -3,6 +3,8 @@ import {postViewModel} from "../models/postsModel";
 import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
+import * as dotenv from 'dotenv'  // idk why but it repairs supertest inside tests
+dotenv.config()
 
 const dbUri: string = process.env.MONGO_URI as string
 if(!dbUri) {
@@ -22,7 +24,7 @@ export async function runDb(): Promise<boolean> {
         console.log('db Connection success\n Creating required collections')
         return true
     } catch (error) {
-        console.log('Cannot connect to db \n' + error)
+        console.log('Can not connect to db \n' + error)
         await client.close()
         return false
     }
