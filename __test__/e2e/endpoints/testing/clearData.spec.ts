@@ -28,6 +28,7 @@ describe('clearing all data', () => {
     it('should be clear users in response', async () => {
         const response = await request(app).get('/api/users').set({Authorization: "Basic YWRtaW46cXdlcnR5"})
         expect(response.status).toBe(200)
+        expect(response.body.items.length).toBe(0)
     })
 
     it('count users should be 0',async () => {
