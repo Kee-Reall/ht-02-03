@@ -11,9 +11,9 @@ export async function jwtAuth (req: Request, res: Response, next: NextFunction )
         return res.sendStatus(httpStatus.notAuthorized)
     }
     const user = await jwtService.getUserByToken(token)
-    if (user) {
-        req.user = user
-        return next()
+    if (!user) {
+        return res.sendStatus(httpStatus.notAuthorized)
     }
-    res.sendStatus(httpStatus.notAuthorized)
+    req.user = user
+    next()
 }
