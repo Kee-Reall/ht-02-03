@@ -1,6 +1,6 @@
 import request from 'supertest';
-import {app} from "../../../../src/app";
-import {blogs, comments, posts, users} from "../../../../src/adapters/mongoConnectorCreater";
+import app from "../../src/app";
+import {blogs, comments, posts, users} from "../../src/adapters/mongoConnectorCreater";
 describe('clearing all data', () => {
 
     it('should response with code 204', async () => {
