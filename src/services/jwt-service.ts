@@ -1,5 +1,5 @@
 import jwt, {JwtPayload, SignOptions} from 'jsonwebtoken'
-import {userLogicModel, userTokensData, userViewModel} from "../models/userModel";
+import {userLogicModel} from "../models/userModel";
 import {usersService} from "./users-service";
 import {tokenPair} from "../models/mixedModels";
 import {commandRepository} from "../repositories/commandRepository";
@@ -12,6 +12,12 @@ class JwtService {
         return process.env.JWT_SECRET as string
     }
 
+    private convertDayToMS(day: number): number { // convert day into ms
+        const [msPerSec, secPerMin, MinPerHour, HourPerDay] = [1000, 60 , 60 , 24]
+        return day * msPerSec * secPerMin * MinPerHour * HourPerDay
+    }
+
+
     private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
             expiresIn: `${time}s`
@@ -19,11 +25,15 @@ class JwtService {
     }
 
     public async createAccessToken(userId: string): Promise<string> {
-        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire());
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(
+            1000 * 60 * 15  // it should be 15 minutes
+        ));
     }
 
     private async createRefreshToken(userId: string): Promise<string> {
-        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(20));
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(
+            this.convertDayToMS(3)
+        ));
     }
 
     public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> {
