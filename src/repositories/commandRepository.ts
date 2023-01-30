@@ -165,10 +165,10 @@ class CommandRepository {
 
     async createMetaToken(input: createTokenClientMeta): Promise<refreshTokenDbResponse | null> {
         try {
-            const {deviceInfo = null, ip: initialIp, userId} = input
+            const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
             const [updateDate, deviceId] = [new Date(Date.now()),this.genDeviceId()]
-            const {acknowledged} = await tokens.insertOne({userId, ip, deviceInfo, updateDate, deviceId})
+            const {acknowledged} = await tokens.insertOne({userId, ip, title, updateDate, deviceId})
             if(!acknowledged) {
                 return null
             }

@@ -15,7 +15,7 @@ class AuthController {
         const meta: createTokenClientMeta = {
             userId: user.id,
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
-            deviceInfo:"iphone"
+            title: req.headers['user-agent'] as string
         }
         const tokenPair = await jwtService.createNewTokenPair(meta)
         if(!tokenPair) {

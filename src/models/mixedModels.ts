@@ -8,7 +8,7 @@ export interface tokenPair {
 export type createTokenClientMeta = {
     userId: string
     ip: string
-    deviceInfo: string
+    title: string
 }
 
 export type clientMeta = {

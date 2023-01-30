@@ -5,7 +5,7 @@ export interface refreshTokensMeta {
     deviceId: string
     updateDate: Date
     ip: Array<string | "undetected">
-    deviceInfo: string | null
+    title: string | null
 }
 
 export interface refreshTokenPayload extends JwtPayload {
