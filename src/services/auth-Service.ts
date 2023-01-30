@@ -2,6 +2,8 @@ import {queryRepository} from "../repositories/queryRepository";
 import {hash as toHash} from "bcrypt";
 import {userInputModel, userLogicModel, userTokensData, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
+import {jwtService} from "./jwt-service";
+import {clientMeta} from "../models/mixedModels";
 
 class AuthService {
 
@@ -30,8 +32,8 @@ class AuthService {
         return await usersService.resend(email)
     }
 
-    async refresh(userId: string, refreshToken: string) {
-        return await usersService.refresh(userId,refreshToken)
+    async refresh(meta: clientMeta) {
+        return await jwtService.updateTokenPair(meta)
     }
 
     async logout(id: string,token: string,tokensInfo: userTokensData): Promise<boolean> {

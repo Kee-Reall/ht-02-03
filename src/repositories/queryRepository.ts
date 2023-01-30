@@ -1,9 +1,10 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, users} from "../adapters/mongoConnectorCreater";
+import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
+import {refreshTokenPayload, refreshTokensMeta} from "../models/refreshTokensMeta";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -211,6 +212,11 @@ class QueryRepository {
         } catch (e) {
             return null
         }
+    }
+
+    async getMetaToken(data: refreshTokenPayload): Promise<refreshTokensMeta | null> {
+        const {userId,deviceId} = data
+        return await tokens.findOne({userId,deviceId})
     }
 }
 

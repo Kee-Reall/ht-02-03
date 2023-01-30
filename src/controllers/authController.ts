@@ -2,7 +2,8 @@ import {Request, Response} from "express"
 import {httpStatus} from "../enums/httpEnum"
 import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
-import {tokenPair} from "../models/mixedModels";
+import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
+import {refreshTokenPayload} from "../models/refreshTokensMeta";
 
 class AuthController {
     async login(req: Request, res: Response) {
@@ -11,8 +12,14 @@ class AuthController {
         if (!loginResult) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const tokenPair = await jwtService.createTokenPair(loginResult.id,loginResult.refreshTokens.current)
-        if(!tokenPair){
+
+        const meta: createTokenClientMeta = {
+            userId: loginResult.id,
+            ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
+            deviceInfo:"iphone"
+        }
+        const tokenPair = await jwtService.createNewTokenPair(meta)
+        if(!tokenPair) {
             return res.sendStatus(httpStatus.teapot)
         }
         const { refreshToken, accessToken} = tokenPair
@@ -51,17 +58,23 @@ class AuthController {
 
     async refresh(req: Request, res: Response) {
         const {cookies:{refreshToken}} = req
-        const user = await jwtService.getUserByToken(refreshToken)
-        if(!user) {
+        const payload: refreshTokenPayload | null = await jwtService.verifyRefreshToken(refreshToken)
+        if(!payload) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const pair: tokenPair | null  = await authService.refresh(user.id, refreshToken)
+        const meta: clientMeta = {
+            userId: payload.userId,
+            ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
+            updateDate: payload.updateDate,
+            deviceId: payload.deviceId,
+        }
+        const pair: tokenPair | null  = await jwtService.updateTokenPair(meta)
         if(!pair) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair!.refreshToken,{httpOnly: true, secure: true})
-            .json({accessToken: pair!.accessToken})
+            .cookie('refreshToken', pair.refreshToken,{httpOnly: true, secure: true})
+            .json({accessToken: pair.accessToken})
     }
 
     async logout(req: Request, res: Response) {
