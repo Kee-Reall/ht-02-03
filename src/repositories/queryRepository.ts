@@ -4,7 +4,7 @@ import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorC
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
-import {refreshTokenPayload, refreshTokensMeta} from "../models/refreshTokensMeta";
+import {refreshTokensMeta, sessionFilter} from "../models/refreshTokensMeta";
 
 class QueryRepository {
     private readonly noHiddenId = {projection: {_id: false}};
@@ -214,7 +214,7 @@ class QueryRepository {
         }
     }
 
-    async getMetaToken(data: refreshTokenPayload): Promise<refreshTokensMeta | null> {
+    async getMetaToken(data: sessionFilter): Promise<refreshTokensMeta | null> {
         const {userId,deviceId} = data
         return await tokens.findOne({userId,deviceId})
     }

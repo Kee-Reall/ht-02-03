@@ -14,6 +14,11 @@ export interface refreshTokenPayload extends JwtPayload {
     updateDate: string
 }
 
+export interface sessionFilter {
+    userId: string
+    deviceId: string
+}
+
 export interface refreshTokenDbResponse {
     deviceId: string
     updateDate: Date

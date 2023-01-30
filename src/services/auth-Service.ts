@@ -1,16 +1,18 @@
 import {queryRepository} from "../repositories/queryRepository";
 import {hash as toHash} from "bcrypt";
-import {userInputModel, userLogicModel, userTokensData, userViewModel} from "../models/userModel";
+import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
 import {usersService} from "./users-service";
 import {jwtService} from "./jwt-service";
 import {clientMeta} from "../models/mixedModels";
+import {refreshTokenPayload, sessionFilter} from "../models/refreshTokensMeta";
+import {commandRepository} from "../repositories/commandRepository";
 
 class AuthService {
 
     async login(loginOrEmail: string, password: string): Promise< userLogicModel | null> {
         const user: userLogicModel | null = await queryRepository.getUserByLoginOrEmail(loginOrEmail)
-        if (user === null) {
-            return user
+        if(!user) {
+            return null
         }
         const {hash, salt} = user
         return  await toHash(password, salt) === hash ? user : null
@@ -36,8 +38,14 @@ class AuthService {
         return await jwtService.updateTokenPair(meta)
     }
 
-    async logout(id: string,token: string,tokensInfo: userTokensData): Promise<boolean> {
-        return await usersService.logout(id,token,tokensInfo)
+    async logout(tokensInfo: refreshTokenPayload): Promise<boolean> {
+        const {updateDate, userId, deviceId} = tokensInfo
+        const filter: sessionFilter = {userId,deviceId}
+        const sessionData = await queryRepository.getMetaToken(filter)
+        if(!sessionData || updateDate !== sessionData.updateDate.toISOString()) {
+            return false
+        }
+        return await commandRepository.killMetaToken(filter)
     }
 }
 

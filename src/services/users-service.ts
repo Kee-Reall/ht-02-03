@@ -1,15 +1,13 @@
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {confirmation, userInputModel, userLogicModel, userTokensData, userViewModel} from "../models/userModel";
+import {confirmation, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
 import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 import {v4 as uniqueCode} from "uuid"
 import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
-import {tokenPair} from "../models/mixedModels";
-import {jwtService} from "./jwt-service";
 
 class UsersService {
     public async getUsers(params: usersFilters): Promise<getOutput> {
@@ -49,8 +47,7 @@ class UsersService {
         confirmation.isConfirmed = true
         const user: userLogicModel = {
             login, email, id,
-            hash, createdAt, salt, confirmation,
-            refreshTokens:{current:'', expired:[]}
+            hash, createdAt, salt, confirmation
         }
         const result = await commandRepository.createUser(user)
         if(result) {
@@ -68,8 +65,7 @@ class UsersService {
         const confirmation = await this.generateConfirmData(false)
         const user: userLogicModel = {
             login, email, hash, createdAt,
-            salt, id, confirmation,
-            refreshTokens: {current:'', expired:[]}
+            salt, id, confirmation
         }
         const isUserCreated: boolean = await commandRepository.createUser(user)
         if(!isUserCreated) {
@@ -113,25 +109,6 @@ class UsersService {
        const mailSent = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
        if(!mailSent) return false
        return await commandRepository.changeConfirm(user!.id,confirmation)
-   }
-
-   public async refresh(id: string, refreshToken: string): Promise<tokenPair | null> {
-       const user = await queryRepository.getUserByIdWithLogic(id)
-       if(!user || user.refreshTokens.expired.includes(refreshToken) ) {
-           return null
-       }
-       return  await jwtService.createTokenPair(id,refreshToken)
-   }
-
-   public async logout(id: string, token: string,tokensInfo: userTokensData): Promise<boolean> {
-       if(tokensInfo.expired.includes(token)) {
-           return false
-       }
-       return await commandRepository.changeCurrentToken({
-           id,
-           nextToken: '',
-           previousToken: token
-       })
    }
 }
 

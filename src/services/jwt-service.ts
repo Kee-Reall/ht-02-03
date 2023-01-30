@@ -51,19 +51,6 @@ class JwtService {
         return jwt.sign(payload, this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
-    private async updateRefreshToken(tokenMeta: refreshTokenPayload,ip: string): Promise<string | null> {
-        const{ updateDate, userId, deviceId} = tokenMeta
-        const dbToken = await queryRepository.getMetaToken(tokenMeta)
-        if(!dbToken || ( dbToken.updateDate.toISOString() !== updateDate)){
-            return null
-        }
-        const metaDataAfterUpdate = await commandRepository.updateMetaToken({userId, deviceId, ip})
-        if(!metaDataAfterUpdate) {
-            return null
-        }
-        return jwt.sign(metaDataAfterUpdate,this.getJwtSecret(),this.generateExpireIn15Days())
-    }
-
     private async createRefreshToken(userId: string): Promise<string> {
         return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(
             this.convertDayToSec(3)
@@ -87,6 +74,19 @@ class JwtService {
         }
         const accessToken = await this.createAccessToken(clientInfo.userId)
         return { accessToken, refreshToken }
+    }
+
+    private async updateRefreshToken(tokenMeta: refreshTokenPayload,ip: string): Promise<string | null> {
+        const{ updateDate, userId, deviceId} = tokenMeta
+        const dbToken = await queryRepository.getMetaToken(tokenMeta)
+        if(!dbToken || ( dbToken.updateDate.toISOString() !== updateDate)){
+            return null
+        }
+        const metaDataAfterUpdate = await commandRepository.updateMetaToken({userId, deviceId, ip})
+        if(!metaDataAfterUpdate) {
+            return null
+        }
+        return jwt.sign(metaDataAfterUpdate,this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
     public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> {

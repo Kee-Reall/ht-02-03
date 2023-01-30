@@ -3,7 +3,12 @@ import {postInputModel, postViewModel} from "../models/postsModel";
 import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
 import {confirmation, userLogicModel, userUpdateTokenModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
-import {refreshTokenDbResponse, refreshTokenPayload, updateRefreshTokenMeta} from "../models/refreshTokensMeta";
+import {
+    refreshTokenDbResponse,
+    refreshTokenPayload,
+    sessionFilter,
+    updateRefreshTokenMeta
+} from "../models/refreshTokensMeta";
 import {createTokenClientMeta} from "../models/mixedModels";
 import {generateDeviceId} from "../helpers/generateDeviceId";
 
@@ -161,9 +166,6 @@ class CommandRepository {
     async createMetaToken(input: createTokenClientMeta): Promise<refreshTokenDbResponse | null> {
         try {
             const {deviceInfo = null, ip: initialIp, userId} = input
-            if(!userId) {
-                return null
-            }
             const ip = [(initialIp ?? 'undetected')]
             const [updateDate, deviceId] = [new Date(Date.now()),this.genDeviceId()]
             const {acknowledged} = await tokens.insertOne({userId, ip, deviceInfo, updateDate, deviceId})
@@ -179,9 +181,6 @@ class CommandRepository {
     async updateMetaToken(input: updateRefreshTokenMeta): Promise<Partial<refreshTokenPayload> | null> {
         try {
             const {deviceId, userId} = input
-            if(!userId || ! deviceId) {
-                return null
-            }
             const updateDate = new Date(Date.now())
             const {modifiedCount} = await tokens.updateOne({userId,deviceId}, {
                 $set:{updateDate},
@@ -194,6 +193,15 @@ class CommandRepository {
             return modifiedCount > 0 ? toReturn : null
         } catch (e) {
             return null
+        }
+    }
+
+    async killMetaToken(filter: sessionFilter): Promise<boolean> {
+        try {
+            const {deletedCount} = await tokens.deleteOne(filter)
+            return deletedCount > 0
+        } catch (e) {
+            return false
         }
     }
 }

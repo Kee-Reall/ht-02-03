@@ -8,13 +8,12 @@ import {refreshTokenPayload} from "../models/refreshTokensMeta";
 class AuthController {
     async login(req: Request, res: Response) {
         const {body: {loginOrEmail, password}} = req
-        const loginResult = await authService.login(loginOrEmail, password)
-        if (!loginResult) {
+        const user = await authService.login(loginOrEmail, password)
+        if (!user || !user.confirmation.isConfirmed) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-
         const meta: createTokenClientMeta = {
-            userId: loginResult.id,
+            userId: user.id,
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
             deviceInfo:"iphone"
         }
@@ -79,11 +78,11 @@ class AuthController {
 
     async logout(req: Request, res: Response) {
         const {cookies:{refreshToken}} = req
-        const user = await jwtService.getUserByToken(refreshToken)
-        if (!user) {
+        const meta = await jwtService.verifyRefreshToken(refreshToken)
+        if (!meta) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const result = await authService.logout(user.id,refreshToken,user.refreshTokens)
+        const result = await authService.logout(meta)
         if(!result) {
             return res.sendStatus(httpStatus.notAuthorized)
         }

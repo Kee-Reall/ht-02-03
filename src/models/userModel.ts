@@ -20,13 +20,7 @@ export interface userLogicModel {
     createdAt: string
     hash:string
     salt: string
-    confirmation?:confirmation
-    refreshTokens: userTokensData
-}
-
-export type userTokensData = {
-    current: string
-    expired: Array<string>
+    confirmation:confirmation
 }
 
 export type userUpdateTokenModel = {
