@@ -33,9 +33,7 @@ class JwtService {
     }
 
     public async createAccessToken(userId: string): Promise<string> {
-        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(
-            60 * 15  // it should be 15 minutes
-        ));
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(10));
     }
 
     private async createNewRefreshToken(clientInfo: createTokenClientMeta): Promise<string | null>{
@@ -48,7 +46,7 @@ class JwtService {
             deviceId: metaDataAfterCreation.deviceId,
             updateDate: metaDataAfterCreation.updateDate.toISOString(),
         }
-        return jwt.sign(payload, this.getJwtSecret(),this.generateExpireIn15Days())
+        return jwt.sign(payload, this.getJwtSecret(),{expiresIn:'20s'}/*this.generateExpireIn15Days()*/)
     }
 
     private async createRefreshToken(userId: string): Promise<string> {
