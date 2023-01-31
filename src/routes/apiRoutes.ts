@@ -9,6 +9,7 @@ import {authRouter} from "./authRouter"
 import {commentsRouter} from "./commentsRouter";
 import {securityRouter} from "./securityRouter";
 import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
+import {refreshAuth} from "../middleware/refreshAuth";
 
 const apiRouter = Router()
 
@@ -18,6 +19,6 @@ apiRouter.use('/users',basicAuth,usersRouter)
 apiRouter.use('/auth',authRouter)
 apiRouter.use('/testing', testingRouter)
 apiRouter.use('/comments', commentsRouter)
-apiRouter.use('/security', ...refreshTokenValidator ,securityRouter)
+apiRouter.use('/security', ...refreshTokenValidator,refreshAuth,securityRouter)
 
 export { apiRouter }

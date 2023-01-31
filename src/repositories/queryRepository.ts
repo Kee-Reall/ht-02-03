@@ -223,6 +223,10 @@ class QueryRepository {
         return await tokens.findOne({userId, deviceId})
     }
 
+    async getSession(deviceId: string): Promise<refreshTokensMeta | null> {
+        return await tokens.findOne({deviceId})
+    }
+
     async getTokensForUser(userId: string): Promise<Array<securityViewModel>> {
         const arrayFromDb = await tokens.find({userId}).toArray()
         return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
