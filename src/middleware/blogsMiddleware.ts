@@ -2,8 +2,9 @@ import { body } from "express-validator"
 import { hasError } from "./hasError"
 import { message } from "../enums/messageEnum"
 import {httpStatus} from "../enums/httpEnum";
+import {RequestHandler} from "express";
 
-export const blogMiddlewares = [
+export const blogMiddlewares: RequestHandler[] = [
     body('name').exists()
         .withMessage(message.requireField)
         .isString()

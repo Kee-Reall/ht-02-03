@@ -2,8 +2,9 @@ import {body} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {hasError} from "./hasError";
 import {httpStatus} from "../enums/httpEnum";
+import {RequestHandler} from "express";
 
-export const loginMiddleware = [
+export const loginMiddleware: RequestHandler[] = [
     body('loginOrEmail').exists()
         .withMessage(message.requireField)
         .isString()

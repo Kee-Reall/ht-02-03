@@ -2,11 +2,12 @@ import {cookie} from "express-validator";
 import {message} from "../enums/messageEnum";
 import {hasError} from "./hasError";
 import {httpStatus} from "../enums/httpEnum";
+import {RequestHandler} from "express";
 
-export const refreshTokenValidator = [
+export const refreshTokenValidator: RequestHandler[] = [
     cookie('refreshToken')
         .exists().withMessage(message.requireField)
-        .trim().isLength({min:5})
+        .isString().trim().isLength({min:10,max:512})
         .isJWT().withMessage(message.invalidType),
 
     hasError(httpStatus.notAuthorized,false)

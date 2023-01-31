@@ -3,8 +3,9 @@ import { httpStatus } from "../enums/httpEnum";
 import { message } from "../enums/messageEnum";
 import { checkForExistingPost } from "../helpers/checkForExistingPost";
 import { hasError } from "./hasError";
+import {RequestHandler} from "express";
 
-export const createCommentMiddlewares = [
+export const createCommentMiddlewares: RequestHandler[] = [
     body('content').exists()
         .withMessage(message.requireField)
         .isString()

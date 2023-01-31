@@ -7,6 +7,9 @@ import {basicAuth} from "../middleware/basicAuth";
 import {usersRouter} from "./usersRouter";
 import {authRouter} from "./authRouter"
 import {commentsRouter} from "./commentsRouter";
+import {securityRouter} from "./securityRouter";
+import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
+
 const apiRouter = Router()
 
 apiRouter.use('/blogs',basicAuthWithoutGet,blogsRouter)
@@ -15,5 +18,6 @@ apiRouter.use('/users',basicAuth,usersRouter)
 apiRouter.use('/auth',authRouter)
 apiRouter.use('/testing', testingRouter)
 apiRouter.use('/comments', commentsRouter)
+apiRouter.use('/security', ...refreshTokenValidator ,securityRouter)
 
 export { apiRouter }

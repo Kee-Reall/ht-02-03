@@ -3,8 +3,9 @@ import {message} from "../enums/messageEnum";
 import {hasError} from "./hasError";
 import {queryRepository} from "../repositories/queryRepository";
 import {httpStatus} from "../enums/httpEnum";
+import {RequestHandler} from "express";
 
-export const createUserMiddleware = [
+export const createUserMiddleware: RequestHandler[] = [
     body('login').exists()
         .withMessage(message.requireField)
         .isString()

@@ -1,7 +1,7 @@
-import { NextFunction, Request, Response } from "express";
+import {RequestHandler} from "express";
 import { validationResult } from 'express-validator'
 
-export const hasError = (errorStatus: number, shouldResponse: boolean = true): (req: Request, res: Response, next: NextFunction) => void => {
+export const hasError = (errorStatus: number, shouldResponse: boolean = true): RequestHandler => {
     return (req, res, next) => {
         const error = validationResult(req)
         if (error.isEmpty()) {
