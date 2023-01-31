@@ -1,6 +1,6 @@
 import {securityViewModel} from "../models/SecurityModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {refreshTokenPayload, sessionFilter} from "../models/refreshTokensMeta";
 import {commandRepository} from "../repositories/commandRepository";
 
 class SecurityService {
@@ -14,6 +14,10 @@ class SecurityService {
             return false
         }
         return await commandRepository.killMetaToken({deviceId: deviceId,userId: metaToken.userId})
+    }
+
+    public async killAllForUser({deviceId, userId}: sessionFilter) {
+        return await commandRepository.killSessionsForUser(userId,deviceId)
     }
 }
 

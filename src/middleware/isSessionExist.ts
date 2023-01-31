@@ -11,5 +11,5 @@ export const isSessionExist: RequestHandler[] = [
             throw new Error('session does not exist')
         }
     }),
-    hasError(httpStatus.notFound)
+    hasError(httpStatus.notFound, false)
 ]

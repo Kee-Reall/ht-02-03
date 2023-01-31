@@ -12,7 +12,10 @@ class SecurityController {
     }
 
     public async killOthersSessions(req: Request, res: Response) {
-
+        const {tokenMetaDates: {deviceId, userId}} = req
+        res.sendStatus(
+            await securityService.killAllForUser({deviceId,userId}) ? httpStatus.noContent : httpStatus.teapot
+        )
     }
 
     public async killSession(req: Request, res: Response) {

@@ -204,6 +204,14 @@ class CommandRepository {
             return false
         }
     }
+
+    async killSessionsForUser(userId: string, exclude: string): Promise<boolean> {
+        try {
+            return !!await tokens.deleteMany({userId, deviceId:{$ne:exclude}})
+        } catch (e) {
+            return false
+        }
+    }
 }
 
 const commandRepository = new CommandRepository(generateDeviceId)
