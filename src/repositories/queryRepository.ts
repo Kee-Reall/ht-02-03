@@ -232,7 +232,7 @@ class QueryRepository {
         return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
             return {
                 ip: ip[ip.length - 1] as string,
-                lastActivateDate: updateDate.toISOString(),
+                lastActiveDate: updateDate.toISOString(),
                 deviceId,
                 title: title as string
             }
