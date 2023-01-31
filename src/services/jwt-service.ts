@@ -87,7 +87,7 @@ class JwtService {
         return jwt.sign(metaDataAfterUpdate,this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
-    public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> {
+    public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> { //deprecated
         const nextRefreshToken = await this.createRefreshToken(userId)
         const tokensUpdated = await commandRepository.changeCurrentToken({
             id: userId,
@@ -131,7 +131,7 @@ class JwtService {
         }
     }
 
-    public async getPayload(token: string): Promise<JwtPayload> {
+    public async getPayload(token: string): Promise<JwtPayload> { //deprecated
         return jwt.decode(token) as JwtPayload;
     }
 }
