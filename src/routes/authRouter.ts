@@ -6,13 +6,14 @@ import {createUserMiddleware} from "../middleware/createUserMiddleware";
 import {conformationValidator} from "../middleware/conformationValidator";
 import {resendValidator} from "../middleware/resendValidator";
 import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
+import {ipLimiter} from "../middleware/ipControll";
 
 const authRouter = Router()
 
-authRouter.post('/login',...loginMiddleware, authController.login)
-authRouter.post('/registration',...createUserMiddleware, authController.registration)
-authRouter.post('/registration-confirmation',...conformationValidator,authController.conformation)
-authRouter.post('/registration-email-resending',...resendValidator,authController.resending)
+authRouter.post('/login',ipLimiter,...loginMiddleware, authController.login)
+authRouter.post('/registration',ipLimiter,...createUserMiddleware, authController.registration)
+authRouter.post('/registration-confirmation',ipLimiter,...conformationValidator,authController.conformation)
+authRouter.post('/registration-email-resending',ipLimiter,...resendValidator,authController.resending)
 authRouter.post('/refresh-token',...refreshTokenValidator,authController.refresh)
 authRouter.post('/logout',...refreshTokenValidator,authController.logout)
 authRouter.get('/me', jwtAuth, authController.getUserFromRequest)

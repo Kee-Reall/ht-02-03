@@ -15,5 +15,6 @@ export enum httpStatus {
     forbidden = 403,
     notFound = 404,
     deprecated=405,
-    teapot = 418
+    teapot = 418,
+    requestLimit = 429
 }

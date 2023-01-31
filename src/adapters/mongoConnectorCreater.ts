@@ -4,7 +4,8 @@ import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import * as dotenv from 'dotenv'
-import {refreshTokensMeta} from "../models/refreshTokensMeta";  // idk why but it repairs supertest inside tests
+import {refreshTokensMeta} from "../models/refreshTokensMeta";
+import {attemptsModel} from "../models/attemptsModel";  // idk why but it repairs supertest inside tests
 dotenv.config()
 
 const dbUri: string = process.env.MONGO_URI as string
@@ -20,6 +21,7 @@ export const users = db.collection<userDbModel>('users')
 export const comments = db.collection<commentsDbModel>('comments')
 
 export const tokens = db.collection<refreshTokensMeta>('refreshTokensMeta')
+export const attempts = db.collection<attemptsModel>('attempts')
 export async function runDb(): Promise<boolean> {
     try {
         await client.connect()
