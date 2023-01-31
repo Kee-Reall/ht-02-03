@@ -4,7 +4,7 @@ import {httpStatus} from "../enums/httpEnum";
 class SecurityController {
     public async getAllSessions(req: Request,res: Response){
         const { cookies: { refreshToken }} = req
-        const data = securityService.getAllSessionsByToken(refreshToken)
+        const data = await securityService.getAllSessionsByToken(refreshToken)
         if(!data) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
