@@ -9,6 +9,21 @@ import {v4 as uniqueCode} from "uuid"
 import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
 
+type ResultType<T> = {
+    data: T | null,
+    error?: {
+        status: number,
+        message: string
+    }
+}
+
+export class ForbiddenError extends Error {
+    constructor(message: string) {
+        super(message);
+    }
+    //..
+}
+
 class UsersService {
     public async getUsers(params: usersFilters): Promise<getOutput> {
 
@@ -56,7 +71,8 @@ class UsersService {
         return null
     }
 
-    public async createUser(input: userInputModel): Promise<boolean> {
+    public async createUser(input: userInputModel): Promise<ResultType<boolean>> {
+        //try
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await bcrypt.genSalt(10)
@@ -69,13 +85,23 @@ class UsersService {
         }
         const isUserCreated: boolean = await commandRepository.createUser(user)
         if(!isUserCreated) {
-            return false
+            throw new ForbiddenError('dfgdfg')
+            return {
+                data: null,
+                error: {
+                    message: 'user does not created',
+                    status: 500
+                }
+            }
         }
         const isMailSent: boolean = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
         if(!isMailSent) {
             await commandRepository.deleteUser(id)
         }
         return isMailSent
+        //catch(e)
+        //logger.log(e)
+        //throw(e)
     }
 
     public async deleteUser(id:string): Promise<boolean> {
