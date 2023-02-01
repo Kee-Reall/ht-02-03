@@ -102,6 +102,7 @@ class UsersService {
         //catch(e)
         //logger.log(e)
         //throw(e)
+        ///
     }
 
     public async deleteUser(id:string): Promise<boolean> {
