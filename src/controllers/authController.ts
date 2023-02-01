@@ -4,6 +4,7 @@ import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
 import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
 import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {ForbiddenError} from "../services/users-service";
 
 class AuthController {
     async login(req: Request, res: Response) {
@@ -33,8 +34,30 @@ class AuthController {
     }
 
     async registration(req: Request, res: Response) {
-        const result = await authService.registration(req.body)
-        res.sendStatus(result? httpStatus.noContent : httpStatus.teapot)
+        try {
+            const result = await authService.registration(req.body)
+
+            if(result.data) {
+                res.send(result.data)
+                return
+            }
+
+            res.status(result.error?.status).send(result.error?.message)
+
+            res.sendStatus(result? httpStatus.noContent : httpStatus.teapot)
+        } catch (error) {
+            if(error instanceof ForbiddenError) {
+
+            res.status(500).send(error.message)
+            }
+            else if(error instanceof differentError){
+                res.status(418)  // etc
+            }
+            else {
+                console.error("We dont know what type of error is it")
+                res.sendStatus(505)
+            }
+        }
     }
 
     async conformation(req: Request, res: Response) {

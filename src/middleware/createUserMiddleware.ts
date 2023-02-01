@@ -15,7 +15,7 @@ export const createUserMiddleware: RequestHandler[] = [
         .withMessage(message.length)
         .matches(/^[a-zA-Z0-9_-]*$/)
         .withMessage(message.symbols)
-        .custom(async (value: string)=>{
+        .custom(async (value: string) => {
             const checker = await queryRepository.getUserByLogin(value)
             if(checker){
                 throw new Error('Login already exists')
@@ -39,7 +39,7 @@ export const createUserMiddleware: RequestHandler[] = [
         .trim()
         .isEmail()
         .withMessage(message.invalidType)
-        .custom(async (value: string)=>{
+        .custom(async (value: string) => {
             const checker = await queryRepository.getUserByEmail(value)
             if(checker){
                 throw new Error('email already in use')
