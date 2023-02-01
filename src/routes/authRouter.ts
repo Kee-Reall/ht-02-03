@@ -6,7 +6,7 @@ import {createUserMiddleware} from "../middleware/createUserMiddleware";
 import {conformationValidator} from "../middleware/conformationValidator";
 import {resendValidator} from "../middleware/resendValidator";
 import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
-import {ipLimiter} from "../middleware/ipControll";
+import {ipLimiter} from "../middleware/ipLimiter";
 
 const authRouter = Router()
 
