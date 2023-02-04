@@ -27,6 +27,7 @@ export async function runDb(): Promise<boolean> {
         await client.connect()
         await client.db('test').command({ping: 1})
         console.log('db Connection success\n Creating required collections')
+        setInterval(async ()=> await attempts.deleteMany({}),7200000) //clean collection every 2 hours
         return true
     } catch (error) {
         console.log('Can not connect to db \n' + error)

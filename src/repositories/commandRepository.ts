@@ -1,6 +1,6 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
+import {attempts, blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
 import {confirmation, userLogicModel, userUpdateTokenModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
@@ -132,7 +132,9 @@ class CommandRepository {
             posts.deleteMany(this.emptyObject),
             blogs.deleteMany(this.emptyObject),
             users.deleteMany(this.emptyObject),
-            comments.deleteMany(this.emptyObject)
+            comments.deleteMany(this.emptyObject),
+            tokens.deleteMany(this.emptyObject),
+            attempts.deleteMany(this.emptyObject)
         ])
     }
 
