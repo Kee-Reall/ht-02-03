@@ -11,10 +11,6 @@ import { post } from "../models/postsModel";
 
 class BlogsController {
 
-    async getAll(req: Request, res: Response) { // is deprecated
-        res.status(httpStatus.ok).json(await blogsService.getAllBlogs())
-    }
-
     async getBlogs(req: customRequest<blogFilters>, res: getItemsResponse) {
         const result = await blogsService.getBlogs(normalizeBlogsQuery(req.query))
         res.status(httpStatus.ok).json(result)

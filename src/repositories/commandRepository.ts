@@ -1,6 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {attempts, blogs, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
+import {attempts, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
+import {Blogs} from "../adapters/mongooseCreater";
 import {confirmation, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
@@ -22,8 +23,10 @@ class CommandRepository {
 
     async createBlog(blog: blogViewModel): Promise<boolean> {
         try {
-            const insert = await blogs.insertOne(blog)
-            return insert.acknowledged
+            console.log('creation')
+            const  res = await Blogs.create(blog)
+            console.log(res)
+            return true
         } catch (e) {
             return false
         }
@@ -31,8 +34,9 @@ class CommandRepository {
 
     async updateBlog(id: string, updatedFields: blogInputModel): Promise<boolean> {
         try {
-            const {modifiedCount} = await blogs.updateOne({id}, {$set: updatedFields})
-            return modifiedCount > 0
+            console.log('inside updating')
+            await Blogs.findOneAndUpdate({id},updatedFields)
+            return true
         } catch (e) {
             return false
         }
@@ -40,8 +44,8 @@ class CommandRepository {
 
     async deleteBlog(id: string): Promise<boolean> {
         try {
-            const {deletedCount} = await blogs.deleteOne({id})
-            return deletedCount > 0
+            await Blogs.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -117,7 +121,7 @@ class CommandRepository {
     async clearStore(): Promise<void> {
         await Promise.all([
             posts.deleteMany(this.emptyObject),
-            blogs.deleteMany(this.emptyObject),
+            Blogs.deleteMany(this.emptyObject),
             users.deleteMany(this.emptyObject),
             comments.deleteMany(this.emptyObject),
             sessions.deleteMany(this.emptyObject),

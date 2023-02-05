@@ -1,6 +1,7 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
+import { comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
+import {Blogs} from "../adapters/mongooseCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
@@ -16,27 +17,11 @@ class QueryRepository {
             _id: false, hash: false, salt: false, confirmation: false
         }
     }
-
-    async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
-        try {
-            const reg = {name: {$regex: filter.searchNameTerm, $options: "i"}}
-            return await blogs.find(reg, this.noHiddenId).toArray()
-        } catch (e) {
-            return null
-        }
-    }
-
-    async getAllBlogsCount(filter: any): Promise<number> {
-        try {
-            return await blogs.count(filter)
-        } catch (e) {
-            return 0
-        }
-    }
+    private readonly excludeHiddenFields = '-_id -__v'
 
     async getBlogsCount(filter: string): Promise<number> {
         try {
-            return await blogs.count({
+            return await Blogs.count({
                 name: new RegExp(filter, 'ig')
             })
         } catch (e) {
@@ -56,11 +41,11 @@ class QueryRepository {
         const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {}
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
-            return await blogs.find(filter, this.noHiddenId)
+            return await Blogs.find(filter)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.excludeHiddenFields)
         } catch (e) {
             return null
         }
@@ -68,7 +53,7 @@ class QueryRepository {
 
     async getBlogById(id: string): Promise<blogViewModel | null> {
         try {
-            return await blogs.findOne({id}, this.noHiddenId)
+            return await Blogs.findOne({id}).select(this.excludeHiddenFields)
         } catch (e) {
             return null
         }

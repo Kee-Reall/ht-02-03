@@ -12,7 +12,7 @@ export const BlogSchema = new mongoose.Schema<blogDbModel>({
         type: String,
         required: true,
         maxLength:15,
-        minLength:5,
+        minLength:1,
         trim: true
     },
     description:{
