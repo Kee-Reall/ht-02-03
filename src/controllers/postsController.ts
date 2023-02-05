@@ -9,10 +9,6 @@ import { commentsFilter } from "../models/filtersModel";
 
 class PostsController {
 
-    async getAll(req: Request, res: Response) {
-        res.status(httpStatus.ok).json( await postsService.getAllPosts())
-    }
-
     async getOne(req: Request, res: Response) {
         const { params: { id }} = req
         const result = await postsService.getPost(id)

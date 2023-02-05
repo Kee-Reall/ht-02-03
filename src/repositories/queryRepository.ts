@@ -1,7 +1,8 @@
+import {FilterQuery} from "mongoose"
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import { comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
-import {Blogs} from "../adapters/mongooseCreater";
+import { comments, sessions, users} from "../adapters/mongoConnectorCreater";
+import {Blogs, Posts} from "../adapters/mongooseCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
@@ -31,14 +32,14 @@ class QueryRepository {
 
     async getPostsCount(filter: any = this.all): Promise<number> {
         try {
-            return await posts.count(filter)
+            return await Posts.count(filter)
         } catch (e) {
             return 0
         }
     }
 
     async getBlogWithPagination(config: SearchConfiguration<blogViewModel>): Promise<blogViewModel[] | null> {
-        const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {}
+        const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {} //if filter.name does not exist set all
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
             return await Blogs.find(filter)
@@ -59,17 +60,9 @@ class QueryRepository {
         }
     }
 
-    async getAllPosts(): Promise<postViewModel[] | null> {
-        try {
-            return await posts.find(this.all, this.noHiddenId).toArray()
-        } catch (e) {
-            return null
-        }
-    }
-
     async getPost(id: string): Promise<postViewModel | null> {
         try {
-            return await posts.findOne({id}, this.noHiddenId)
+            return await Posts.findOne({id}).select(this.excludeHiddenFields)
         } catch (e) {
             return null
         }
@@ -78,11 +71,11 @@ class QueryRepository {
     async getPostsWithPagination(config: SearchConfiguration<postViewModel>) {
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
-            return await posts.find(this.all, this.noHiddenId)
+            return await Posts.find(this.all)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.excludeHiddenFields)
         } catch (e) {
             return null
         }
@@ -91,11 +84,11 @@ class QueryRepository {
     async getPostsByFilter(config: SearchConfiguration<postViewModel>): Promise<postViewModel[] | null> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            return await posts.find(config.filter!, this.noHiddenId)
+            return await Posts.find(config.filter as FilterQuery<postViewModel>)
                 .sort(sorter)
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.excludeHiddenFields)
         } catch (e) {
             return null
         }

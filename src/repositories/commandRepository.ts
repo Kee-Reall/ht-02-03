@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {attempts, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
-import {Blogs} from "../adapters/mongooseCreater";
+import {attempts, comments, sessions, users} from "../adapters/mongoConnectorCreater";
+import {Blogs, Posts} from "../adapters/mongooseCreater";
 import {confirmation, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
@@ -53,17 +53,18 @@ class CommandRepository {
 
     async createPost(post: postViewModel): Promise<boolean> {
         try {
-            const result = await posts.insertOne(post)
-            return result.acknowledged
+            await Posts.create(post)
+            return true
         } catch (e) {
+            console.log(e ?? 'no message')
             return false
         }
     }
 
     async updatePost(id: string, updateFields: postInputModel): Promise<boolean> {
         try {
-            const {modifiedCount} = await posts.updateOne({id}, {$set: updateFields})
-            return modifiedCount > 0
+            await Posts.findOneAndUpdate({id}, updateFields)
+            return true
         } catch (e) {
             return false
         }
@@ -71,8 +72,8 @@ class CommandRepository {
 
     async deletePost(id: string): Promise<boolean> {
         try {
-            const {deletedCount} = await posts.deleteOne({id})
-            return deletedCount > 0
+            await Posts.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -120,7 +121,7 @@ class CommandRepository {
 
     async clearStore(): Promise<void> {
         await Promise.all([
-            posts.deleteMany(this.emptyObject),
+            Posts.deleteMany(this.emptyObject),
             Blogs.deleteMany(this.emptyObject),
             users.deleteMany(this.emptyObject),
             comments.deleteMany(this.emptyObject),

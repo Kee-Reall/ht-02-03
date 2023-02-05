@@ -11,7 +11,9 @@ export const PostSchema = new mongoose.Schema<postDbModel>({
     },
     title: {
         type: String,
-        required: true
+        required: true,
+        maxlength: 30,
+        minlength: 1
     },
     shortDescription: {
         type: String,
@@ -24,7 +26,7 @@ export const PostSchema = new mongoose.Schema<postDbModel>({
         type: String,
         trim: true,
         minLength: 1,
-        maxLength: 100,
+        maxLength: 1000,
         required: true
     },
     createdAt: {
