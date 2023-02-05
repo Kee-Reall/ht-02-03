@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {attempts, blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
-import {confirmation, userLogicModel, userUpdateTokenModel} from "../models/userModel";
+import {attempts, blogs, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
+import {confirmation, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
     refreshTokenDbResponse,
@@ -105,19 +105,6 @@ class CommandRepository {
         }
     }
 
-    async changeCurrentToken(dataSet: userUpdateTokenModel): Promise<boolean> {
-        try {
-            const {id, nextToken, previousToken} = dataSet
-            const {modifiedCount} = await users.updateOne({id},{
-                $set:{"refreshTokens.current" : nextToken},
-                $push:{"refreshTokens.expired": previousToken}
-            })
-            return modifiedCount > 0
-        } catch (e) {
-            return false
-        }
-    }
-
     async changeConfirm(id: string, confirmation: confirmation): Promise<boolean> {
         try {
             const {modifiedCount} = await users.updateOne({id},{$set:{confirmation}})
@@ -133,7 +120,7 @@ class CommandRepository {
             blogs.deleteMany(this.emptyObject),
             users.deleteMany(this.emptyObject),
             comments.deleteMany(this.emptyObject),
-            tokens.deleteMany(this.emptyObject),
+            sessions.deleteMany(this.emptyObject),
             attempts.deleteMany(this.emptyObject)
         ])
     }
@@ -170,7 +157,7 @@ class CommandRepository {
             const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
             const [updateDate, deviceId] = [new Date(Date.now()),this.genDeviceId()]
-            const {acknowledged} = await tokens.insertOne({userId, ip, title, updateDate, deviceId})
+            const {acknowledged} = await sessions.insertOne({userId, ip, title, updateDate, deviceId})
             if(!acknowledged) {
                 return null
             }
@@ -184,7 +171,7 @@ class CommandRepository {
         try {
             const {deviceId, userId} = input
             const updateDate = new Date(Date.now())
-            const {modifiedCount} = await tokens.updateOne({userId,deviceId}, {
+            const {modifiedCount} = await sessions.updateOne({userId,deviceId}, {
                 $set:{updateDate},
                 $push:{ip: input.ip ?? 'undetected'}
             })
@@ -200,7 +187,7 @@ class CommandRepository {
 
     async killMetaToken(filter: sessionFilter): Promise<boolean> {
         try {
-            const {deletedCount} = await tokens.deleteOne(filter)
+            const {deletedCount} = await sessions.deleteOne(filter)
             return deletedCount > 0
         } catch (e) {
             return false
@@ -209,7 +196,7 @@ class CommandRepository {
 
     async killSessionsForUser(userId: string, exclude: string): Promise<boolean> {
         try {
-            return !!await tokens.deleteMany({userId, deviceId:{$ne:exclude}})
+            return !!await sessions.deleteMany({userId, deviceId:{$ne:exclude}})
         } catch (e) {
             return false
         }

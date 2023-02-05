@@ -23,12 +23,6 @@ export interface userLogicModel {
     confirmation:confirmation
 }
 
-export type userUpdateTokenModel = {
-    id: string
-    nextToken: string
-    previousToken: string
-}
-
 export type confirmation = {
     isConfirmed: boolean
     code: string

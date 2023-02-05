@@ -17,7 +17,7 @@ class AuthController {
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
             title: req.headers['user-agent'] as string
         }
-        const tokenPair = await jwtService.createNewTokenPair(meta)
+        const tokenPair = await jwtService.createTokenPair(meta)
         if(!tokenPair) {
             return res.sendStatus(httpStatus.teapot)
         }

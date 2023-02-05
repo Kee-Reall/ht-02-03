@@ -1,46 +1,37 @@
 import mongoose from "mongoose";
+import {blogDbModel} from "../blogModel";
 
-export const BlogSchema = new mongoose.Schema({
+export const BlogSchema = new mongoose.Schema<blogDbModel>({
     id: {
         type: String,
-        require: true,
-        readonly: true
+        required: true,
+        readonly: true,
+        unique: true
     },
     name:{
         type: String,
-        require: true,
+        required: true,
         maxLength:15,
         minLength:5,
         trim: true
     },
     description:{
         type: String,
-        require: true,
+        required: true,
         maxLength:500,
         minLength:1,
         trim: true
     },
     websiteUrl: {
         type: String,
-        require: true,
+        required: true,
         maxLength:100,
         minLength:1,
         trim: true
     },
     createdAt: {
-        type: Date,
-        default: new Date(),
+        type: String,
+        default: new Date().toISOString(),
         readonly: true
-    }
-}, {
-    toObject: {
-        transform: function (doc, ret) {
-            delete ret._id;
-        }
-    },
-    toJSON: {
-        transform: function (doc, ret) {
-            delete ret._id;
-        }
     }
 })

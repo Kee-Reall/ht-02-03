@@ -1,6 +1,6 @@
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
+import {blogs, comments, posts, sessions, users} from "../adapters/mongoConnectorCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
@@ -220,15 +220,15 @@ class QueryRepository {
 
     async getMetaToken(data: sessionFilter): Promise<refreshTokensMeta | null> {
         const {userId, deviceId} = data
-        return await tokens.findOne({userId, deviceId})
+        return await sessions.findOne({userId, deviceId})
     }
 
     async getSession(deviceId: string): Promise<refreshTokensMeta | null> {
-        return await tokens.findOne({deviceId})
+        return await sessions.findOne({deviceId})
     }
 
     async getTokensForUser(userId: string): Promise<Array<securityViewModel>> {
-        const arrayFromDb = await tokens.find({userId}).toArray()
+        const arrayFromDb = await sessions.find({userId}).toArray()
         return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
             return {
                 ip: ip[ip.length - 1] as string,

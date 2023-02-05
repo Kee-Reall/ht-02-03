@@ -1,14 +1,14 @@
 import {attemptsModel} from "../models/attemptsModel";
-import {attempts} from "../adapters/mongoConnectorCreater";
+import {Attempts} from "../adapters/mongooseCreater";
 
 
 class AttemptsRepository {
     public async addNewAttempt(input: attemptsModel){
-        await attempts.insertOne(input)
+        await Attempts.create(input)
     }
 
     public async getAttemptsCount(endpointAndIp: string,date: string) {
-        return await attempts.count({endpointAndIp, date:{$gte:date}})
+        return Attempts.count({endpointAndIp, date:{$gte:date}})
     }
 }
 
