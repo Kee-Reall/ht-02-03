@@ -9,10 +9,6 @@ import { commentsFilter } from "../models/filtersModel";
 
 class PostsController {
 
-    async getAll(req: Request, res: Response) {
-        res.status(httpStatus.ok).json( await postsService.getAllPosts())
-    }
-
     async getOne(req: Request, res: Response) {
         const { params: { id }} = req
         const result = await postsService.getPost(id)
@@ -53,8 +49,6 @@ class PostsController {
         }
         res.status(httpStatus.ok).json(await postsService.getCommentForPost(query))
     }
-
-
 
     async createCommentForPost(req: Request, res: Response) {
         const { body:{ content }, params:{ id: postId }, user } = req

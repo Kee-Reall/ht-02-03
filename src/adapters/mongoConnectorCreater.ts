@@ -20,14 +20,13 @@ export const blogs = db.collection<blogViewModel>('blogs')
 export const users = db.collection<userDbModel>('users')
 export const comments = db.collection<commentsDbModel>('comments')
 
-export const tokens = db.collection<refreshTokensMeta>('refreshTokensMeta')
+export const sessions = db.collection<refreshTokensMeta>('sessions')
 export const attempts = db.collection<attemptsModel>('attempts')
 export async function runDb(): Promise<boolean> {
     try {
         await client.connect()
         await client.db('test').command({ping: 1})
         console.log('db Connection success\n Creating required collections')
-        setInterval(async ()=> await attempts.deleteMany({}),7200000) //clean collection every 2 hours
         return true
     } catch (error) {
         console.log('Can not connect to db \n' + error)

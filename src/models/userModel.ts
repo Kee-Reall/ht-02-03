@@ -21,12 +21,12 @@ export interface userLogicModel {
     hash:string
     salt: string
     confirmation:confirmation
+    recovery: recovery
 }
 
-export type userUpdateTokenModel = {
-    id: string
-    nextToken: string
-    previousToken: string
+export type recovery = {
+    recoveryCode: string,
+    expirationDate: Date
 }
 
 export type confirmation = {

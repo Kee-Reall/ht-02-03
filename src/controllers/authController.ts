@@ -4,6 +4,7 @@ import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
 import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
 import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {usersService} from "../services/users-service";
 
 class AuthController {
     async login(req: Request, res: Response) {
@@ -17,7 +18,7 @@ class AuthController {
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
             title: req.headers['user-agent'] as string
         }
-        const tokenPair = await jwtService.createNewTokenPair(meta)
+        const tokenPair = await jwtService.createTokenPair(meta)
         if(!tokenPair) {
             return res.sendStatus(httpStatus.teapot)
         }
@@ -87,6 +88,18 @@ class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.cookie('refreshToken','',{httpOnly: true, secure: true}).sendStatus(httpStatus.noContent)
+    }
+
+    async recoverPassword(req: Request,res: Response) {
+        const {body:{email}} = req
+        await usersService.recoverPassword(email)
+        res.sendStatus(httpStatus.noContent)
+    }
+
+    async confirmPasswordChange(req: Request,res: Response) {
+        const {body:{newPassword,recoveryCode}} = req
+        const isPasswordChanged: boolean = await usersService.confirmRecovery(recoveryCode,newPassword)
+        res.sendStatus(isPasswordChanged ? httpStatus.noContent : httpStatus.badRequest)
     }
 }
 

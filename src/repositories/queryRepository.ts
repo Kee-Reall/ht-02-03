@@ -1,6 +1,7 @@
+import {FilterQuery} from "mongoose"
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
-import {blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
+import {Blogs, Posts, Users, Comments, Sessions} from "../adapters/mongooseCreater";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {userLogicModel, userViewModel} from "../models/userModel";
 import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
@@ -8,35 +9,21 @@ import {refreshTokensMeta, sessionFilter} from "../models/refreshTokensMeta";
 import {securityViewModel} from "../models/SecurityModel";
 
 class QueryRepository {
-    private readonly noHiddenId = {projection: {_id: false}};
+    //private readonly noHiddenId = {projection: {_id: false}}; deprecated projection for mongo driver
+    // private readonly commentProjection = {projection: {_id: false, postId: false}}
+    // private readonly userProjection = {
+    //     projection: {
+    //         _id: false, hash: false, salt: false, confirmation: false
+    //     }
+    //}
     private readonly all = {};
-    private readonly commentProjection = {projection: {_id: false, postId: false}}
-    private readonly userProjection = {
-        projection: {
-            _id: false, hash: false, salt: false, confirmation: false
-        }
-    }
-
-    async getAllBlogs(filter: {} | any = this.all): Promise<blogViewModel[] | null> {
-        try {
-            const reg = {name: {$regex: filter.searchNameTerm, $options: "i"}}
-            return await blogs.find(reg, this.noHiddenId).toArray()
-        } catch (e) {
-            return null
-        }
-    }
-
-    async getAllBlogsCount(filter: any): Promise<number> {
-        try {
-            return await blogs.count(filter)
-        } catch (e) {
-            return 0
-        }
-    }
+    private readonly viewSelector = '-_id -__v'
+    private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation -recovery'
+    private readonly commentSelector = this.viewSelector + ' '+ '-postId'
 
     async getBlogsCount(filter: string): Promise<number> {
         try {
-            return await blogs.count({
+            return await Blogs.count({
                 name: new RegExp(filter, 'ig')
             })
         } catch (e) {
@@ -46,21 +33,21 @@ class QueryRepository {
 
     async getPostsCount(filter: any = this.all): Promise<number> {
         try {
-            return await posts.count(filter)
+            return await Posts.count(filter)
         } catch (e) {
             return 0
         }
     }
 
     async getBlogWithPagination(config: SearchConfiguration<blogViewModel>): Promise<blogViewModel[] | null> {
-        const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {}
+        const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {} //if filter.name does not exist set all
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
-            return await blogs.find(filter, this.noHiddenId)
+            return await Blogs.find(filter)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -68,15 +55,7 @@ class QueryRepository {
 
     async getBlogById(id: string): Promise<blogViewModel | null> {
         try {
-            return await blogs.findOne({id}, this.noHiddenId)
-        } catch (e) {
-            return null
-        }
-    }
-
-    async getAllPosts(): Promise<postViewModel[] | null> {
-        try {
-            return await posts.find(this.all, this.noHiddenId).toArray()
+            return await Blogs.findOne({id}).select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -84,7 +63,7 @@ class QueryRepository {
 
     async getPost(id: string): Promise<postViewModel | null> {
         try {
-            return await posts.findOne({id}, this.noHiddenId)
+            return await Posts.findOne({id}).select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -93,11 +72,11 @@ class QueryRepository {
     async getPostsWithPagination(config: SearchConfiguration<postViewModel>) {
         const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
-            return await posts.find(this.all, this.noHiddenId)
+            return await Posts.find(this.all)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -106,11 +85,11 @@ class QueryRepository {
     async getPostsByFilter(config: SearchConfiguration<postViewModel>): Promise<postViewModel[] | null> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            return await posts.find(config.filter!, this.noHiddenId)
+            return await Posts.find(config.filter as FilterQuery<postViewModel>)
                 .sort(sorter)
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -118,7 +97,7 @@ class QueryRepository {
 
     async getUsersCount(config: any): Promise<number> {
         try {
-            return users.count(config)
+            return  await Users.count(config)
         } catch (e) {
             return 0
         }
@@ -127,11 +106,11 @@ class QueryRepository {
     async getUsers(config: any): Promise<userViewModel[] | null> {
         try {
             const direction: 1 | -1 = config.sortDirection === 'asc' ? 1 : -1
-            return await users.find(config.filter, this.userProjection)
+            return await Users.find(config.filter)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.userViewSelector)
         } catch (e) {
             return null
         }
@@ -139,7 +118,7 @@ class QueryRepository {
 
     async getUserById(id: string): Promise<userViewModel | null> {
         try {
-            return await users.findOne({id}, this.userProjection)
+            return await Users.findOne({id}).select(this.userViewSelector)
         } catch (e) {
             return null
         }
@@ -147,7 +126,7 @@ class QueryRepository {
 
     async getUserByIdWithLogic(id: string): Promise<userLogicModel | null> {
         try {
-            return await users.findOne({id}, this.noHiddenId)
+            return await Users.findOne({id}).select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -155,7 +134,7 @@ class QueryRepository {
 
     async getUserByLogin(login: string): Promise<userViewModel | null> {
         try {
-            return await users.findOne({login}, this.userProjection)
+            return await Users.findOne({login}).select(this.userViewSelector)
         } catch (e) {
             return null
         }
@@ -163,7 +142,7 @@ class QueryRepository {
 
     async getUserByEmail(email: string): Promise<userLogicModel | null> {
         try {
-            return await users.findOne({email}, this.noHiddenId)
+            return await Users.findOne({email}).select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -171,12 +150,12 @@ class QueryRepository {
 
     async getUserByLoginOrEmail(loginOrEmail: string): Promise<userLogicModel | null> {
         try {
-            return await users.findOne({
+            return await Users.findOne({
                 $or: [
                     {login: loginOrEmail},
                     {email: loginOrEmail}
                 ]
-            }, this.noHiddenId)
+            }).select(this.viewSelector)
         } catch (e) {
             return null
         }
@@ -184,7 +163,15 @@ class QueryRepository {
 
     async getUserByConfirm(code: string): Promise<userLogicModel | null> {
         try {
-            return await users.findOne({"confirmation.code": code}, this.noHiddenId)
+            return await Users.findOne({"confirmation.code": code}).select(this.viewSelector)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByRecoveryCode(recoveryCode: string): Promise<userLogicModel | null> {
+        try {
+            return await Users.findOne({"recovery.recoveryCode": recoveryCode})
         } catch (e) {
             return null
         }
@@ -192,7 +179,7 @@ class QueryRepository {
 
     async getCommentById(id: string): Promise<commentsOutputModel | null> {
         try {
-            return await comments.findOne({id}, this.commentProjection)
+            return await Comments.findOne({id}).select(this.commentSelector)
         } catch (e) {
             return null
         }
@@ -200,7 +187,7 @@ class QueryRepository {
 
     async countCommentsByPostId(postId: string): Promise<number> {
         try {
-            return await comments.count({postId})
+            return await Comments.count({postId})
         } catch (e) {
             return 0
         }
@@ -208,11 +195,11 @@ class QueryRepository {
 
     async getCommentsByPostId(config: SearchConfiguration<commentsDbModel>): Promise<commentsOutputModel[] | null> {
         try {
-            return await comments.find({postId: config.filter!.postId}, this.commentProjection)
+            return await Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
-                .toArray()
+                .select(this.commentSelector)
         } catch (e) {
             return null
         }
@@ -220,15 +207,15 @@ class QueryRepository {
 
     async getMetaToken(data: sessionFilter): Promise<refreshTokensMeta | null> {
         const {userId, deviceId} = data
-        return await tokens.findOne({userId, deviceId})
+        return await Sessions.findOne({userId, deviceId})
     }
 
     async getSession(deviceId: string): Promise<refreshTokensMeta | null> {
-        return await tokens.findOne({deviceId})
+        return await Sessions.findOne({deviceId})
     }
 
     async getTokensForUser(userId: string): Promise<Array<securityViewModel>> {
-        const arrayFromDb = await tokens.find({userId}).toArray()
+        const arrayFromDb = await Sessions.find({userId})
         return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
             return {
                 ip: ip[ip.length - 1] as string,

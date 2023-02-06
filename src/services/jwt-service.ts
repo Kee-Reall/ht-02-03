@@ -14,12 +14,6 @@ class JwtService {
         return process.env.JWT_SECRET as string
     }
 
-    private convertDayToSec(day: number): number { // convert day into ms
-        const [secPerMin, MinPerHour, HourPerDay] = [ 60 , 60 , 24]
-        return day * secPerMin * MinPerHour * HourPerDay
-    }
-
-
     private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
             expiresIn: `${time}s`
@@ -36,7 +30,7 @@ class JwtService {
         return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(10 * 60));
     }
 
-    private async createNewRefreshToken(clientInfo: createTokenClientMeta): Promise<string | null>{
+    private async createRefreshToken(clientInfo: createTokenClientMeta): Promise<string | null>{
         const metaDataAfterCreation = await commandRepository.createMetaToken(clientInfo)
         if(!metaDataAfterCreation) {
             return null
@@ -49,14 +43,8 @@ class JwtService {
         return jwt.sign(payload, this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
-    private async createRefreshToken(userId: string): Promise<string> {
-        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(
-            this.convertDayToSec(3)
-        ));
-    }
-
-    public async createNewTokenPair(clientInfo: createTokenClientMeta): Promise<tokenPair | null> {
-        const refreshToken = await this.createNewRefreshToken(clientInfo)
+    public async createTokenPair(clientInfo: createTokenClientMeta): Promise<tokenPair | null> {
+        const refreshToken = await this.createRefreshToken(clientInfo)
         if(!refreshToken) {
             return null
         }
@@ -87,19 +75,6 @@ class JwtService {
         return jwt.sign(metaDataAfterUpdate,this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
-    public async createTokenPair(userId: string,current: string): Promise<tokenPair | null> { //deprecated
-        const nextRefreshToken = await this.createRefreshToken(userId)
-        const tokensUpdated = await commandRepository.changeCurrentToken({
-            id: userId,
-            previousToken: current,
-            nextToken: nextRefreshToken
-        })
-        if(!tokensUpdated) return null
-        return {
-            accessToken: await this.createAccessToken(userId),
-            refreshToken: nextRefreshToken
-        }
-    }
 
     private async _verify(token: string): Promise<string | null> {
         try {
@@ -110,14 +85,6 @@ class JwtService {
         }
     }
 
-    public async verify(token: string): Promise<boolean> {
-        try {
-            const isVerified = jwt.verify(token,this.getJwtSecret())
-            return !!isVerified
-        } catch (e) {
-            return false
-        }
-    }
     public async getUserByToken(token: string): Promise< userLogicModel | null> {
         const userId: string | null = await this._verify(token)
         return userId ? await usersService.getUserById(userId) : userId as null

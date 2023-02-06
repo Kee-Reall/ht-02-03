@@ -7,6 +7,8 @@ import {conformationValidator} from "../middleware/conformationValidator";
 import {resendValidator} from "../middleware/resendValidator";
 import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
 import {ipLimiter} from "../middleware/ipLimiter";
+import {emailValidator} from "../middleware/emailValidator";
+import {newPasswordValidator} from "../middleware/newPasswordValidator";
 
 const authRouter = Router()
 
@@ -17,5 +19,7 @@ authRouter.post('/registration-email-resending',ipLimiter,...resendValidator,aut
 authRouter.post('/refresh-token',...refreshTokenValidator,authController.refresh)
 authRouter.post('/logout',...refreshTokenValidator,authController.logout)
 authRouter.get('/me', jwtAuth, authController.getUserFromRequest)
+authRouter.post('/password-recovery',ipLimiter,...emailValidator,authController.recoverPassword)
+authRouter.post('/new-password',ipLimiter,...newPasswordValidator,authController.confirmPasswordChange)
 
 export { authRouter }

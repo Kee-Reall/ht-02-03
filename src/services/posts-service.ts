@@ -1,5 +1,5 @@
 import { queryRepository } from "../repositories/queryRepository";
-import {post, posts, postInputModel, postViewModel} from "../models/postsModel";
+import {post, postInputModel, postViewModel} from "../models/postsModel";
 import { blog } from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
@@ -12,9 +12,6 @@ import {getOutput} from "../models/ResponseModel";
 
 
 class PostsService {
-    async getAllPosts(): Promise<posts> {
-        return await queryRepository.getAllPosts()
-    }
 
     async getPost(id:string): Promise<post> {
         return await queryRepository.getPost(id)

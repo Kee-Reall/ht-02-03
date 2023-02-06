@@ -1,5 +1,5 @@
 import { queryRepository } from "../repositories/queryRepository";
-import {blogInputModel, blog, blogs, blogViewModel} from "../models/blogModel";
+import {blogInputModel, blog, blogViewModel} from "../models/blogModel";
 import generateId from "../helpers/generateId";
 import { commandRepository } from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
@@ -9,9 +9,6 @@ import {postInputThrowBlog, postInputModel, postViewModel} from "../models/posts
 import { postsService } from "./posts-service";
 
 class BlogsService {
-    async getAllBlogs(): Promise<blogs> {
-        return await queryRepository.getAllBlogs()
-    }
 
     async getBlogs(params: blogFilters): Promise<getOutput> {
         const searchConfig:SearchConfiguration<blogViewModel> = {

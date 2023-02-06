@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
-import {attempts, blogs, comments, posts, tokens, users} from "../adapters/mongoConnectorCreater";
-import {confirmation, userLogicModel, userUpdateTokenModel} from "../models/userModel";
+import {Attempts, Blogs, Posts, Comments, Users, Sessions} from "../adapters/mongooseCreater";
+import {confirmation, recovery, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
     refreshTokenDbResponse,
@@ -16,14 +16,17 @@ class CommandRepository {
 
     constructor(
         private genDeviceId: () => string
-    ) {}
+    ) {
+    }
 
     private readonly emptyObject = {}
 
     async createBlog(blog: blogViewModel): Promise<boolean> {
         try {
-            const insert = await blogs.insertOne(blog)
-            return insert.acknowledged
+            console.log('creation')
+            const res = await Blogs.create(blog)
+            console.log(res)
+            return true
         } catch (e) {
             return false
         }
@@ -31,8 +34,8 @@ class CommandRepository {
 
     async updateBlog(id: string, updatedFields: blogInputModel): Promise<boolean> {
         try {
-            const {modifiedCount} = await blogs.updateOne({id}, {$set: updatedFields})
-            return modifiedCount > 0
+            await Blogs.findOneAndUpdate({id}, updatedFields)
+            return true
         } catch (e) {
             return false
         }
@@ -40,8 +43,8 @@ class CommandRepository {
 
     async deleteBlog(id: string): Promise<boolean> {
         try {
-            const {deletedCount} = await blogs.deleteOne({id})
-            return deletedCount > 0
+            await Blogs.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -49,17 +52,18 @@ class CommandRepository {
 
     async createPost(post: postViewModel): Promise<boolean> {
         try {
-            const result = await posts.insertOne(post)
-            return result.acknowledged
+            await Posts.create(post)
+            return true
         } catch (e) {
+            console.log(e ?? 'no message')
             return false
         }
     }
 
     async updatePost(id: string, updateFields: postInputModel): Promise<boolean> {
         try {
-            const {modifiedCount} = await posts.updateOne({id}, {$set: updateFields})
-            return modifiedCount > 0
+            await Posts.findOneAndUpdate({id}, updateFields)
+            return true
         } catch (e) {
             return false
         }
@@ -67,8 +71,8 @@ class CommandRepository {
 
     async deletePost(id: string): Promise<boolean> {
         try {
-            const {deletedCount} = await posts.deleteOne({id})
-            return deletedCount > 0
+            await Posts.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -76,8 +80,8 @@ class CommandRepository {
 
     async createUser(user: userLogicModel): Promise<boolean> {
         try {
-            const {acknowledged} = await users.insertOne(user)
-            return acknowledged
+            await Users.create(user)
+            return true
         } catch (e) {
             return false
         }
@@ -85,8 +89,8 @@ class CommandRepository {
 
     async deleteUser(id: string): Promise<boolean> {
         try {
-            const result = await users.deleteOne({id})
-            return result.deletedCount !== 0
+            await Users.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -94,25 +98,8 @@ class CommandRepository {
 
     async confirmUser(id: string): Promise<boolean> {
         try {
-            const {modifiedCount} = await users.updateOne({id},
-                {$set:{
-                    "confirmation.isConfirmed":true
-                }}
-            )
-            return modifiedCount > 0
-        } catch (e) {
-            return false
-        }
-    }
-
-    async changeCurrentToken(dataSet: userUpdateTokenModel): Promise<boolean> {
-        try {
-            const {id, nextToken, previousToken} = dataSet
-            const {modifiedCount} = await users.updateOne({id},{
-                $set:{"refreshTokens.current" : nextToken},
-                $push:{"refreshTokens.expired": previousToken}
-            })
-            return modifiedCount > 0
+            await Users.findOneAndUpdate({id}, {"confirmation.isConfirmed": true})
+            return true
         } catch (e) {
             return false
         }
@@ -120,8 +107,8 @@ class CommandRepository {
 
     async changeConfirm(id: string, confirmation: confirmation): Promise<boolean> {
         try {
-            const {modifiedCount} = await users.updateOne({id},{$set:{confirmation}})
-            return modifiedCount > 0
+            await Users.findOneAndUpdate({id}, {confirmation})
+            return true
         } catch (e) {
             return false
         }
@@ -129,19 +116,19 @@ class CommandRepository {
 
     async clearStore(): Promise<void> {
         await Promise.all([
-            posts.deleteMany(this.emptyObject),
-            blogs.deleteMany(this.emptyObject),
-            users.deleteMany(this.emptyObject),
-            comments.deleteMany(this.emptyObject),
-            tokens.deleteMany(this.emptyObject),
-            attempts.deleteMany(this.emptyObject)
+            Posts.deleteMany(this.emptyObject),
+            Blogs.deleteMany(this.emptyObject),
+            Users.deleteMany(this.emptyObject),
+            Comments.deleteMany(this.emptyObject),
+            Sessions.deleteMany(this.emptyObject),
+            Attempts.deleteMany(this.emptyObject)
         ])
     }
 
     async createComment(commentDb: commentsDbModel): Promise<boolean> {
         try {
-            const {acknowledged} = await comments.insertOne(commentDb)
-            return acknowledged
+            await Comments.create(commentDb)
+            return true
         } catch (e) {
             return false
         }
@@ -149,8 +136,8 @@ class CommandRepository {
 
     async updateComment(id: string, content: string): Promise<boolean> {
         try {
-            const { acknowledged: flag } = await comments.updateOne({id},{$set:{content}})
-            return flag
+            await Comments.findOneAndUpdate({id}, {content})
+            return true
         } catch (e) {
             return false
         }
@@ -158,8 +145,8 @@ class CommandRepository {
 
     async deleteComment(id: string): Promise<boolean> {
         try {
-            const { deletedCount } = await comments.deleteOne({id})
-            return deletedCount > 0
+            await Comments.deleteOne({id})
+            return true
         } catch (e) {
             return false
         }
@@ -169,12 +156,9 @@ class CommandRepository {
         try {
             const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
-            const [updateDate, deviceId] = [new Date(Date.now()),this.genDeviceId()]
-            const {acknowledged} = await tokens.insertOne({userId, ip, title, updateDate, deviceId})
-            if(!acknowledged) {
-                return null
-            }
-            return {updateDate,deviceId}
+            const [updateDate, deviceId] = [new Date(Date.now()), this.genDeviceId()]
+            await Sessions.create({userId, ip, title, updateDate, deviceId})
+            return {updateDate, deviceId}
         } catch (e) {
             return null
         }
@@ -184,15 +168,12 @@ class CommandRepository {
         try {
             const {deviceId, userId} = input
             const updateDate = new Date(Date.now())
-            const {modifiedCount} = await tokens.updateOne({userId,deviceId}, {
-                $set:{updateDate},
-                $push:{ip: input.ip ?? 'undetected'}
-            })
-            const toReturn = {
-                deviceId,userId,
-                updateDate: updateDate.toISOString()
-            }
-            return modifiedCount > 0 ? toReturn : null
+            const session = await Sessions.findOne({userId, deviceId})
+            if (!session) return null
+            session.updateDate = updateDate
+            session.ip.push(input.ip ?? 'undetected')
+            session.save()
+            return {deviceId, userId, updateDate: updateDate.toISOString()}
         } catch (e) {
             return null
         }
@@ -200,8 +181,8 @@ class CommandRepository {
 
     async killMetaToken(filter: sessionFilter): Promise<boolean> {
         try {
-            const {deletedCount} = await tokens.deleteOne(filter)
-            return deletedCount > 0
+            await Sessions.deleteOne(filter)
+            return true
         } catch (e) {
             return false
         }
@@ -209,7 +190,26 @@ class CommandRepository {
 
     async killSessionsForUser(userId: string, exclude: string): Promise<boolean> {
         try {
-            return !!await tokens.deleteMany({userId, deviceId:{$ne:exclude}})
+            await Sessions.deleteMany({userId, deviceId: {$ne: exclude}})
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    async recoverAttempt(email: string, recovery: recovery): Promise<userLogicModel | null> {
+        try {
+            return await Users.findOneAndUpdate({email}, {recovery})
+        } catch (e) {
+            console.log('attempt to recover not-existing email')
+            return null
+        }
+    }
+
+    async changeUserPassword(id: string,hash: string, salt: string): Promise<boolean> {
+        try {
+            await Users.findOneAndUpdate({id},{hash,salt})
+            return true
         } catch (e) {
             return false
         }
@@ -217,4 +217,4 @@ class CommandRepository {
 }
 
 const commandRepository = new CommandRepository(generateDeviceId)
-export { commandRepository }
+export {commandRepository}
