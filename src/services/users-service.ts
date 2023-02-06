@@ -1,17 +1,16 @@
+import bcrypt from "bcrypt"
+import {v4 as uniqueCode} from "uuid"
+import {add, isAfter} from "date-fns"
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
 import {confirmation, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
-import bcrypt from "bcrypt"
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
-import {v4 as uniqueCode} from "uuid"
-import {add, isAfter} from "date-fns"
 import {mailWorker} from "../repositories/mailWorker";
 
 class UsersService {
     public async getUsers(params: usersFilters): Promise<getOutput> {
-
         const searchConfig = {
             filter: {
                 $or: [
@@ -26,7 +25,6 @@ class UsersService {
         }
         const totalCount: number = await queryRepository.getUsersCount(searchConfig.filter)
         const items: userViewModel[] = await queryRepository.getUsers(searchConfig) ?? []
-
         return {
             page: params.pageNumber!,
             pageSize: params.pageSize!,
@@ -35,7 +33,6 @@ class UsersService {
             items
         }
     }
-
 
     public async adminCreatingUser(input: userInputModel): Promise<userViewModel | null> {
         const {password, email, login} = input

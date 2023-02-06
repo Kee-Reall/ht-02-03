@@ -50,8 +50,6 @@ class PostsController {
         res.status(httpStatus.ok).json(await postsService.getCommentForPost(query))
     }
 
-
-
     async createCommentForPost(req: Request, res: Response) {
         const { body:{ content }, params:{ id: postId }, user } = req
         const result = await postsService.createComment({content,postId,user})
