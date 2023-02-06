@@ -4,7 +4,7 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 class MailWorker {
     private readonly link: string = "https://ht-02-03.vercel.app/api/auth/registration-confirmation?code="
     //private readonly localLink: string = "http://localhost:3000/api/auth/registration-confirmation?code="
-    private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?code="
+    private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?recoveryCode="
     constructor(
         private mainTransporter: Mail<SMTPTransport.SentMessageInfo> = mailAdapter
     ) {}
