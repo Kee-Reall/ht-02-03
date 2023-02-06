@@ -15,7 +15,7 @@ export async function mRunDb(){
             console.log('cant get env variable')
             return false
         }
-        await mongoose.connect(`${dbUri}/ht10`)
+        await mongoose.connect(dbUri)
         return true
     } catch (e){
         console.log('unable to connect')

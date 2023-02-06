@@ -28,8 +28,7 @@ class BlogsController {
     async createBlog(req: Request, res: Response) {
         const result: blog = await blogsService.createBlog(req.body)
         if(result) {
-            res.status(httpStatus.created).json(result)
-            return
+            return res.status(httpStatus.created).json(result)
         }
         res.sendStatus(httpStatus.teapot)
     }
