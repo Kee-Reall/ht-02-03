@@ -4,6 +4,7 @@ import SMTPTransport from "nodemailer/lib/smtp-transport";
 class MailWorker {
     private readonly link: string = "https://ht-02-03.vercel.app/api/auth/registration-confirmation?code="
     //private readonly localLink: string = "http://localhost:3000/api/auth/registration-confirmation?code="
+    private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?code="
     constructor(
         private mainTransporter: Mail<SMTPTransport.SentMessageInfo> = mailAdapter
     ) {}
@@ -21,7 +22,7 @@ class MailWorker {
     }
 
     private changePassMessage(code: string) {
-        return `<h1>Chage Password</h1><p>To change  please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
+        return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${this.passLink}${code}">recovery password</a></p>`
     }
 
     public async sendConfirmationAfterRegistration(email: string,code: any): Promise<boolean> {
