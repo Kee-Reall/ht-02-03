@@ -50,8 +50,8 @@ class CommentsService {
             totalCount,
             page: params.pageNumber!,
             pageSize: params.pageSize!,
-            items,
-            pagesCount : Math.ceil(totalCount / params.pageSize!)
+            pagesCount : Math.ceil(totalCount / params.pageSize!),
+            items
         }
     }
 }

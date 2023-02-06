@@ -5,6 +5,8 @@ import {UserSchema} from "../models/Schemas/user";
 import {CommentsSchema} from "../models/Schemas/comments";
 import {SessionSchema} from "../models/Schemas/session";
 import {AttemptsSchema} from "../models/Schemas/attempts";
+import * as dotenv from "dotenv";
+dotenv.config()
 
 export async function mRunDb(){
     try {
