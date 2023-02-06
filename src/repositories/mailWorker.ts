@@ -38,7 +38,7 @@ class MailWorker {
         }
     }
 
-    public async chagePassword(email:string, code: string) {
+    public async changePassword(email:string, code: string) {
         try {
             const {accepted} = await this.mainTransporter.sendMail({
                 from: `it-incubator Application <${process.env.MAIL_NAME}>`,

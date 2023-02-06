@@ -118,7 +118,7 @@ class UsersService {
         const recovery = await this.generateRecovery()
         const user = await commandRepository.recoverAttempt(email, recovery)
         if(!user) return
-        await mailWorker.chagePassword(user.email,recovery.recoveryCode)
+        await mailWorker.changePassword(user.email,recovery.recoveryCode)
     }
 
     public async confirmRecovery(recoveryCode: string, newPassword: string): Promise<boolean> {
