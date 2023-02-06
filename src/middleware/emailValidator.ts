@@ -8,5 +8,5 @@ export const emailValidator: RequestHandler[] = [
         .isString().trim()
         .isEmail().isLength({min:1,max:150}),
 
-    hasError(httpStatus.badRequest,false)
+    hasError(httpStatus.badRequest)
 ]

@@ -99,7 +99,15 @@ class AuthController {
     async confirmPasswordChange(req: Request,res: Response) {
         const {body:{newPassword,recoveryCode}} = req
         const isPasswordChanged: boolean = await usersService.confirmRecovery(recoveryCode,newPassword)
-        res.sendStatus(isPasswordChanged ? httpStatus.noContent : httpStatus.badRequest)
+        if (isPasswordChanged) {
+            return res.sendStatus(httpStatus.noContent)
+        }
+        res.status(httpStatus.badRequest).json({"errorsMessages": [
+                {
+                    message: "If the confirmation code is expired or already been applied",
+                    field: "recoveryCode"
+                }
+            ]})
     }
 }
 
