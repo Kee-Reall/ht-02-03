@@ -13,10 +13,7 @@ class UsersController {
 
     async createUser({body}: Request, res: Response) {
         const result = await usersService.adminCreatingUser(body)
-        if(result) {
-            return res.status(httpStatus.created).json(result)
-        }
-        res.sendStatus(httpStatus.teapot)
+        return res.status(httpStatus.created).json(result)
     }
 
     async deleteUser(req: Request, res: Response) {
