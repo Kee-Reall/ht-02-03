@@ -116,8 +116,9 @@ class UsersService {
 
     public async recoverPassword(email: string): Promise<void> {
         const recovery = await this.generateRecovery()
-        const user = await commandRepository.recoverAttempt(email, recovery)
+        const user = await queryRepository.getUserByEmail(email)
         if(!user) return
+        await commandRepository.recoverAttempt(email, recovery)
         await mailWorker.changePassword(user.email,recovery.recoveryCode)
     }
 

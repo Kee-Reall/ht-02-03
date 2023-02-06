@@ -199,7 +199,7 @@ class CommandRepository {
 
     async recoverAttempt(email: string, recovery: recovery): Promise<userLogicModel | null> {
         try {
-            return await Users.findOneAndUpdate({email}, {recovery}).select('-_id -__v')
+            return await Users.findOneAndUpdate({email}, {recovery})
         } catch (e) {
             console.log('attempt to recover not-existing email')
             return null

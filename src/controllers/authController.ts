@@ -91,9 +91,9 @@ class AuthController {
     }
 
     async recoverPassword(req: Request,res: Response) {
-        res.sendStatus(httpStatus.noContent)
         const {body:{email}} = req
         await usersService.recoverPassword(email)
+        res.sendStatus(httpStatus.noContent)
     }
 
     async confirmPasswordChange(req: Request,res: Response) {
