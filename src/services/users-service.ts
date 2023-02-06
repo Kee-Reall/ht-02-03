@@ -4,7 +4,7 @@ import {add, isAfter} from "date-fns"
 import {getOutput} from "../models/ResponseModel";
 import {usersFilters} from "../models/filtersModel";
 import {queryRepository} from "../repositories/queryRepository";
-import {confirmation, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
+import {confirmation, recovery, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
 import {commandRepository} from "../repositories/commandRepository";
 import generateId from "../helpers/generateId";
 import {mailWorker} from "../repositories/mailWorker";
@@ -14,8 +14,8 @@ class UsersService {
         const searchConfig = {
             filter: {
                 $or: [
-                    {login: new RegExp(params.searchLoginTerm!,'ig')},
-                    {email: new RegExp(params.searchEmailTerm!,'ig')}
+                    {login: new RegExp(params.searchLoginTerm!, 'ig')},
+                    {email: new RegExp(params.searchEmailTerm!, 'ig')}
                 ]
             },
             sortDirection: params.sortDirection,
@@ -38,16 +38,17 @@ class UsersService {
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password,salt)
+        const hash = await bcrypt.hash(password, salt)
         const id = generateId("user")
         const confirmation = await this.generateConfirmData(true)
+        const recovery = await this.generateRecovery(true)
         confirmation.isConfirmed = true
         const user: userLogicModel = {
             login, email, id,
-            hash, createdAt, salt, confirmation
+            hash, createdAt, salt, confirmation, recovery
         }
         const result = await commandRepository.createUser(user)
-        if(result) {
+        if (result) {
             return await queryRepository.getUserById(id)
         }
         return null
@@ -57,56 +58,85 @@ class UsersService {
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password,salt)
+        const hash = await bcrypt.hash(password, salt)
         const id = generateId("user")
         const confirmation = await this.generateConfirmData(false)
+        const recovery = await this.generateRecovery(true)
         const user: userLogicModel = {
             login, email, hash, createdAt,
-            salt, id, confirmation
+            salt, id, confirmation, recovery
         }
         const isUserCreated: boolean = await commandRepository.createUser(user)
-        if(!isUserCreated) {
+        if (!isUserCreated) {
             return false
         }
-        const isMailSent: boolean = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
-        if(!isMailSent) {
+        const isMailSent: boolean = await mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        if (!isMailSent) {
             await commandRepository.deleteUser(id)
         }
         return isMailSent
     }
 
-    public async deleteUser(id:string): Promise<boolean> {
+    public async deleteUser(id: string): Promise<boolean> {
         return await commandRepository.deleteUser(id)
-   }
+    }
 
-   public async getUserById(id: string): Promise<userLogicModel | null> {
+    public async getUserById(id: string): Promise<userLogicModel | null> {
         return queryRepository.getUserByIdWithLogic(id)
-   }
+    }
 
-   private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
+    private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
         return {
             code: uniqueCode(),
             isConfirmed,
-            confirmationDate: add(new Date(),{minutes: 15})
+            confirmationDate: add(new Date(), {minutes: 15})
         }
-   }
+    }
 
-   public async confirm(code: string): Promise<boolean> {
-       const user = await queryRepository.getUserByConfirm(code)
-       if(!user) return false
-       if(user.confirmation!.isConfirmed) return false
-       const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
-       if(isDataExpired) return false
-       return await commandRepository.confirmUser(user.id)
-   }
+    public async confirm(code: string): Promise<boolean> {
+        const user = await queryRepository.getUserByConfirm(code)
+        if (!user) return false
+        if (user.confirmation!.isConfirmed) return false
+        const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
+        if (isDataExpired) return false
+        return await commandRepository.confirmUser(user.id)
+    }
 
-   public async resend(email: string): Promise<boolean> {
-       const user = await queryRepository.getUserByEmail(email)
-       const confirmation = await this.generateConfirmData()
-       const mailSent = await mailWorker.sendConfirmationAfterRegistration(email,confirmation.code)
-       if(!mailSent) return false
-       return await commandRepository.changeConfirm(user!.id,confirmation)
-   }
+    public async resend(email: string): Promise<boolean> {
+        const user = await queryRepository.getUserByEmail(email)
+        const confirmation = await this.generateConfirmData()
+        const mailSent = await mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        if (!mailSent) return false
+        return await commandRepository.changeConfirm(user!.id, confirmation)
+    }
+
+    private async generateRecovery(isNewUser: boolean = false): Promise<recovery> {
+        return {
+            recoveryCode: uniqueCode(),
+            expirationDate: isNewUser ? new Date() : add(new Date(), {minutes: 10})
+        }
+    }
+
+    public async recoverPassword(email: string): Promise<void> {
+        const recovery = await this.generateRecovery()
+        const user = await commandRepository.recoverAttempt(email, recovery)
+        if(!user) return
+        await mailWorker.chagePassword(user.email,recovery.recoveryCode)
+    }
+
+    public async confirmRecovery(recoveryCode: string, newPassword: string): Promise<boolean> {
+        const user = await queryRepository.getUserByRecoveryCode(recoveryCode)
+        console.log(user)
+        if (!user || !user.confirmation.isConfirmed) return false
+        if (isAfter(Date.now(),user.recovery.expirationDate)){
+            console.log('is after')
+            return false
+        }
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(newPassword, salt)
+        await commandRepository.changeUserPassword(user.id,hash,salt)
+        return true
+    }
 }
 
 export const usersService = new UsersService()

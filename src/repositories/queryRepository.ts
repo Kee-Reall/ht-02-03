@@ -18,7 +18,7 @@ class QueryRepository {
     //}
     private readonly all = {};
     private readonly viewSelector = '-_id -__v'
-    private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation'
+    private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation -recovery'
     private readonly commentSelector = this.viewSelector + ' '+ '-postId'
 
     async getBlogsCount(filter: string): Promise<number> {
@@ -164,6 +164,14 @@ class QueryRepository {
     async getUserByConfirm(code: string): Promise<userLogicModel | null> {
         try {
             return await Users.findOne({"confirmation.code": code}).select(this.viewSelector)
+        } catch (e) {
+            return null
+        }
+    }
+
+    async getUserByRecoveryCode(recoveryCode: string): Promise<userLogicModel | null> {
+        try {
+            return await Users.findOne({"recovery.recoveryCode": recoveryCode})
         } catch (e) {
             return null
         }

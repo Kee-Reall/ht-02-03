@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import {confirmation, userDbModel} from "../userModel";
+import {confirmation, userDbModel,recovery} from "../userModel";
 
 
 const ConfirmationScheme = new mongoose.Schema<confirmation>({
@@ -14,6 +14,17 @@ const ConfirmationScheme = new mongoose.Schema<confirmation>({
     confirmationDate:{
         type:Date,
         required: true
+    }
+},{_id: false})
+
+const RecoveryScheme = new mongoose.Schema<recovery>({
+    recoveryCode:{
+        type: String,
+        default: ''
+    },
+    expirationDate:{
+        type: Date,
+        default: new Date()
     }
 },{_id: false})
 
@@ -51,5 +62,6 @@ export const UserSchema = new mongoose.Schema<userDbModel>({
         type: String,
         default: "deleteIt"
     },
-    confirmation: ConfirmationScheme
+    confirmation: ConfirmationScheme,
+    recovery: RecoveryScheme
 })

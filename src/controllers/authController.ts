@@ -4,6 +4,7 @@ import {authService} from "../services/auth-Service";
 import {jwtService} from "../services/jwt-service";
 import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
 import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {usersService} from "../services/users-service";
 
 class AuthController {
     async login(req: Request, res: Response) {
@@ -87,6 +88,18 @@ class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.cookie('refreshToken','',{httpOnly: true, secure: true}).sendStatus(httpStatus.noContent)
+    }
+
+    async recoverPassword(req: Request,res: Response) {
+        res.sendStatus(httpStatus.noContent)
+        const {body:{email}} = req
+        await usersService.recoverPassword(email)
+    }
+
+    async confirmPasswordChange(req: Request,res: Response) {
+        const {body:{newPassword,recoveryCode}} = req
+        const isPasswordChanged: boolean = await usersService.confirmRecovery(recoveryCode,newPassword)
+        res.sendStatus(isPasswordChanged ? httpStatus.noContent : httpStatus.badRequest)
     }
 }
 

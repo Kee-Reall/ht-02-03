@@ -17,7 +17,11 @@ class MailWorker {
     }
 
     private message(code: any) {
-        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below:<a href="${this.link}${code}">complete registration</a></p>`
+        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
+    }
+
+    private changePassMessage(code: string) {
+        return `<h1>Chage Password</h1><p>To change  please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
     }
 
     public async sendConfirmationAfterRegistration(email: string,code: any): Promise<boolean> {
@@ -27,6 +31,20 @@ class MailWorker {
                 to: email,
                 subject: 'Registration conformation',
                 html: this.message(code),
+            })
+            return accepted.length > 0
+        } catch (e) {
+            return false
+        }
+    }
+
+    public async chagePassword(email:string, code: string) {
+        try {
+            const {accepted} = await this.mainTransporter.sendMail({
+                from: `it-incubator Application <${process.env.MAIL_NAME}>`,
+                to: email,
+                subject: 'Password Changing',
+                html: this.changePassMessage(code),
             })
             return accepted.length > 0
         } catch (e) {

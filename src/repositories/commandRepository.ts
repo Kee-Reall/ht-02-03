@@ -1,7 +1,7 @@
 import {blogInputModel, blogViewModel} from "../models/blogModel";
 import {postInputModel, postViewModel} from "../models/postsModel";
 import {Attempts, Blogs, Posts, Comments, Users, Sessions} from "../adapters/mongooseCreater";
-import {confirmation, userLogicModel} from "../models/userModel";
+import {confirmation, recovery, userLogicModel} from "../models/userModel";
 import {commentsDbModel} from "../models/commentsModel";
 import {
     refreshTokenDbResponse,
@@ -16,14 +16,15 @@ class CommandRepository {
 
     constructor(
         private genDeviceId: () => string
-    ) {}
+    ) {
+    }
 
     private readonly emptyObject = {}
 
     async createBlog(blog: blogViewModel): Promise<boolean> {
         try {
             console.log('creation')
-            const  res = await Blogs.create(blog)
+            const res = await Blogs.create(blog)
             console.log(res)
             return true
         } catch (e) {
@@ -33,7 +34,7 @@ class CommandRepository {
 
     async updateBlog(id: string, updatedFields: blogInputModel): Promise<boolean> {
         try {
-            await Blogs.findOneAndUpdate({id},updatedFields)
+            await Blogs.findOneAndUpdate({id}, updatedFields)
             return true
         } catch (e) {
             return false
@@ -97,7 +98,7 @@ class CommandRepository {
 
     async confirmUser(id: string): Promise<boolean> {
         try {
-            await Users.findOneAndUpdate({id}, {"confirmation.isConfirmed":true})
+            await Users.findOneAndUpdate({id}, {"confirmation.isConfirmed": true})
             return true
         } catch (e) {
             return false
@@ -106,7 +107,7 @@ class CommandRepository {
 
     async changeConfirm(id: string, confirmation: confirmation): Promise<boolean> {
         try {
-            await Users.findOneAndUpdate({id},{confirmation})
+            await Users.findOneAndUpdate({id}, {confirmation})
             return true
         } catch (e) {
             return false
@@ -135,7 +136,7 @@ class CommandRepository {
 
     async updateComment(id: string, content: string): Promise<boolean> {
         try {
-            await Comments.findOneAndUpdate({id},{content})
+            await Comments.findOneAndUpdate({id}, {content})
             return true
         } catch (e) {
             return false
@@ -155,9 +156,9 @@ class CommandRepository {
         try {
             const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
-            const [updateDate, deviceId] = [new Date(Date.now()),this.genDeviceId()]
+            const [updateDate, deviceId] = [new Date(Date.now()), this.genDeviceId()]
             await Sessions.create({userId, ip, title, updateDate, deviceId})
-            return {updateDate,deviceId}
+            return {updateDate, deviceId}
         } catch (e) {
             return null
         }
@@ -167,12 +168,12 @@ class CommandRepository {
         try {
             const {deviceId, userId} = input
             const updateDate = new Date(Date.now())
-            const session = await Sessions.findOne({userId,deviceId})
-            if(!session) return null
+            const session = await Sessions.findOne({userId, deviceId})
+            if (!session) return null
             session.updateDate = updateDate
             session.ip.push(input.ip ?? 'undetected')
             session.save()
-            return  { deviceId, userId, updateDate: updateDate.toISOString() }
+            return {deviceId, userId, updateDate: updateDate.toISOString()}
         } catch (e) {
             return null
         }
@@ -189,7 +190,25 @@ class CommandRepository {
 
     async killSessionsForUser(userId: string, exclude: string): Promise<boolean> {
         try {
-            await Sessions.deleteMany({userId, deviceId:{$ne:exclude}})
+            await Sessions.deleteMany({userId, deviceId: {$ne: exclude}})
+            return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    async recoverAttempt(email: string, recovery: recovery): Promise<userLogicModel | null> {
+        try {
+            return await Users.findOneAndUpdate({email}, {recovery}).select('-_id -__v')
+        } catch (e) {
+            console.log('attempt to recover not-existing email')
+            return null
+        }
+    }
+
+    async changeUserPassword(id: string,hash: string, salt: string): Promise<boolean> {
+        try {
+            await Users.findOneAndUpdate({id},{hash,salt})
             return true
         } catch (e) {
             return false
@@ -198,4 +217,4 @@ class CommandRepository {
 }
 
 const commandRepository = new CommandRepository(generateDeviceId)
-export { commandRepository }
+export {commandRepository}
