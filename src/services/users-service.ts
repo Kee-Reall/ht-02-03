@@ -47,11 +47,8 @@ class UsersService {
             login, email, id,
             hash, createdAt, salt, confirmation, recovery
         }
-        const result = await commandRepository.createUser(user)
-        if (result) {
-            return await queryRepository.getUserById(id)
-        }
-        return null
+        await commandRepository.createUser(user)
+        return await queryRepository.getUserById(id)
     }
 
     public async createUser(input: userInputModel): Promise<boolean> {
