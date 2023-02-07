@@ -17,7 +17,7 @@ export const newPasswordValidator: RequestHandler[] = [
         .withMessage(message.requireField)
         .isString().withMessage(message.invalidType)
         .trim()
-        .isLength({min:1,max:200})
+        .isLength({min:5,max:200})
         .withMessage(message.length),
 
     hasError(httpStatus.badRequest)

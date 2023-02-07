@@ -109,8 +109,8 @@ class UsersService {
 
     private async generateRecovery(isNewUser: boolean = false): Promise<recovery> {
         return {
-            recoveryCode: uniqueCode(),
-            expirationDate: isNewUser ? new Date() : add(new Date(), {minutes: 10})
+            recoveryCode: isNewUser ? '' : uniqueCode(),
+            expirationDate: add(new Date(), {minutes: 10})
         }
     }
 
@@ -127,12 +127,12 @@ class UsersService {
         console.log(user)
         if (!user || !user.confirmation.isConfirmed) return false
         if (isAfter(Date.now(),user.recovery.expirationDate)){
-            console.log('is after')
             return false
         }
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(newPassword, salt)
         await commandRepository.changeUserPassword(user.id,hash,salt)
+        await commandRepository.setDefaultRecoveryCode(user.id)
         return true
     }
 }

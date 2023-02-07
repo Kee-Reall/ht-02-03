@@ -214,6 +214,15 @@ class CommandRepository {
             return false
         }
     }
+
+    async setDefaultRecoveryCode(id: string): Promise<boolean> {
+        try {
+            await Users.findOneAndUpdate({id},{"recovery.recoveryCode":''})
+            return true
+        } catch (e) {
+            return false
+        }
+    }
 }
 
 const commandRepository = new CommandRepository(generateDeviceId)
