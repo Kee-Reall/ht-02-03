@@ -5,6 +5,8 @@ import {Blogs, Comments, mRunDb, Posts, Users, Sessions, Attempts} from "../../s
 
 describe('to run all by one button', () => {
 
+    const [Authorization, Basis, Bearer, space, adminData, wrongPass] = ['Authorization', "Basic" ,"Bearer", ' ',"YWRtaW46cXdlcnR5", "YWRtaW5lOnF3ZXJ0eQ==" ]
+
     beforeAll(async () => {
         await mRunDb()
     })
@@ -58,8 +60,9 @@ describe('to run all by one button', () => {
     })
 
     describe('blog endpoint', () => {
+
         const link: string = 'api/blogs'
-        it('get root Structure', async () => {
+        it('root Structure checker by GET /blogs', async () => {
             request(app).get(link)
                 .then((res) => {
                     const {body: {page, pageCount, pageSize, totalCount, items}} = res
@@ -70,7 +73,25 @@ describe('to run all by one button', () => {
                     expect(items).toEqual(expect.any(Array))
                 })
         })
-        it('create correct Blog', async () => {
+
+        it('should return 404', async () => {
+            request(app).get(link + '/' + 'asggrh24353t2yt354h6533')
+                .then(res => {
+                    expect(res.status).toBe(404)
+                })
+
+            request(app).delete(link + '/' + 'asggrh24353t2yt354h6533')
+                .then(res => {
+                    expect(res.status).toBe(401)
+                })
+
+            request(app).delete(link + '/' + 'asggrh24353t2yt354h6533').set({Authorization: `${Basis}${space}${adminData}`})
+                .then(res => {
+                    expect(res.status).toBe(404)
+                })
+        })
+
+        it('create correct Blog with POST /bogs than GET /blog/[id] and then DEL /blog[ID]', async () => {
             const blogInput = {
                 name: "coney",
                 description: "jafar     ",
@@ -83,10 +104,31 @@ describe('to run all by one button', () => {
                     expect(status).toBe(201)
                     expect(name).toBe(blogInput.name)
                     expect(description).toBe(blogInput.description.trim())
-                    expect(websiteUrl).toBe(websiteUrl)
+                    expect(websiteUrl).toBe(blogInput.websiteUrl)
                     expect(id.startsWith('bg')).toBe(true)
                     expect(id).toEqual(expect.any(String))
                     expect(createdAt).toEqual(date)
+                    return id
+                })
+                .then(async (id) => {
+                    return [await request(app).get(link + '/' + id), id]
+                })
+                .then(async ([{status, body: {id: resId, name, description, websiteUrl, createdAt}}, id]) => {
+                    expect(status).toBe(200)
+                    expect(resId).toBe(id)
+                    expect(name).toBe(blogInput.name)
+                    expect(description).toBe(blogInput.description.trim())
+                    expect(websiteUrl).toBe(blogInput.websiteUrl)
+                    expect(id.startsWith('bg')).toBe(true)
+                    expect(createdAt).toEqual(date)
+                    return [await request(app).delete(link + '/' + id), id]
+                })
+                .then ( async ([res,id]) => {
+                    expect(res.status).toBe(204)
+                    return [await request(app).get(link + '/' + id), id]
+                })
+                .then(async ([res,id]) => {
+                    expect(res.status).toBe(404)
                 })
         })
     })

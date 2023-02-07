@@ -41,8 +41,8 @@ class CommandRepository {
 
     async deleteBlog(id: string): Promise<boolean> {
         try {
-            await Blogs.deleteOne({id})
-            return true
+            const res = await Blogs.deleteOne({id})
+            return res.deletedCount > 0
         } catch (e) {
             return false
         }
@@ -80,8 +80,8 @@ class CommandRepository {
 
     async deletePost(id: string): Promise<boolean> {
         try {
-            await Posts.deleteOne({id})
-            return true
+            const res = await Posts.deleteOne({id})
+            return res.deletedCount > 0
         } catch (e) {
             return false
         }
@@ -98,8 +98,8 @@ class CommandRepository {
 
     async deleteUser(id: string): Promise<boolean> {
         try {
-            await Users.deleteOne({id})
-            return true
+            const res = await Users.deleteOne({id})
+            return res.deletedCount > 0
         } catch (e) {
             return false
         }
@@ -154,8 +154,8 @@ class CommandRepository {
 
     async deleteComment(id: string): Promise<boolean> {
         try {
-            await Comments.deleteOne({id})
-            return true
+            const res = await Comments.deleteOne({id})
+            return res.deletedCount > 0
         } catch (e) {
             return false
         }
@@ -190,8 +190,8 @@ class CommandRepository {
 
     async killMetaToken(filter: sessionFilter): Promise<boolean> {
         try {
-            await Sessions.deleteOne(filter)
-            return true
+            const res = await Sessions.deleteOne(filter)
+            return res.deletedCount > 0
         } catch (e) {
             return false
         }
