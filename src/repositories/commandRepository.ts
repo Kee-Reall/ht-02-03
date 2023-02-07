@@ -23,10 +23,8 @@ class CommandRepository {
 
     async createBlog(blog: blogViewModel): Promise<boolean> {
         try {
-            console.log('creation')
             const res = await Blogs.create(blog)
-            console.log(res)
-            return true
+            return !!res
         } catch (e) {
             return false
         }
@@ -34,8 +32,8 @@ class CommandRepository {
 
     async updateBlog(id: string, updatedFields: blogInputModel): Promise<boolean> {
         try {
-            await Blogs.findOneAndUpdate({id}, updatedFields)
-            return true
+            const doc = await Blogs.findOneAndUpdate({id}, updatedFields)
+            return !!doc
         } catch (e) {
             return false
         }
@@ -60,9 +58,20 @@ class CommandRepository {
         }
     }
 
-    async updatePost(id: string, updateFields: postInputModel): Promise<boolean> {
+    async updatePost(id: string, updateFields: postInputModel & {blogName?: string}): Promise<boolean> {
         try {
-            await Posts.findOneAndUpdate({id}, updateFields)
+            const post = await Posts.findOneAndUpdate({id}, updateFields)
+            return !!post
+        } catch (e) {
+            return false
+        }
+    }
+
+    async updateManyPostsByBlogId(blogId: string): Promise<boolean> {
+        try {
+            const blog = await Blogs.findOne({id: blogId})
+            if (!blog ) return false
+            await Posts.updateMany({blogId},{blogName: blog.name})
             return true
         } catch (e) {
             return false

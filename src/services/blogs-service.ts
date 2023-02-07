@@ -82,7 +82,11 @@ class BlogsService {
     async updateBlog(id: string, blogInput: blogInputModel): Promise<boolean> {
         const {description, websiteUrl, name} = blogInput
         const updatesField = {description,websiteUrl,name}
-        return await commandRepository.updateBlog(id, updatesField)
+        const result = await commandRepository.updateBlog(id, updatesField)
+        if(result) {
+            await commandRepository.updateManyPostsByBlogId(id)
+        }
+        return result
     }
 
     async deleteBlog(id: string): Promise<boolean> {

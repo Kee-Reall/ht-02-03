@@ -56,11 +56,11 @@ class PostsService {
     async updatePost(id: string, postInput: postInputModel): Promise<boolean> {
         const {blogId, content, shortDescription, title} = postInput
         const blog = await queryRepository.getBlogById(blogId)
-        if(blog === null) {
+        if(!blog) {
             return false
         }
         const {name: blogName} = blog
-        const toUpdate = {blogId,content,shortDescription,title,blogName}
+        const toUpdate: postInputModel & {blogName?: string} = {blogId,content,shortDescription,title,blogName}
         return commandRepository.updatePost(id,toUpdate)
     }
 
