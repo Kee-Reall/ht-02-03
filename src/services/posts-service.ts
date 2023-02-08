@@ -41,16 +41,17 @@ class PostsService {
         const {blogId, content, shortDescription, title} = postInput
         const id = generateId("post")
         const blog: blog = await queryRepository.getBlogById(blogId)
+        if(!blog) return null
         const toPut = {
             id, blogId, content, shortDescription , title,
-            blogName: blog!.name,
+            blogName: blog.name,
             createdAt: new Date(Date.now()).toISOString()
         }
         const result = await commandRepository.createPost(toPut)
-        if(result) {
-            return await queryRepository.getPost(id)
+        if(!result) {
+            return null
         }
-        return null
+        return await queryRepository.getPost(id)
     }
 
     async updatePost(id: string, postInput: postInputModel): Promise<boolean> {
