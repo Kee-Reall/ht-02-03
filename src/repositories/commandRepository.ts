@@ -51,14 +51,15 @@ class CommandRepository {
     async createPost(post: postViewModel): Promise<boolean> {
         try {
             const res = await Posts.create(post)
-            return !!res
+            if (!res) return false
+            return true
         } catch (e) {
             console.log(e ?? 'no message')
             return false
         }
     }
 
-    async updatePost(id: string, updateFields: postInputModel & {blogName?: string}): Promise<boolean> {
+    async updatePost(id: string, updateFields: postInputModel & { blogName?: string }): Promise<boolean> {
         try {
             const post = await Posts.findOneAndUpdate({id}, updateFields)
             return !!post
@@ -70,8 +71,8 @@ class CommandRepository {
     async updateManyPostsByBlogId(blogId: string): Promise<boolean> {
         try {
             const blog = await Blogs.findOne({id: blogId})
-            if (!blog ) return false
-            await Posts.updateMany({blogId},{blogName: blog.name})
+            if (!blog) return false
+            await Posts.updateMany({blogId}, {blogName: blog.name})
             return true
         } catch (e) {
             return false
@@ -215,9 +216,9 @@ class CommandRepository {
         }
     }
 
-    async changeUserPassword(id: string,hash: string, salt: string): Promise<boolean> {
+    async changeUserPassword(id: string, hash: string, salt: string): Promise<boolean> {
         try {
-            await Users.findOneAndUpdate({id},{hash,salt})
+            await Users.findOneAndUpdate({id}, {hash, salt})
             return true
         } catch (e) {
             return false
@@ -226,7 +227,7 @@ class CommandRepository {
 
     async setDefaultRecoveryCode(id: string): Promise<boolean> {
         try {
-            await Users.findOneAndUpdate({id},{"recovery.recoveryCode":''})
+            await Users.findOneAndUpdate({id}, {"recovery.recoveryCode": ''})
             return true
         } catch (e) {
             return false
