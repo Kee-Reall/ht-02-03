@@ -50,8 +50,8 @@ class CommandRepository {
 
     async createPost(post: postViewModel): Promise<boolean> {
         try {
-            await Posts.create(post)
-            return true
+            const res = await Posts.create(post)
+            return !!res
         } catch (e) {
             console.log(e ?? 'no message')
             return false
