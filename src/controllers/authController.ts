@@ -24,7 +24,7 @@ class AuthController {
         }
         const { refreshToken, accessToken} = tokenPair
         res.status(httpStatus.ok)
-            .cookie('refreshToken', refreshToken, {httpOnly:true,/*secure: true*/} )
+            .cookie('refreshToken', refreshToken, {httpOnly:true,secure: true} )
             .json({accessToken})
     }
 
@@ -73,7 +73,7 @@ class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair.refreshToken,{httpOnly: true, /*secure: true*/})
+            .cookie('refreshToken', pair.refreshToken,{httpOnly: true, secure: true})
             .json({accessToken: pair.accessToken})
     }
 
@@ -87,7 +87,7 @@ class AuthController {
         if(!result) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        res.cookie('refreshToken','',{httpOnly: true,/* secure: true*/}).sendStatus(httpStatus.noContent)
+        res.cookie('refreshToken','',{httpOnly: true, secure: true}).sendStatus(httpStatus.noContent)
     }
 
     async recoverPassword(req: Request,res: Response) {
