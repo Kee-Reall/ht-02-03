@@ -10,5 +10,5 @@ export const refreshTokenValidator: RequestHandler[] = [
         .isString().trim().isLength({min:10,max:512})
         .isJWT().withMessage(message.invalidType),
 
-    hasError(httpStatus.notAuthorized)
+    hasError(httpStatus.notAuthorized,false)
 ]
