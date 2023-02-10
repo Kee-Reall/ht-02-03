@@ -5,9 +5,9 @@ import cors from 'cors'
 
 const app = express()
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: true,
     credentials: true
-}))
+})) 
 app.use(express.json())
 app.use(cookiesParser())
 app.set('trust-proxy', true)
