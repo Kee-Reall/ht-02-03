@@ -24,7 +24,7 @@ class AuthController {
         }
         const { refreshToken, accessToken} = tokenPair
         res.status(httpStatus.ok)
-            .cookie('refreshToken', refreshToken, {httpOnly:true,/*secure: true,*/domain:"localhost"} )
+            .cookie('refreshToken', refreshToken, {httpOnly:true,/*secure: true,*/domain:"localhost:300"} )
             .json({accessToken})
     }
 
