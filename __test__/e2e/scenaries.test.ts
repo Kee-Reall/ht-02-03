@@ -5,6 +5,7 @@ import {blogInputModel, blogViewModel} from "../../src/models/blogModel";
 //@ts-ignore
 import {isIsoDate} from "../helpers/isIsoDate";
 import generateRandomString from "../../src/helpers/generateRandomString";
+import {isValidHttpUrl} from "../helpers/isValidUrl";
 
 describe('one button for every suit', () => {
     beforeAll(async () => {
@@ -122,17 +123,89 @@ describe('one button for every suit', () => {
             expect(res.body.items.length).toBe(3)
         })
 
-        describe('get in existed blog',()=>{
+        it('should be 3 doc\'s in collection', async () => expect(await Blogs.count({})).toBe(3))
+
+        describe('get in existed blog', () => {
             it.each(
-                new Array(15).fill(true).map( () => generateRandomString())
-            )('random id bg%s', (value: string)=>{
-                        request(app).get(`/api/blogs/bg${value}`).expect(404)
+                new Array(150).fill(true).map(() => generateRandomString())
+            )('random id bg%s', (value: string) => {
+                request(app).get(`/api/blogs/bg${value}`).expect(404)
             })
         })
 
-        // describe('1 get all 2 take first 3 get it by id 4 update it 5 get it by id again delete it',()=>{
-        //     let blog: blogViewModel
-        //     it('')
+        describe('1 get all take first 2 get it by id 3 update it 4 get it by id 5 delete it', () => {
+            let blog: blogViewModel
+
+            it('get all and take first', async () => {
+                const response = await request(app).get('/api/blogs')
+                const {body: {items}} = response
+                expect(response.status).toBe(200)
+                const [firstItem] = items
+                blog = firstItem
+                items.forEach((el: blogViewModel) => {
+                    const {id, description, createdAt, name, websiteUrl} = el
+                    expect(description).toEqual(expect.any(String))
+                    expect(name).toEqual(expect.any(String))
+                    expect(websiteUrl).toEqual(expect.any(String))
+                    expect(isValidHttpUrl(websiteUrl)).toBe(true)
+                    expect(id).toEqual(expect.any(String))
+                    expect(id.startsWith('bg')).toBe(true)
+                    expect(isIsoDate(createdAt)).toBe(true)
+                })
+            })
+
+            it('getSame by id', async () => {
+                const response = await request(app).get(`/api/blogs/${blog.id}`)
+
+                expect(response.status).toBe(200)
+                for (let key in response.body) {
+                    // @ts-ignore
+                    expect(response.body[key]).toBe(blog[key])
+                }
+            })
+
+            const updateDto:blogInputModel = {
+                "name":"it'sGonnaChange",
+                "description":"atIWillWaitTillCatchYouLoveMeOneDay",
+                "websiteUrl": "afterChange.com"
+            }
+
+            it('update it', async () => {
+                const response = await request(app).put(`/api/blogs/${blog.id}`).send(updateDto).set({Authorization:BasicAuth})
+                expect(response.status).toBe(204)
+            })
+
+            it('get again with correct data',async ()=> {
+                const res = await request(app).get('/api/blogs/' + blog.id)
+                expect(res.status).toBe(200)
+                expect(res.body.name).toBe(updateDto.name)
+                expect(res.body.description).toBe(updateDto.description)
+                expect(res.body.websiteUrl).toBe(updateDto.websiteUrl)
+            })
+
+            it('delete it',async () => {
+                const res = await request(app).delete('/api/blogs/' + blog.id).set({Authorization:BasicAuth})
+                expect(res.status).toBe(204)
+                expect(res.body).toEqual({})
+            })
+
+            it('delete again should be 404',async () => {
+                const res = await request(app).get('/api/blogs/' + blog.id).set({Authorization:BasicAuth})
+                expect(res.status).toBe(404)
+                expect(res.body).toEqual({})
+
+            })
+
+            it('get again but now it\'s not existing ',async ()=> {
+                const res = await request(app).get('/api/blogs/' + blog.id)
+                expect(res.status).toBe(404)
+                expect(res.body).toEqual({})
+
+            })
+        })
+
+        // describe('create with incorrect data',() => {
+        //     it()
         // })
     })
 })
