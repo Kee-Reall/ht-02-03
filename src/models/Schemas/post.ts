@@ -36,7 +36,6 @@ export const PostSchema = new mongoose.Schema<postDbModel>({
     },
     blogId: {
         type: String,
-        ref:"Blog",
         required: true
     },
     blogName: {

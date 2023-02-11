@@ -41,8 +41,8 @@ class CommandRepository {
 
     async deleteBlog(id: string): Promise<boolean> {
         try {
-            const res = await Blogs.deleteOne({id})
-            return res.deletedCount > 0
+            const result = await Blogs.deleteOne({id})
+            return result.deletedCount > 0
         } catch (e) {
             return false
         }
@@ -50,9 +50,8 @@ class CommandRepository {
 
     async createPost(post: postViewModel): Promise<boolean> {
         try {
-            const res = await Posts.create(post)
-            if(!res) return false
-            return true
+            const createdPost = await Posts.create(post)
+            return !!createdPost
         } catch (e) {
             console.log(e ?? 'no message')
             return false

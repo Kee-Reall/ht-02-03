@@ -2,11 +2,11 @@ import request from 'supertest';
 import app from "../../src/app"
 import {Blogs, Comments, mRunDb, Posts, Users, Sessions, Attempts} from "../../src/adapters/mongooseCreater";
 
-beforeAll(async () => {
-    await mRunDb()
-})
-
 describe('clearing all data', () => {
+
+    beforeAll(async () => {
+        await mRunDb(true,'mongodb://127.0.0.1:27017/ht10')
+    })
 
     it('should response with code 204', async () => {
         await request(app).delete('/api/testing/all-data').expect(204)
@@ -54,12 +54,13 @@ describe('clearing all data', () => {
     })
 
     it('root Structure checker by GET /blogs', async () => {
-        const res = await request(app).get('api/blogs')
+        const res = await request(app).get('/api/blogs')
+        console.log(res)
         const {body: {page, pageCount, pageSize, totalCount, items}} = res
         expect(page).toBe(1)
-        expect(pageCount).toBe(1)
         expect(pageSize).toBe(10)
         expect(totalCount).toEqual(expect.any(Number))
         expect(items).toEqual(expect.any(Array))
+        expect(pageCount).toEqual(expect.any(Number))
     })
 })

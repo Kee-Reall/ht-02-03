@@ -8,9 +8,9 @@ import {AttemptsSchema} from "../models/Schemas/attempts";
 import * as dotenv from "dotenv";
 dotenv.config()
 
-export async function mRunDb(){
+export async function mRunDb(testMod: boolean = false, link?: string){
     try {
-        const dbUri: string = process.env.MONGO_URI as string
+        const dbUri: string = testMod ? link as string : process.env.MONGO_URI as string
         if(!dbUri) {
             console.log('cant get env variable')
             return false
