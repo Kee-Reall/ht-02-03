@@ -5,8 +5,8 @@ import {httpStatus} from "../enums/httpEnum";
 
 export const ipLimiter: RequestHandler = async (req, res, next) => {
     const {ip, headers, url, socket: {remoteAddress}} = req
-    const endpointAndIp = (headers['x-forwarded-for'] || remoteAddress || ip) + url
-    const date = new Date(Date.now())
+    const endpointAndIp: string = (headers['x-forwarded-for'] || remoteAddress || ip) + url
+    const date = new Date()
     await attemptsRepository.addNewAttempt({endpointAndIp, date: date.toISOString()})
     const limit: number = 5
     const tenSecAgo = subSeconds(date, 10).toISOString()
