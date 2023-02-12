@@ -19,12 +19,12 @@ class AuthController {
             title: req.headers['user-agent'] as string
         }
         const tokenPair = await jwtService.createTokenPair(meta)
-        if(!tokenPair) {
+        if (!tokenPair) {
             return res.sendStatus(httpStatus.teapot)
         }
-        const { refreshToken, accessToken} = tokenPair
+        const {refreshToken, accessToken} = tokenPair
         res.status(httpStatus.ok)
-            .cookie('refreshToken', refreshToken, {httpOnly:true,secure: true,sameSite:'none'} )
+            .cookie('refreshToken', refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
             .json({accessToken})
     }
 
@@ -35,31 +35,33 @@ class AuthController {
 
     async registration(req: Request, res: Response) {
         const result = await authService.registration(req.body)
-        res.sendStatus(result? httpStatus.noContent : httpStatus.teapot)
+        res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }
 
     async conformation(req: Request, res: Response) {
         const confirmSuccess = await authService.conformation(req.body.code)
-        if(!confirmSuccess){
-            return res.status(httpStatus.badRequest).json({"errorsMessages": [
+        if (!confirmSuccess) {
+            return res.status(httpStatus.badRequest).json({
+                "errorsMessages": [
                     {
                         "message": "If the confirmation code is expired or already been applied",
                         "field": "code"
                     }
-                ]})
+                ]
+            })
         }
         res.sendStatus(httpStatus.noContent)
     }
 
-    async resending(req: Request,res: Response) {
+    async resending(req: Request, res: Response) {
         const isResent = await authService.resendEmail(req.body.email)
         res.sendStatus(isResent ? httpStatus.noContent : httpStatus.teapot)
     }
 
     async refresh(req: Request, res: Response) {
-        const {cookies:{refreshToken}} = req
+        const {cookies: {refreshToken}} = req
         const payload: refreshTokenPayload | null = await jwtService.verifyRefreshToken(refreshToken)
-        if(!payload) {
+        if (!payload) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         const meta: clientMeta = {
@@ -68,46 +70,52 @@ class AuthController {
             updateDate: payload.updateDate,
             deviceId: payload.deviceId,
         }
-        const pair: tokenPair | null  = await jwtService.updateTokenPair(meta)
-        if(!pair) {
+        const pair: tokenPair | null = await jwtService.updateTokenPair(meta)
+        if (!pair) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair.refreshToken,{httpOnly: true, secure: true,sameSite:'none'})
+            .cookie('refreshToken', pair.refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
             .json({accessToken: pair.accessToken})
     }
 
     async logout(req: Request, res: Response) {
-        const {cookies:{refreshToken}} = req
+        const {cookies: {refreshToken}} = req
         const meta = await jwtService.verifyRefreshToken(refreshToken)
         if (!meta) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         const result = await authService.logout(meta)
-        if(!result) {
+        if (!result) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        res.cookie('refreshToken','',{httpOnly: true, secure: true,sameSite:'none'}).sendStatus(httpStatus.noContent)
+        res.cookie('refreshToken', '', {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
+        }).sendStatus(httpStatus.noContent)
     }
 
-    async recoverPassword(req: Request,res: Response) {
-        const {body:{email}} = req
+    async recoverPassword(req: Request, res: Response) {
+        const {body: {email}} = req
         await usersService.recoverPassword(email)
         res.sendStatus(httpStatus.noContent)
     }
 
-    async confirmPasswordChange(req: Request,res: Response) {
-        const {body:{newPassword,recoveryCode}} = req
-        const isPasswordChanged: boolean = await usersService.confirmRecovery(recoveryCode,newPassword)
+    async confirmPasswordChange(req: Request, res: Response) {
+        const {body: {newPassword, recoveryCode}} = req
+        const isPasswordChanged: boolean = await usersService.confirmRecovery(recoveryCode, newPassword)
         if (isPasswordChanged) {
             return res.sendStatus(httpStatus.noContent)
         }
-        res.status(httpStatus.badRequest).json({"errorsMessages": [
+        res.status(httpStatus.badRequest).json({
+            "errorsMessages": [
                 {
                     message: "If the confirmation code is expired or already been applied",
                     field: "recoveryCode"
                 }
-            ]})
+            ]
+        })
     }
 }
 

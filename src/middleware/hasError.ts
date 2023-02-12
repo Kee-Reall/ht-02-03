@@ -1,5 +1,5 @@
 import {RequestHandler} from "express";
-import { validationResult } from 'express-validator'
+import {validationResult} from 'express-validator'
 
 export const hasError = (errorStatus: number, shouldResponse: boolean = true): RequestHandler => {
     return (req, res, next) => {
@@ -7,10 +7,11 @@ export const hasError = (errorStatus: number, shouldResponse: boolean = true): R
         if (error.isEmpty()) {
             return next()
         }
-        if(shouldResponse){
-            return res.status(errorStatus).json({errorsMessages: error
-                    .array({onlyFirstError:true})
-                    .map(({ msg: message, param: field }) => {
+        if (shouldResponse) {
+            return res.status(errorStatus).json({
+                errorsMessages: error
+                    .array({onlyFirstError: true})
+                    .map(({msg: message, param: field}) => {
                         return {message, field}
                     })
             })

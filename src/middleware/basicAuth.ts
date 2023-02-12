@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import { httpStatus } from "../enums/httpEnum";
+import {NextFunction, Request, Response} from "express";
+import {httpStatus} from "../enums/httpEnum";
 import {basicAuthHelper} from "../helpers/basicAuthHelper";
 
 export const basicAuth = (req: Request, res: Response, next: NextFunction) => {

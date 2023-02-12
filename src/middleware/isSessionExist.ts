@@ -5,9 +5,9 @@ import {hasError} from "./hasError";
 import {httpStatus} from "../enums/httpEnum";
 
 export const isSessionExist: RequestHandler[] = [
-    param('deviceId').custom( async (value: string) => {
+    param('deviceId').custom(async (value: string) => {
         const session = await queryRepository.getSession(value)
-        if(!session) {
+        if (!session) {
             throw new Error('session does not exist')
         }
     }),

@@ -19,7 +19,7 @@ class QueryRepository {
     private readonly all = {};
     private readonly viewSelector = '-_id -__v'
     private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation -recovery'
-    private readonly commentSelector = this.viewSelector + ' '+ '-postId'
+    private readonly commentSelector = this.viewSelector + ' ' + '-postId'
 
     async getBlogsCount(filter: string): Promise<number> {
         try {
@@ -97,7 +97,7 @@ class QueryRepository {
 
     async getUsersCount(config: any): Promise<number> {
         try {
-            return  await Users.count(config)
+            return await Users.count(config)
         } catch (e) {
             return 0
         }

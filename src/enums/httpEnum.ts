@@ -9,12 +9,12 @@ export enum httpMethod {
 export enum httpStatus {
     ok = 200,
     created = 201,
-    noContent=204,
+    noContent = 204,
     badRequest = 400,
     notAuthorized = 401,
     forbidden = 403,
     notFound = 404,
-    deprecated=405,
+    deprecated = 405,
     teapot = 418,
     tooManyRequests = 429
 }

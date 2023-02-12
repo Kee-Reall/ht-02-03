@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb"
+import {MongoClient} from "mongodb"
 import {postViewModel} from "../models/postsModel";
 import {blogViewModel} from "../models/blogModel";
 import {userDbModel} from "../models/userModel";
@@ -9,7 +9,7 @@ import {attemptsModel} from "../models/attemptsModel";  // idk why but it repair
 dotenv.config()
 
 const dbUri: string = process.env.MONGO_URI as string
-if(!dbUri) {
+if (!dbUri) {
     throw new Error('you should set a MONGO_URI in .env')
 }
 
@@ -22,6 +22,7 @@ export const comments = db.collection<commentsDbModel>('comments')
 
 export const sessions = db.collection<refreshTokensMeta>('sessions')
 export const attempts = db.collection<attemptsModel>('attempts')
+
 export async function runDb(): Promise<boolean> {
     try {
         await client.connect()
