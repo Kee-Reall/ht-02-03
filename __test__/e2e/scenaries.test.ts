@@ -4,8 +4,9 @@ import {Blogs, Comments, mRunDb, Posts, Users, Sessions, Attempts} from "../../s
 import {blogInputModel, blogViewModel} from "../../src/models/blogModel";
 //@ts-ignore
 import {isIsoDate} from "../helpers/isIsoDate";
-import generateRandomString from "../../src/helpers/generateRandomString";
+//@ts-ignore
 import {isValidHttpUrl} from "../helpers/isValidUrl";
+import generateRandomString from "../../src/helpers/generateRandomString";
 
 describe('one button for every suit', () => {
     beforeAll(async () => {
@@ -81,22 +82,55 @@ describe('one button for every suit', () => {
             "websiteUrl": "string.kz"
         }
 
-        it('should return 401 for not authorized', async () => {
-            const res = await request(app).post('/api/blogs').send(blogInput)
-            const res2 = await request(app).post('/api/blogs').send({})
-            expect(res.status).toBe(401)
-            expect(res2.status).toBe(401)
+        describe('should return 401 for not authorized', () => {
+            it('creation', async () => {
+                const res = await request(app).post('/api/blogs').send(blogInput)
+                const res2 = await request(app).post('/api/blogs').send({})
+                expect(res.status).toBe(401)
+                expect(res2.status).toBe(401)
+            })
+
+            it('updatong', async () => {
+                const res = await request(app).put('/api/blogs/bgrandom').send(blogInput)
+                const res2 = await request(app).put('/api/blogs/bgrandom').send({})
+                expect(res.status).toBe(401)
+                expect(res2.status).toBe(401)
+            })
+
+            it('creation', async () => {
+                const [res, res2, res3] = await Promise.all([
+                    request(app).delete('/api/blogs/bgrandom').send(blogInput),
+                    request(app).delete('/api/blogs/bgrandom').send({}),
+                    request(app).delete('/api/blogs/bgrandom')
+                ])
+                expect(res3.status).toBe(401)
+                expect(res.status).toBe(401)
+                expect(res2.status).toBe(401)
+            })
         })
 
         describe('should return 401 for wrong authorization', () => {
             const wrongAuth: any[] = [
                 "Bearer YWRtaW46cXdlcnR5", "Basic cm9vdDpxd2VydHk=", "Basic YWRtaW46YXplcnR5",
-                "BasicYWRtaW46YXplcnR5", "", "       ", null, false, true, NaN
+                "BasicYWRtaW46YXplcnR5", "", "       ", null, false, true, NaN, "Basic:YWRtaW46YXplcnR5"
             ]
-            it.each(wrongAuth)('%p', async (arg) => {
-                const res = await request(app).post('/api/blogs').set({Authorization: arg}).send(blogInput)
-                expect(res.status).toBe(401)
-
+            describe('creation', () => {
+                it.each(wrongAuth)('%p', async (arg) => {
+                    const res = await request(app).post('/api/blogs').set({Authorization: arg}).send(blogInput)
+                    expect(res.status).toBe(401)
+                })
+            })
+            describe('updating', () => {
+                it.each(wrongAuth)('%p', async (arg) => {
+                    const res = await request(app).put('/api/blogs/bgrandomid').set({Authorization: arg}).send(blogInput)
+                    expect(res.status).toBe(401)
+                })
+            })
+            describe('deleting', () => {
+                it.each(wrongAuth)('%p', async (arg) => {
+                    const res = await request(app).delete('/api/blogs/bgrandomid').set({Authorization: arg})
+                    expect(res.status).toBe(401)
+                })
             })
         })
 
@@ -125,11 +159,42 @@ describe('one button for every suit', () => {
 
         it('should be 3 doc\'s in collection', async () => expect(await Blogs.count({})).toBe(3))
 
-        describe('get in existed blog', () => {
-            it.each(
-                new Array(150).fill(true).map(() => generateRandomString())
-            )('random id bg%s', (value: string) => {
-                request(app).get(`/api/blogs/bg${value}`).expect(404)
+        const updateDto: blogInputModel = {
+            "name": "it'sGonnaChange",
+            "description": "atIWillWaitTillCatchYouLoveMeOneDay",
+            "websiteUrl": "afterChange.com"
+        }
+
+        describe('unexciting blog', () => {
+            describe('get by id', () => {
+                it.each(
+                    new Array(150).fill(true).map(() => generateRandomString())
+                )('random id bg%s', (value: string) => {
+                    request(app).get(`/api/blogs/bg${value}`).expect(404)
+                })
+            })
+
+            describe('update by id', () => {
+                it.each(
+                    new Array(150).fill(true).map(() => generateRandomString())
+                )('random id bg%s', async (value: string) => {
+                    request(app)
+                        .put(`/api/blogs/bg${value}`)
+                        .send(blogInput)
+                        .set({Authorization: BasicAuth})
+                        .expect(404)
+                })
+            })
+
+            describe('delete by id', () => {
+                it.each(
+                    new Array(150).fill(true).map(() => generateRandomString())
+                )('delete id bg%s', async (value: string) => {
+                    request(app)
+                        .delete(`/api/blogs/bg${value}`)
+                        .set({Authorization: BasicAuth})
+                        .expect(404)
+                })
             })
         })
 
@@ -164,18 +229,12 @@ describe('one button for every suit', () => {
                 }
             })
 
-            const updateDto:blogInputModel = {
-                "name":"it'sGonnaChange",
-                "description":"atIWillWaitTillCatchYouLoveMeOneDay",
-                "websiteUrl": "afterChange.com"
-            }
-
             it('update it', async () => {
-                const response = await request(app).put(`/api/blogs/${blog.id}`).send(updateDto).set({Authorization:BasicAuth})
+                const response = await request(app).put(`/api/blogs/${blog.id}`).send(updateDto).set({Authorization: BasicAuth})
                 expect(response.status).toBe(204)
             })
 
-            it('get again with correct data',async ()=> {
+            it('get again with correct data', async () => {
                 const res = await request(app).get('/api/blogs/' + blog.id)
                 expect(res.status).toBe(200)
                 expect(res.body.name).toBe(updateDto.name)
@@ -183,29 +242,141 @@ describe('one button for every suit', () => {
                 expect(res.body.websiteUrl).toBe(updateDto.websiteUrl)
             })
 
-            it('delete it',async () => {
-                const res = await request(app).delete('/api/blogs/' + blog.id).set({Authorization:BasicAuth})
+            it('delete it', async () => {
+                const res = await request(app).delete('/api/blogs/' + blog.id).set({Authorization: BasicAuth})
                 expect(res.status).toBe(204)
                 expect(res.body).toEqual({})
             })
 
-            it('delete again should be 404',async () => {
-                const res = await request(app).get('/api/blogs/' + blog.id).set({Authorization:BasicAuth})
+            it('delete again should be 404', async () => {
+                const res = await request(app).get('/api/blogs/' + blog.id).set({Authorization: BasicAuth})
                 expect(res.status).toBe(404)
                 expect(res.body).toEqual({})
 
             })
 
-            it('get again but now it\'s not existing ',async ()=> {
+            it('get again but now it\'s not existing ', async () => {
                 const res = await request(app).get('/api/blogs/' + blog.id)
                 expect(res.status).toBe(404)
                 expect(res.body).toEqual({})
+            })
 
+            it('update it, but it doesn\'t exist', async () => {
+                const res = await request(app).put('/api/blogs/' + blog.id).send(updateDto).set({Authorization: BasicAuth})
+                expect(res.status).toBe(404)
+                expect(res.body).toEqual({})
+            })
+
+        })
+
+        function checkIncorrectRes(res: request.Response) {
+            expect(res.status).toBe(400)
+            expect(res.body.errorsMessages).toBeDefined()
+            expect(res.body.errorsMessages).toEqual(expect.any(Array))
+            expect(res.body.errorsMessages[0].message).toEqual(expect.any(String))
+
+        }
+
+        describe('create with incorrect data', () => {
+
+            const incorrect = [null, 0, 1, 2, 3, 1245154264623, 0x53, '', '       ']
+            describe('incorrect name', () => {
+                it.each([...incorrect, '1234567890123456'])('name: \'%p\'', async (name: any) => {
+                    const res = await request(app).post('/api/blogs/').send({
+                        ...blogInput,
+                        name
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("name")
+                })
+            })
+            describe('incorrect describe', () => {
+                it.each([...incorrect, new Array(501).fill(true).map(() => '1').join('')])('content: \'%p\'', async (description: any) => {
+                    const res = await request(app).post('/api/blogs/').send({
+                        ...blogInput,
+                        description
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("description")
+                })
+            })
+
+            describe('incorrect url', () => {
+                it.each([
+                    ...incorrect, /*"http://www.asiom",*/ // need to do smthin' with this
+                    "mongodb://www.string.kz", `https://${
+                        new Array(90).fill(true).map(() => '1').join('')
+                    }.kz`])('websiteUrl: \'%p\'', async (websiteUrl: any) => {
+                    const res = await request(app).post('/api/blogs/').send({
+                        ...blogInput,
+                        websiteUrl
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("websiteUrl")
+                })
             })
         })
 
-        // describe('create with incorrect data',() => {
-        //     it()
-        // })
+        describe('update with incorrect data', () => {
+
+            let id: string = ""
+            let createdAt: string = ""
+
+            beforeAll(async () => {
+                const res = await request(app).post('/api/blogs').set({Authorization: BasicAuth}).send(blogInput)
+                expect(res.status).toBe(201)
+                id = res.body.id
+                createdAt = res.body.createdAt
+            })
+
+            afterEach(async () => {
+                const res = await request(app).get('/api/blogs/' + id)
+                expect(res.status).toBe(200)
+                expect(res.body.name).toBe(blogInput.name)
+                expect(res.body.description).toBe(blogInput.description)
+                expect(res.body.websiteUrl).toBe(blogInput.websiteUrl)
+                expect(res.body.id).toBe(id)
+                expect(res.body.createdAt).toBe(createdAt)
+            })
+
+
+            const incorrect = [null, 0, 1, 2, 3, 1245154264623, 0x53, '', '       ']
+            describe('incorrect name', () => {
+                it.each([...incorrect, '1234567890123456'])('name: \'%p\'', async (name: any) => {
+                    const res = await request(app).put('/api/blogs/' + id).send({
+                        ...updateDto,
+                        name
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("name")
+                })
+            })
+
+            describe('incorrect describe', () => {
+                it.each([...incorrect, new Array(501).fill(true).map(() => '1').join('')])('content: \'%p\'', async (description: any) => {
+                    const res = await request(app).put('/api/blogs/' + id).send({
+                        ...updateDto,
+                        description
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("description")
+                })
+            })
+
+            describe('incorrect url', () => {
+                it.each([
+                    ...incorrect, /*"http://www.asiom",*/ // need to do smthin' with this
+                    "mongodb://www.string.kz", `https://${
+                        new Array(90).fill(true).map(() => '1').join('')
+                    }.kz`])('websiteUrl: \'%p\'', async (websiteUrl: any) => {
+                    const res = await request(app).put('/api/blogs/' + id).send({
+                        ...updateDto,
+                        websiteUrl
+                    }).set({Authorization: BasicAuth})
+                    checkIncorrectRes(res)
+                    expect(res.body.errorsMessages[0].field).toBe("websiteUrl")
+                })
+            })
+        })
     })
 })
