@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import {commentsDbModel} from "../commentsModel";
 
 
-export const CommentsSchema = new mongoose.Schema<commentsDbModel>({
+export const CommentSchema = new mongoose.Schema<commentsDbModel>({
     id: {
         type: String,
         required: true,

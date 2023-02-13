@@ -8,7 +8,7 @@ import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 import {refreshTokensMeta, sessionFilter} from "../models/refreshTokensMeta";
 import {securityViewModel} from "../models/SecurityModel";
 
-class QueryRepository {
+export class QueryRepository {
     //private readonly noHiddenId = {projection: {_id: false}}; deprecated projection for mongo driver
     // private readonly commentProjection = {projection: {_id: false, postId: false}}
     // private readonly userProjection = {
