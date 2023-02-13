@@ -11,13 +11,10 @@ import {
 } from "../models/refreshTokensMeta";
 import {createTokenClientMeta} from "../models/mixedModels";
 import {generateDeviceId} from "../helpers/generateDeviceId";
+import {injectable} from "inversify";
 
-class CommandRepository {
-
-    constructor(
-        private genDeviceId: () => string
-    ) {
-    }
+@injectable()
+export class CommandRepository {
 
     private readonly emptyObject = {}
 
@@ -165,7 +162,7 @@ class CommandRepository {
         try {
             const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
-            const [updateDate, deviceId] = [new Date(Date.now()), this.genDeviceId()]
+            const [updateDate, deviceId] = [new Date(Date.now()), generateDeviceId()]
             await Sessions.create({userId, ip, title, updateDate, deviceId})
             return {updateDate, deviceId}
         } catch (e) {
@@ -234,5 +231,4 @@ class CommandRepository {
     }
 }
 
-const commandRepository = new CommandRepository(generateDeviceId)
-export {commandRepository}
+export const commandRepository = new CommandRepository()

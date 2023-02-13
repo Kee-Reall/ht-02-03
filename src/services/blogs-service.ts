@@ -1,16 +1,22 @@
-import { queryRepository } from "../repositories/queryRepository";
 import {blogInputModel, blog, blogViewModel} from "../models/blogModel";
 import generateId from "../helpers/generateId";
-import { commandRepository } from "../repositories/commandRepository";
+import {CommandRepository} from "../repositories/commandRepository";
 import {blogFilters} from "../models/filtersModel";
 import {getOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {postInputThrowBlog, postInputModel, postViewModel} from "../models/postsModel";
 import { postsService } from "./posts-service";
+import {QueryRepository} from "../repositories/queryRepository";
+import {injectable,inject} from "inversify";
 
-class BlogsService {
+@injectable()
+export class BlogsService {
+    constructor(
+        @inject(QueryRepository)protected queryRepository: QueryRepository,
+        @inject(CommandRepository)protected commandRepository: CommandRepository
+    ) {}
 
-    async getBlogs(params: blogFilters): Promise<getOutput> {
+        async getBlogs(params: blogFilters): Promise<getOutput> {
         const searchConfig:SearchConfiguration<blogViewModel> = {
             filter: {
                 name: params.searchNameTerm!
@@ -20,9 +26,9 @@ class BlogsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize!
         }
-        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter!.name as string)
+        const totalCount = await  this.queryRepository.getBlogsCount(searchConfig.filter!.name as string)
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
-        const items = await queryRepository.getBlogWithPagination(searchConfig) || []
+        const items = await this.queryRepository.getBlogWithPagination(searchConfig) || []
         return {
             pagesCount,
             page: params.pageNumber!,
@@ -33,7 +39,7 @@ class BlogsService {
     }
 
     async getBlog(id: string): Promise<blog> {
-        return await queryRepository.getBlogById(id)
+        return await this.queryRepository.getBlogById(id)
     }
 
     async getBlogPosts(blogId: string, params: any) {
@@ -44,8 +50,8 @@ class BlogsService {
             limit: params.pageSize,
             sortDirection: params.sortDirection
         }
-        const blogGot = await queryRepository.getPostsByFilter(config)
-        const totalCount = await queryRepository.getPostsCount(config.filter)
+        const blogGot = await this.queryRepository.getPostsByFilter(config)
+        const totalCount = await this.queryRepository.getPostsCount(config.filter)
         return {
             pagesCount: Math.ceil(totalCount / params.pageSize!),
             page: params.pageNumber,
@@ -72,9 +78,9 @@ class BlogsService {
             id, description, websiteUrl, name,
             createdAt: new Date(Date.now()).toISOString()
         }
-        const result = await commandRepository.createBlog(blogToPush)
+        const result = await this.commandRepository.createBlog(blogToPush)
         if (result) {
-            return queryRepository.getBlogById(id)
+            return this.queryRepository.getBlogById(id)
         }
         return null
     }
@@ -82,16 +88,14 @@ class BlogsService {
     async updateBlog(id: string, blogInput: blogInputModel): Promise<boolean> {
         const {description, websiteUrl, name} = blogInput
         const updatesField = {description,websiteUrl,name}
-        const result = await commandRepository.updateBlog(id, updatesField)
+        const result = await this.commandRepository.updateBlog(id, updatesField)
         if(result) {
-            await commandRepository.updateManyPostsByBlogId(id)
+            await this.commandRepository.updateManyPostsByBlogId(id)
         }
         return result
     }
 
     async deleteBlog(id: string): Promise<boolean> {
-        return await commandRepository.deleteBlog(id)
+        return await this.commandRepository.deleteBlog(id)
     }
 }
-
-export const blogsService = new BlogsService()

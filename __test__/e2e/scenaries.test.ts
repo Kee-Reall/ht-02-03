@@ -149,15 +149,15 @@ describe('one button for every suit', () => {
                 expect(new Date(createdAt).getTime()).toBeCloseTo(creationDate, -3)
                 expect(isIsoDate(createdAt)).toBe(true)
             })
-        })
+            it('after last test item length should be three', async () => {
+                const res = await request(app).get('/api/blogs')
+                expect(res.status).toBe(200)
+                expect(res.body.items.length).toBe(3)
+            })
 
-        it('after last test item length should be three', async () => {
-            const res = await request(app).get('/api/blogs')
-            expect(res.status).toBe(200)
-            expect(res.body.items.length).toBe(3)
-        })
+            it('should be 3 doc\'s in collection', async () => expect(await Blogs.countDocuments({})).toBe(3))
 
-        it('should be 3 doc\'s in collection', async () => expect(await Blogs.count({})).toBe(3))
+        })
 
         const updateDto: blogInputModel = {
             "name": "it'sGonnaChange",
@@ -378,5 +378,12 @@ describe('one button for every suit', () => {
                 })
             })
         })
+
+        // describe('testing queyParams and pagination',()=>{
+        //
+        // })
+    })
+    describe('/posts endpoint',()=>{
+
     })
 })

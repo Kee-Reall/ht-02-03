@@ -1,4 +1,5 @@
-import {FilterQuery} from "mongoose"
+import {FilterQuery} from "mongoose";
+import {injectable} from "inversify";
 import {blogViewModel} from "../models/blogModel";
 import {postViewModel} from "../models/postsModel";
 import {Blogs, Posts, Users, Comments, Sessions} from "../adapters/mongooseCreater";
@@ -8,6 +9,7 @@ import {commentsDbModel, commentsOutputModel} from "../models/commentsModel";
 import {refreshTokensMeta, sessionFilter} from "../models/refreshTokensMeta";
 import {securityViewModel} from "../models/SecurityModel";
 
+@injectable()
 export class QueryRepository {
     //private readonly noHiddenId = {projection: {_id: false}}; deprecated projection for mongo driver
     // private readonly commentProjection = {projection: {_id: false, postId: false}}
