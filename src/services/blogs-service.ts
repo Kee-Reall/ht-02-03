@@ -5,7 +5,7 @@ import {blogFilters} from "../models/filtersModel";
 import {getOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {postInputThrowBlog, postInputModel, postViewModel} from "../models/postsModel";
-import { postsService } from "./posts-service";
+import {PostsService} from "./posts-service";
 import {QueryRepository} from "../repositories/queryRepository";
 import {injectable,inject} from "inversify";
 
@@ -13,7 +13,8 @@ import {injectable,inject} from "inversify";
 export class BlogsService {
     constructor(
         @inject(QueryRepository)protected queryRepository: QueryRepository,
-        @inject(CommandRepository)protected commandRepository: CommandRepository
+        @inject(CommandRepository)protected commandRepository: CommandRepository,
+        @inject(PostsService)protected postsService: PostsService
     ) {}
 
         async getBlogs(params: blogFilters): Promise<getOutput> {
@@ -26,7 +27,7 @@ export class BlogsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize!
         }
-        const totalCount = await  this.queryRepository.getBlogsCount(searchConfig.filter!.name as string)
+        const totalCount = await this.queryRepository.getBlogsCount(searchConfig.filter!.name as string)
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
         const items = await this.queryRepository.getBlogWithPagination(searchConfig) || []
         return {
@@ -68,7 +69,7 @@ export class BlogsService {
             content: inputData.content,
             blogId: id,
         }
-        return postsService.createPost(post)
+        return this.postsService.createPost(post)
     }
 
     async createBlog(blogInput: blogInputModel): Promise<blog> {

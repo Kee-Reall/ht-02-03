@@ -1,21 +1,26 @@
+import {inject,injectable} from "inversify";
 import {Request, Response} from "express";
-import {commentsService} from "../services/comments-service";
+import {CommentsService} from "../services/comments-service";
 import {httpStatus} from "../enums/httpEnum";
 
-class CommentsController {
-    async updateComment(req: Request, res: Response) {
+@injectable()
+export class CommentsController {
+    constructor(
+        @inject(CommentsService) protected commentsService: CommentsService
+    ) {}
+    public async updateComment(req: Request, res: Response) {
         const { comment, body: { content }} = req
-        const result: boolean = await commentsService.updateCommentAfterMiddleware(comment,content)
+        const result: boolean = await this.commentsService.updateCommentAfterMiddleware(comment,content)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }
 
-    async deleteComment(req: Request, res: Response) {
+    public async deleteComment(req: Request, res: Response) {
         const { params: { id }} = req
-        const result = await commentsService.deleteCommentAfterMiddleware(id)
+        const result = await this.commentsService.deleteCommentAfterMiddleware(id)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }
-    async getCommentById(req: Request, res: Response){
-        const comment = await commentsService.getCommentById(req.params.id)
+    public async getCommentById(req: Request, res: Response){
+        const comment = await this.commentsService.getCommentById(req.params.id)
         if(!comment) {
             res.sendStatus(httpStatus.notFound)
         } else {
@@ -23,5 +28,3 @@ class CommentsController {
         }
     }
 }
-
-export const commentsController = new CommentsController()

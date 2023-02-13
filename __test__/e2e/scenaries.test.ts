@@ -379,11 +379,14 @@ describe('one button for every suit', () => {
             })
         })
 
-        // describe('testing queyParams and pagination',()=>{
+        // describe('testing queryParams and pagination',()=>{
         //
         // })
     })
-    describe('/posts endpoint',()=>{
-
-    })
+    // describe('/posts endpoint',()=>{
+    //
+    // })
+    // describe('/blogs/id/posts endpoint',()=>{
+    //
+    // })
 })

@@ -29,7 +29,7 @@ export class QueryRepository {
                 name: new RegExp(filter, 'ig')
             })
         } catch (e) {
-            return -1
+            return 0
         }
     }
 
@@ -42,9 +42,9 @@ export class QueryRepository {
     }
 
     async getBlogWithPagination(config: SearchConfiguration<blogViewModel>): Promise<blogViewModel[] | null> {
-        const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {} //if filter.name does not exist set all
-        const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
         try {
+            const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {} //if filter.name does not exist set all
+            const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
             return await Blogs.find(filter)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
