@@ -11,6 +11,9 @@ import {AuthController} from "../controllers/authController";
 import {SecurityService} from "../services/security-service";
 import {SecurityController} from "../controllers/securityController";
 import {Normalizer} from "../helpers/normalizer";
+import Mail from "nodemailer/lib/mailer";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
+import {mailAdapter} from "../adapters/mailAdapter";
 
 export const userContainer = new Container()
 userContainer.bind<UsersController>(UsersController).to(UsersController)
@@ -24,3 +27,4 @@ userContainer.bind(AuthController).to(AuthController)
 userContainer.bind(SecurityService).to(SecurityService)
 userContainer.bind(SecurityController).to(SecurityController)
 userContainer.bind(Normalizer).toSelf()
+userContainer.bind(Mail<SMTPTransport.SentMessageInfo>).toConstantValue(mailAdapter)

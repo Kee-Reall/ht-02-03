@@ -10,7 +10,6 @@ import {inject, injectable} from "inversify";
 
 @injectable()
 export class AuthService {
-
     constructor(
         @inject(UsersService) protected usersService: UsersService,
         @inject(JwtService) protected jwtService: JwtService,

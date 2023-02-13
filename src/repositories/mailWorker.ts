@@ -1,7 +1,6 @@
-import {mailAdapter} from "../adapters/mailAdapter";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
-import {injectable} from "inversify";
+import {inject, injectable} from "inversify";
 
 @injectable()
 export class MailWorker {
@@ -10,9 +9,8 @@ export class MailWorker {
     private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?recoveryCode="
 
     constructor(
-        private mainTransporter: Mail<SMTPTransport.SentMessageInfo> = mailAdapter
-    ) {
-    }
+        @inject(Mail<SMTPTransport.SentMessageInfo>)private mainTransporter: Mail<SMTPTransport.SentMessageInfo>
+    ){}
 
     public async testingMessage() {
         return await this.mainTransporter.sendMail({
