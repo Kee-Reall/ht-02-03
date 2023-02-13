@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authController } from "../controllers/authController";
+import { AuthController } from "../controllers/authController";
 import {loginMiddleware} from "../middleware/loginMiddleware";
 import {jwtAuth} from "../middleware/jwtAuth";
 import {createUserMiddleware} from "../middleware/createUserMiddleware";
@@ -9,17 +9,19 @@ import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
 import {ipLimiter} from "../middleware/ipLimiter";
 import {emailValidator} from "../middleware/emailValidator";
 import {newPasswordValidator} from "../middleware/newPasswordValidator";
+import {userContainer} from "../containers/userContainer";
 
 const authRouter = Router()
+const authController = userContainer.resolve(AuthController)
 
-authRouter.post('/login',ipLimiter,...loginMiddleware, authController.login)
-authRouter.post('/registration',ipLimiter,...createUserMiddleware, authController.registration)
-authRouter.post('/registration-confirmation',ipLimiter,...conformationValidator,authController.conformation)
-authRouter.post('/registration-email-resending',ipLimiter,...resendValidator,authController.resending)
-authRouter.post('/refresh-token',...refreshTokenValidator,authController.refresh)
-authRouter.post('/logout',...refreshTokenValidator,authController.logout)
-authRouter.get('/me', jwtAuth, authController.getUserFromRequest)
-authRouter.post('/password-recovery',ipLimiter,...emailValidator,authController.recoverPassword)
-authRouter.post('/new-password',ipLimiter,...newPasswordValidator,authController.confirmPasswordChange)
+authRouter.post('/login',ipLimiter,...loginMiddleware, authController.login.bind(authController))
+authRouter.post('/registration',ipLimiter,...createUserMiddleware, authController.registration.bind(authController))
+authRouter.post('/registration-confirmation',ipLimiter,...conformationValidator,authController.conformation.bind(authController))
+authRouter.post('/registration-email-resending',ipLimiter,...resendValidator,authController.resending.bind(authController))
+authRouter.post('/refresh-token',...refreshTokenValidator,authController.refresh.bind(authController))
+authRouter.post('/logout',...refreshTokenValidator,authController.logout.bind(authController))
+authRouter.get('/me', jwtAuth, authController.getUserFromRequest.bind(authController))
+authRouter.post('/password-recovery',ipLimiter,...emailValidator,authController.recoverPassword.bind(authController))
+authRouter.post('/new-password',ipLimiter,...newPasswordValidator,authController.confirmPasswordChange.bind(authController))
 
 export { authRouter }

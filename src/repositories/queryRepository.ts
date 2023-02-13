@@ -228,5 +228,3 @@ export class QueryRepository {
         })
     }
 }
-
-export const queryRepository = new QueryRepository()

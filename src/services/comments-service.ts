@@ -11,10 +11,9 @@ import { getOutput } from "../models/ResponseModel";
 
 @injectable()
 export class CommentsService {
-
     constructor(
         @inject(QueryRepository)protected queryRepository: QueryRepository,
-        @inject(CommandRepository)protected commandRepository: CommandRepository,
+        @inject(CommandRepository)protected commandRepository: CommandRepository
 
         ) {}
 

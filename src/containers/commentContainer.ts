@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import {Container} from "inversify";
 import {CommentsController} from "../controllers/commentsController";
 import {CommentsService} from "../services/comments-service";

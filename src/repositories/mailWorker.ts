@@ -1,8 +1,10 @@
 import {mailAdapter} from "../adapters/mailAdapter";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import {injectable} from "inversify";
 
-class MailWorker {
+@injectable()
+export class MailWorker {
     private readonly link: string = "https://ht-02-03.vercel.app/api/auth/registration-confirmation?code="
     //private readonly localLink: string = "http://localhost:3000/api/auth/registration-confirmation?code="
     private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?recoveryCode="
@@ -57,5 +59,3 @@ class MailWorker {
         }
     }
 }
-
-export const mailWorker = new MailWorker()

@@ -1,3 +1,4 @@
+import "reflect-metadata"
 import {Container} from "inversify";
 import {PostsController} from "../controllers/postsController";
 import {PostsService} from "../services/posts-service";

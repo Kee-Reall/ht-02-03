@@ -230,5 +230,3 @@ export class CommandRepository {
         }
     }
 }
-
-export const commandRepository = new CommandRepository()

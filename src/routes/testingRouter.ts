@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { testingController} from "../controllers/testingController";
+import {mixedContainer} from "../containers/mixedContainer";
+import {TestingController} from "../controllers/testingController";
 export const testingRouter = Router()
+const testingController = mixedContainer.resolve(TestingController)
 
-testingRouter.delete('/all-data',  testingController.clearAll)
+testingRouter.delete('/all-data',  testingController.clearAll.bind(testingController))

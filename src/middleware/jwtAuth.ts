@@ -1,8 +1,10 @@
 import {NextFunction, Request, Response} from "express";
 import {httpStatus} from "../enums/httpEnum";
-import {jwtService} from "../services/jwt-service";
+import {JwtService} from "../services/jwt-service";
+import {userContainer} from "../containers/userContainer";
 
 export async function jwtAuth (req: Request, res: Response, next: NextFunction ) {
+    const jwtService = userContainer.resolve(JwtService)
     if(!req.headers.authorization) {
         return res.sendStatus(httpStatus.notAuthorized)
     }

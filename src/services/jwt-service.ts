@@ -1,12 +1,20 @@
-import jwt, {JwtPayload, SignOptions} from 'jsonwebtoken'
+import jwt, {SignOptions} from 'jsonwebtoken'
 import {userLogicModel} from "../models/userModel";
-import {usersService} from "./users-service";
+import {UsersService} from "./users-service";
 import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
-import {commandRepository} from "../repositories/commandRepository";
-import {queryRepository} from "../repositories/queryRepository";
+import {CommandRepository} from "../repositories/commandRepository";
+import {QueryRepository} from "../repositories/queryRepository";
 import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {inject, injectable} from "inversify";
 
-class JwtService {
+@injectable()
+export class JwtService {
+
+    constructor(
+        @inject(QueryRepository) protected queryRepository: QueryRepository,
+        @inject(CommandRepository) protected commandRepository: CommandRepository,
+        @inject(UsersService) protected usersService: UsersService
+    ) {}
 
     private readonly normalTimeExpire: number = 10
 
@@ -31,7 +39,7 @@ class JwtService {
     }
 
     private async createRefreshToken(clientInfo: createTokenClientMeta): Promise<string | null>{
-        const metaDataAfterCreation = await commandRepository.createMetaToken(clientInfo)
+        const metaDataAfterCreation = await this.commandRepository.createMetaToken(clientInfo)
         if(!metaDataAfterCreation) {
             return null
         }
@@ -64,11 +72,11 @@ class JwtService {
 
     private async updateRefreshToken(tokenMeta: refreshTokenPayload,ip: string): Promise<string | null> {
         const{ updateDate, userId, deviceId} = tokenMeta
-        const dbToken = await queryRepository.getMetaToken(tokenMeta)
+        const dbToken = await this.queryRepository.getMetaToken(tokenMeta)
         if(!dbToken || ( dbToken.updateDate.toISOString() !== updateDate)){
             return null
         }
-        const metaDataAfterUpdate = await commandRepository.updateMetaToken({userId, deviceId, ip})
+        const metaDataAfterUpdate = await this.commandRepository.updateMetaToken({userId, deviceId, ip})
         if(!metaDataAfterUpdate) {
             return null
         }
@@ -87,7 +95,7 @@ class JwtService {
 
     public async getUserByToken(token: string): Promise< userLogicModel | null> {
         const userId: string | null = await this._verify(token)
-        return userId ? await usersService.getUserById(userId) : userId as null
+        return userId ? await this.usersService.getUserById(userId) : userId as null
     }
 
     public async verifyRefreshToken(token: string): Promise<refreshTokenPayload | null> {
@@ -98,9 +106,4 @@ class JwtService {
         }
     }
 
-    public async getPayload(token: string): Promise<JwtPayload> { //deprecated
-        return jwt.decode(token) as JwtPayload;
-    }
 }
-
-export const  jwtService = new JwtService()

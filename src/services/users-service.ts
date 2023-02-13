@@ -1,15 +1,24 @@
 import bcrypt from "bcrypt"
+import {inject, injectable} from "inversify"
 import {v4 as uniqueCode} from "uuid"
 import {add, isAfter} from "date-fns"
-import {getOutput} from "../models/ResponseModel";
-import {usersFilters} from "../models/filtersModel";
-import {queryRepository} from "../repositories/queryRepository";
-import {confirmation, recovery, userInputModel, userLogicModel, userViewModel} from "../models/userModel";
-import {commandRepository} from "../repositories/commandRepository";
-import generateId from "../helpers/generateId";
-import {mailWorker} from "../repositories/mailWorker";
+import {getOutput} from "../models/ResponseModel"
+import {usersFilters} from "../models/filtersModel"
+import {QueryRepository} from "../repositories/queryRepository"
+import {confirmation, recovery, userInputModel, userLogicModel, userViewModel} from "../models/userModel"
+import {CommandRepository} from "../repositories/commandRepository"
+import generateId from "../helpers/generateId"
+import {MailWorker} from "../repositories/mailWorker"
 
-class UsersService {
+
+@injectable()
+export class UsersService {
+    constructor(
+        @inject(QueryRepository) protected queryRepository: QueryRepository,
+        @inject(CommandRepository) protected commandRepository: CommandRepository,
+        @inject(MailWorker) protected mailWorker: MailWorker
+) {}
+
     public async getUsers(params: usersFilters): Promise<getOutput> {
         const searchConfig = {
             filter: {
@@ -23,8 +32,8 @@ class UsersService {
             limit: params.pageSize,
             sortBy: params.sortBy
         }
-        const totalCount: number = await queryRepository.getUsersCount(searchConfig.filter)
-        const items: userViewModel[] = await queryRepository.getUsers(searchConfig) ?? []
+        const totalCount: number = await this.queryRepository.getUsersCount(searchConfig.filter)
+        const items: userViewModel[] = await this.queryRepository.getUsers(searchConfig) ?? []
         return {
             page: params.pageNumber!,
             pageSize: params.pageSize!,
@@ -47,8 +56,8 @@ class UsersService {
             login, email, id,
             hash, createdAt, salt, confirmation, recovery
         }
-        await commandRepository.createUser(user)
-        return await queryRepository.getUserById(id)
+        await this.commandRepository.createUser(user)
+        return await this.queryRepository.getUserById(id)
     }
 
     public async createUser(input: userInputModel): Promise<boolean> {
@@ -63,23 +72,23 @@ class UsersService {
             login, email, hash, createdAt,
             salt, id, confirmation, recovery
         }
-        const isUserCreated: boolean = await commandRepository.createUser(user)
+        const isUserCreated: boolean = await this.commandRepository.createUser(user)
         if (!isUserCreated) {
             return false
         }
-        const isMailSent: boolean = await mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        const isMailSent: boolean = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
         if (!isMailSent) {
-            await commandRepository.deleteUser(id)
+            await this.commandRepository.deleteUser(id)
         }
         return isMailSent
     }
 
     public async deleteUser(id: string): Promise<boolean> {
-        return await commandRepository.deleteUser(id)
+        return await this.commandRepository.deleteUser(id)
     }
 
     public async getUserById(id: string): Promise<userLogicModel | null> {
-        return queryRepository.getUserByIdWithLogic(id)
+        return this.queryRepository.getUserByIdWithLogic(id)
     }
 
     private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
@@ -91,20 +100,20 @@ class UsersService {
     }
 
     public async confirm(code: string): Promise<boolean> {
-        const user = await queryRepository.getUserByConfirm(code)
+        const user = await this.queryRepository.getUserByConfirm(code)
         if (!user) return false
         if (user.confirmation!.isConfirmed) return false
         const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
         if (isDataExpired) return false
-        return await commandRepository.confirmUser(user.id)
+        return await this.commandRepository.confirmUser(user.id)
     }
 
     public async resend(email: string): Promise<boolean> {
-        const user = await queryRepository.getUserByEmail(email)
+        const user = await this.queryRepository.getUserByEmail(email)
         const confirmation = await this.generateConfirmData()
-        const mailSent = await mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        const mailSent = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
         if (!mailSent) return false
-        return await commandRepository.changeConfirm(user!.id, confirmation)
+        return await this.commandRepository.changeConfirm(user!.id, confirmation)
     }
 
     private async generateRecovery(isNewUser: boolean = false): Promise<recovery> {
@@ -116,25 +125,22 @@ class UsersService {
 
     public async recoverPassword(email: string): Promise<void> {
         const recovery = await this.generateRecovery()
-        const user = await queryRepository.getUserByEmail(email)
+        const user = await this.queryRepository.getUserByEmail(email)
         if(!user) return
-        await commandRepository.recoverAttempt(email, recovery)
-        await mailWorker.changePassword(user.email,recovery.recoveryCode)
+        await this.commandRepository.recoverAttempt(email, recovery)
+        await this.mailWorker.changePassword(user.email,recovery.recoveryCode)
     }
 
     public async confirmRecovery(recoveryCode: string, newPassword: string): Promise<boolean> {
-        const user = await queryRepository.getUserByRecoveryCode(recoveryCode)
-        console.log(user)
+        const user = await this.queryRepository.getUserByRecoveryCode(recoveryCode)
         if (!user || !user.confirmation.isConfirmed) return false
         if (isAfter(Date.now(),user.recovery.expirationDate)){
             return false
         }
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(newPassword, salt)
-        await commandRepository.changeUserPassword(user.id,hash,salt)
-        await commandRepository.setDefaultRecoveryCode(user.id)
+        await this.commandRepository.changeUserPassword(user.id,hash,salt)
+        await this.commandRepository.setDefaultRecoveryCode(user.id)
         return true
     }
 }
-
-export const usersService = new UsersService()

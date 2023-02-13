@@ -1,6 +1,5 @@
 import {blogFilters, commentsFilter, usersFilters} from "../models/filtersModel";
 import {sortingDirection} from "../models/mixedModels";
-import {normalizeSortDirection} from "./normalizeSortDirection";
 import {injectable} from "inversify";
 
 @injectable()
@@ -19,7 +18,7 @@ export class Normalizer {
             }
     }
     public normalizeCommentQuery(query: commentsFilter):commentsFilter {
-        const sortDirection = normalizeSortDirection(query.sortDirection)
+        const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return {
             pageNumber: +query.pageNumber! || 1,
             pageSize: +query.pageSize! || 10,
@@ -28,7 +27,7 @@ export class Normalizer {
         }
     }
     public normalizePostsQuery(query: blogFilters):blogFilters {
-        const sortDirection = normalizeSortDirection(query.sortDirection)
+        const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return {
             pageNumber: +query.pageNumber! || 1,
             pageSize: +query.pageSize! || 10,
@@ -37,7 +36,7 @@ export class Normalizer {
         }
     }
     public normalizeUsersQuery(query: usersFilters):usersFilters {
-        const sortDirection = normalizeSortDirection(query.sortDirection)
+        const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return  {
             pageNumber: +query.pageNumber! || 1,
             pageSize: +query.pageSize! || 10,
