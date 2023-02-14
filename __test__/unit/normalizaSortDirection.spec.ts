@@ -1,10 +1,12 @@
+import 'reflect-metadata';
 import {Normalizer} from "../../src/helpers/normalizer";
 import generateRandomString from "../../src/helpers/generateRandomString";
 // @ts-ignore
 import {getRandomIntInclusive} from "../helpers/getRandomIntInclusive";
+import {iocContainer} from "../../src/containers/iocContainer";
 
 describe('normalizeSortDirection function', () => {
-    const normalizer = new Normalizer()
+    const normalizer = iocContainer.resolve(Normalizer)
 
     it('should return same with correct input', () => {
         expect(normalizer.normalizeSortDirection('asc')).toBe('asc')

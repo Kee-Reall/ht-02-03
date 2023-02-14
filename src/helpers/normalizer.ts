@@ -4,7 +4,7 @@ import {injectable} from "inversify";
 
 @injectable()
 export class Normalizer {
-    public normalizeSortDirection (argument?: any): sortingDirection {
+    public normalizeSortDirection (argument?: unknown): sortingDirection {
         return argument === 'asc' ? argument : 'desc'
     }
     public normalizeBlogsQuery(query: BlogFilters):BlogFilters {
