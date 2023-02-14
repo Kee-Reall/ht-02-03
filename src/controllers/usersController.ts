@@ -1,7 +1,7 @@
 import {Request, Response} from "express";
 import {injectable,inject} from "inversify";
 import {httpStatus} from "../enums/httpEnum";
-import {getOutput} from "../models/ResponseModel";
+import {GetOutput} from "../models/ResponseModel";
 import {UsersService} from "../services/users-service";
 import {Normalizer} from "../helpers/normalizer";
 
@@ -15,7 +15,7 @@ export class UsersController {
 
     async getUsers(req: Request, res: Response) {
         const params = this.normalizer.normalizeUsersQuery(req.query)
-        const result: getOutput = await this.usersService.getUsers(params)
+        const result: GetOutput = await this.usersService.getUsers(params)
         res.status(httpStatus.ok).json(result)
     }
 

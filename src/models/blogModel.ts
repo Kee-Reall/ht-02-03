@@ -1,6 +1,6 @@
 import {ObjectId} from "mongodb";
 
-export interface blogViewModel  {
+export interface BlogViewModel {
     id: string
     name: string
     description: string
@@ -8,15 +8,15 @@ export interface blogViewModel  {
     createdAt: string
 }
 
-export interface blogDbModel extends blogViewModel {
+export interface BlogDbModel extends BlogViewModel {
     _id: ObjectId
 }
 
-export interface blogInputModel {
+export interface BlogInputModel {
     name: string
     description: string
     websiteUrl: string
 }
 
-export type blog = blogViewModel | null
-export type blogs = Array<blogViewModel> | null
+export type Blog = BlogViewModel | null
+export type Blogs = Array<BlogViewModel> | null

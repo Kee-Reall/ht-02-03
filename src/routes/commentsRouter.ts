@@ -3,9 +3,9 @@ import {CommentsController} from "../controllers/commentsController";
 import {jwtAuth} from "../middleware/jwtAuth";
 import {updateCommentMiddleware} from "../middleware/updateCommentMiddleware";
 import {isOwnerMiddleware} from "../middleware/isOwnerMiddleware";
-import {commentContainer} from "../containers/commentContainer";
+import {iocContainer} from "../containers/iocContainer";
 
-const commentsController = commentContainer.resolve(CommentsController)
+const commentsController = iocContainer.resolve(CommentsController)
 
 export const commentsRouter = Router()
 const param = '/:id'

@@ -9,10 +9,10 @@ import {refreshTokenValidator} from "../middleware/refreshTokenValidator";
 import {ipLimiter} from "../middleware/ipLimiter";
 import {emailValidator} from "../middleware/emailValidator";
 import {newPasswordValidator} from "../middleware/newPasswordValidator";
-import {userContainer} from "../containers/userContainer";
+import {iocContainer} from "../containers/iocContainer";
 
 const authRouter = Router()
-const authController = userContainer.resolve(AuthController)
+const authController = iocContainer.resolve(AuthController)
 
 authRouter.post('/login',ipLimiter,...loginMiddleware, authController.login.bind(authController))
 authRouter.post('/registration',ipLimiter,...createUserMiddleware, authController.registration.bind(authController))

@@ -1,14 +1,11 @@
-import bcrypt from "bcrypt"
 import {inject, injectable} from "inversify"
-import {v4 as uniqueCode} from "uuid"
-import {add, isAfter} from "date-fns"
-import {getOutput} from "../models/ResponseModel"
-import {usersFilters} from "../models/filtersModel"
+import {GetOutput} from "../models/ResponseModel"
+import {UsersFilters} from "../models/filtersModel"
 import {QueryRepository} from "../repositories/queryRepository"
-import {confirmation, recovery, userInputModel, userLogicModel, userViewModel} from "../models/userModel"
+import {Confirmation, Recovery, UserInputModel, UserLogicModel, UserViewModel} from "../models/userModel"
 import {CommandRepository} from "../repositories/commandRepository"
-import generateId from "../helpers/generateId"
 import {MailWorker} from "../repositories/mailWorker"
+import {AddFunction, HashFunction, IdCreatorFunction, IsAfterFunction, SaltFunction} from "../models/mixedModels";
 
 
 @injectable()
@@ -16,10 +13,17 @@ export class UsersService {
     constructor(
         @inject(QueryRepository) protected queryRepository: QueryRepository,
         @inject(CommandRepository) protected commandRepository: CommandRepository,
-        @inject(MailWorker) protected mailWorker: MailWorker
-) {}
+        @inject(MailWorker) protected mailWorker: MailWorker,
+        @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction,
+        @inject<Function>("UniqueCode") protected uniqueCode: (param?: any)=> string,
+        @inject<HashFunction>('HashFunction') protected hash: HashFunction,
+        @inject<Function>('SaltFunction') protected genSalt: SaltFunction,
+        @inject<AddFunction>("AddFunction") protected add: AddFunction,
+        @inject<IsAfterFunction>("IsAfterFunction") protected isAfter: IsAfterFunction
 
-    public async getUsers(params: usersFilters): Promise<getOutput> {
+    ) {}
+
+    public async getUsers(params: UsersFilters): Promise<GetOutput> {
         const searchConfig = {
             filter: {
                 $or: [
@@ -33,7 +37,7 @@ export class UsersService {
             sortBy: params.sortBy
         }
         const totalCount: number = await this.queryRepository.getUsersCount(searchConfig.filter)
-        const items: userViewModel[] = await this.queryRepository.getUsers(searchConfig) ?? []
+        const items: UserViewModel[] = await this.queryRepository.getUsers(searchConfig) ?? []
         return {
             page: params.pageNumber!,
             pageSize: params.pageSize!,
@@ -43,16 +47,16 @@ export class UsersService {
         }
     }
 
-    public async adminCreatingUser(input: userInputModel): Promise<userViewModel | null> {
+    public async adminCreatingUser(input: UserInputModel): Promise<UserViewModel | null> {
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
-        const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password, salt)
-        const id = generateId("user")
+        const salt = await this.genSalt(10)
+        const hash = await this.hash(password, salt)
+        const id = this.generateId("user")
         const confirmation = await this.generateConfirmData(true)
         const recovery = await this.generateRecovery(true)
         confirmation.isConfirmed = true
-        const user: userLogicModel = {
+        const user: UserLogicModel = {
             login, email, id,
             hash, createdAt, salt, confirmation, recovery
         }
@@ -60,15 +64,15 @@ export class UsersService {
         return await this.queryRepository.getUserById(id)
     }
 
-    public async createUser(input: userInputModel): Promise<boolean> {
+    public async createUser(input: UserInputModel): Promise<boolean> {
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
-        const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password, salt)
-        const id = generateId("user")
+        const salt = await this.genSalt(10)
+        const hash = await this.hash(password, salt)
+        const id = this.generateId("user")
         const confirmation = await this.generateConfirmData(false)
         const recovery = await this.generateRecovery(true)
-        const user: userLogicModel = {
+        const user: UserLogicModel = {
             login, email, hash, createdAt,
             salt, id, confirmation, recovery
         }
@@ -87,15 +91,15 @@ export class UsersService {
         return await this.commandRepository.deleteUser(id)
     }
 
-    public async getUserById(id: string): Promise<userLogicModel | null> {
+    public async getUserById(id: string): Promise<UserLogicModel | null> {
         return this.queryRepository.getUserByIdWithLogic(id)
     }
 
-    private async generateConfirmData(isConfirmed: boolean = false): Promise<confirmation> {
+    private async generateConfirmData(isConfirmed: boolean = false): Promise<Confirmation> {
         return {
-            code: uniqueCode(),
+            code: this.uniqueCode(),
             isConfirmed,
-            confirmationDate: add(new Date(), {minutes: 15})
+            confirmationDate: this.add(new Date(), {minutes: 15})
         }
     }
 
@@ -103,7 +107,7 @@ export class UsersService {
         const user = await this.queryRepository.getUserByConfirm(code)
         if (!user) return false
         if (user.confirmation!.isConfirmed) return false
-        const isDataExpired = isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
+        const isDataExpired = this.isAfter(new Date(Date.now()), user.confirmation!.confirmationDate)
         if (isDataExpired) return false
         return await this.commandRepository.confirmUser(user.id)
     }
@@ -116,10 +120,10 @@ export class UsersService {
         return await this.commandRepository.changeConfirm(user!.id, confirmation)
     }
 
-    private async generateRecovery(isNewUser: boolean = false): Promise<recovery> {
+    private async generateRecovery(isNewUser: boolean = false): Promise<Recovery> {
         return {
-            recoveryCode: isNewUser ? '' : uniqueCode(),
-            expirationDate: add(new Date(), {minutes: 10})
+            recoveryCode: isNewUser ? '' : this.uniqueCode(),
+            expirationDate: this.add(new Date(), {minutes: 10})
         }
     }
 
@@ -134,11 +138,11 @@ export class UsersService {
     public async confirmRecovery(recoveryCode: string, newPassword: string): Promise<boolean> {
         const user = await this.queryRepository.getUserByRecoveryCode(recoveryCode)
         if (!user || !user.confirmation.isConfirmed) return false
-        if (isAfter(Date.now(),user.recovery.expirationDate)){
+        if (this.isAfter(Date.now(),user.recovery.expirationDate)){
             return false
         }
-        const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(newPassword, salt)
+        const salt = await this.genSalt(10)
+        const hash = await this.hash(newPassword, salt)
         await this.commandRepository.changeUserPassword(user.id,hash,salt)
         await this.commandRepository.setDefaultRecoveryCode(user.id)
         return true

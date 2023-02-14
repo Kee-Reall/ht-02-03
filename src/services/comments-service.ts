@@ -1,36 +1,36 @@
 import {inject, injectable} from "inversify";
-import {commentsViewModel, commentCreationModel, commentsDbModel, commentsOutputModel} from "../models/commentsModel";
+import {CommentsViewModel, CommentCreationModel, CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {QueryRepository} from "../repositories/queryRepository";
 import {CommandRepository} from "../repositories/commandRepository";
-import generateId from "../helpers/generateId";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {sortingDirection } from "../models/mixedModels";
-import { commentsFilter } from "../models/filtersModel";
-import { getOutput } from "../models/ResponseModel";
+import {IdCreatorFunction, sortingDirection} from "../models/mixedModels";
+import { CommentsFilter } from "../models/filtersModel";
+import { GetOutput } from "../models/ResponseModel";
 
 
 @injectable()
 export class CommentsService {
     constructor(
         @inject(QueryRepository)protected queryRepository: QueryRepository,
-        @inject(CommandRepository)protected commandRepository: CommandRepository
+        @inject(CommandRepository)protected commandRepository: CommandRepository,
+        @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction
 
         ) {}
 
-    async createComment (input: commentCreationModel): Promise<commentsViewModel | null> {
+    async createComment (input: CommentCreationModel): Promise<CommentsViewModel | null> {
         const createdAt = new Date(Date.now()).toISOString()
         const { content, postId, user: { id: userId, login: userLogin }} = input
-        const id = generateId("comment")
-        const comment: commentsViewModel = {createdAt, content, userId , userLogin}
-        const toPut: commentsDbModel = {id,postId, ...comment}
+        const id = this.generateId("comment")
+        const comment: CommentsViewModel = {createdAt, content, userId , userLogin}
+        const toPut: CommentsDbModel = {id,postId, ...comment}
         const result = await this.commandRepository.createComment(toPut)
         return result ? await this.getCommentById(id) : null
     }
 
-    async getCommentById(id: string): Promise<commentsViewModel | null> {
+    async getCommentById(id: string): Promise<CommentsViewModel | null> {
         return await this.queryRepository.getCommentById(id)
     }
-    async updateCommentAfterMiddleware({ id }: commentsOutputModel, content: string): Promise<boolean> {
+    async updateCommentAfterMiddleware({ id }: CommentsOutputModel, content: string): Promise<boolean> {
         return  await this.commandRepository.updateComment(id,content)
     }
 
@@ -38,8 +38,8 @@ export class CommentsService {
         return await this.commandRepository.deleteComment(id)
     }
 
-    async getCommentsByPost(params: commentsFilter): Promise<getOutput> {
-        const searchConfig: SearchConfiguration<commentsDbModel> = {
+    async getCommentsByPost(params: CommentsFilter): Promise<GetOutput> {
+        const searchConfig: SearchConfiguration<CommentsDbModel> = {
             filter: {
                 postId: params.searchId
             },
@@ -49,7 +49,7 @@ export class CommentsService {
             limit: params.pageSize as number
         }
         const totalCount = await this.queryRepository.countCommentsByPostId(searchConfig.filter!.postId as string)
-        const items: commentsOutputModel[] = await this.queryRepository.getCommentsByPostId(searchConfig) ?? []
+        const items: CommentsOutputModel[] = await this.queryRepository.getCommentsByPostId(searchConfig) ?? []
         return {
             totalCount,
             page: params.pageNumber!,

@@ -1,8 +1,8 @@
 import {QueryRepository} from "../repositories/queryRepository";
-import {postContainer} from "../containers/postContainer";
+import {iocContainer} from "../containers/iocContainer";
 
 export async function checkForExistingPost (value: string) {
-    const queryRepository = postContainer.resolve(QueryRepository)
+    const queryRepository = iocContainer.resolve(QueryRepository)
     const result = await queryRepository.getPost(value)
     if(!result) {
         throw new Error('post does not exist')

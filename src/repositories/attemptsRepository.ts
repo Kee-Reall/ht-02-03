@@ -1,9 +1,9 @@
-import {attemptsModel} from "../models/attemptsModel";
+import {AttemptsModel} from "../models/attemptsModel";
 import {Attempts} from "../adapters/mongooseCreater";
 
 
 class AttemptsRepository {
-    public async addNewAttempt(input: attemptsModel): Promise<void> {
+    public async addNewAttempt(input: AttemptsModel): Promise<void> {
         await Attempts.create(input)
     }
 

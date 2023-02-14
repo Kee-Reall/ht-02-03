@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import {blogDbModel} from "../blogModel";
+import {BlogDbModel} from "../blogModel";
 
-export const BlogSchema = new mongoose.Schema<blogDbModel>({
+export const BlogSchema = new mongoose.Schema<BlogDbModel>({
     id: {
         type: String,
         required: true,

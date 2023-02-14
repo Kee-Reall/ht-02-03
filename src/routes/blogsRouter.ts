@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {blogContainer} from "../containers/blogContainer";
+import {iocContainer} from "../containers/iocContainer";
 import { blogMiddlewares } from "../middleware/blogsMiddleware";
 import { createPostForBlogMiddleware } from "../middleware/createPostForBlog";
 import {getPostsByBlogMiddleware} from "../middleware/postsFromBlogs";
@@ -9,7 +9,7 @@ const root = '/'
 const param = root + ':id'
 const postsByThis = param + '/posts'
 
-const blogsController = blogContainer.resolve(BlogsController)
+const blogsController = iocContainer.resolve(BlogsController)
 
 blogsRouter.get(root, blogsController.getBlogs.bind(blogsController))
 blogsRouter.get(param, blogsController.getOne.bind(blogsController))

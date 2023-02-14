@@ -1,6 +1,6 @@
-import {securityViewModel} from "../models/SecurityModel";
+import {SecurityViewModel} from "../models/SecurityModel";
 import {QueryRepository} from "../repositories/queryRepository";
-import {refreshTokenPayload, sessionFilter} from "../models/refreshTokensMeta";
+import {RefreshTokenPayload, SessionFilter} from "../models/refreshTokensMeta";
 import {CommandRepository} from "../repositories/commandRepository";
 import {inject, injectable} from "inversify";
 
@@ -12,11 +12,11 @@ export class SecurityService {
         @inject(CommandRepository) protected commandRepository: CommandRepository,
     ) {
     }
-    public async getAllSessionsByToken(userId: string): Promise< Array<securityViewModel> | null> {
+    public async getAllSessionsByToken(userId: string): Promise< Array<SecurityViewModel> | null> {
         return await this.queryRepository.getTokensForUser(userId)
     }
 
-    public async killSession(meta: refreshTokenPayload,deviceId: string): Promise<boolean> {
+    public async killSession(meta: RefreshTokenPayload, deviceId: string): Promise<boolean> {
         const metaToken = await this.queryRepository.getMetaToken({userId: meta.userId, deviceId: deviceId})
         if(!metaToken) {
             return false
@@ -24,7 +24,7 @@ export class SecurityService {
         return await this.commandRepository.killMetaToken({deviceId: deviceId,userId: metaToken.userId})
     }
 
-    public async killAllForUser({deviceId, userId}: sessionFilter) {
+    public async killAllForUser({deviceId, userId}: SessionFilter) {
         return await this.commandRepository.killSessionsForUser(userId,deviceId)
     }
 }

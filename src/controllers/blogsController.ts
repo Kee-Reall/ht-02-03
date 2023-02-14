@@ -1,11 +1,11 @@
 import {Request, Response} from "express";
 import {injectable, inject} from 'inversify'
 import {httpStatus} from "../enums/httpEnum";
-import {blog} from "../models/blogModel";
-import {customRequest} from "../models/RequestModel";
-import {getItemsResponse} from "../models/ResponseModel";
-import {blogFilters} from "../models/filtersModel";
-import {post} from "../models/postsModel";
+import {Blog} from "../models/blogModel";
+import {CustomRequest} from "../models/RequestModel";
+import {GetItemsResponse} from "../models/ResponseModel";
+import {BlogFilters} from "../models/filtersModel";
+import {Post} from "../models/postsModel";
 import {BlogsService} from "../services/blogs-service";
 import {Normalizer} from "../helpers/normalizer";
 
@@ -16,13 +16,13 @@ export class BlogsController {
         @inject(Normalizer) protected normalizer: Normalizer
     ) {}
 
-    async getBlogs(req: customRequest<blogFilters>, res: getItemsResponse) {
+    async getBlogs(req: CustomRequest<BlogFilters>, res: GetItemsResponse) {
         const result = await this.blogsService.getBlogs(this.normalizer.normalizeBlogsQuery(req.query))
         res.status(httpStatus.ok).json(result)
     }
 
     async getOne(req: Request, res: Response) {
-        const result: blog = await this.blogsService.getBlog(req.params.id)
+        const result: Blog = await this.blogsService.getBlog(req.params.id)
         if (result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -31,7 +31,7 @@ export class BlogsController {
     }
 
     async createBlog(req: Request, res: Response) {
-        const result: blog = await this.blogsService.createBlog(req.body)
+        const result: Blog = await this.blogsService.createBlog(req.body)
         if (result) {
             return res.status(httpStatus.created).json(result)
         }
@@ -39,7 +39,7 @@ export class BlogsController {
     }
 
     async createPostForThisBlog(req: Request, res: Response) {
-        const result: post = await this.blogsService.createPostForBlog(req.params.id, req.body)
+        const result: Post = await this.blogsService.createPostForBlog(req.params.id, req.body)
         if (result) {
             res.status(httpStatus.created).json(result)
             return

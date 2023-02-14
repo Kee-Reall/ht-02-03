@@ -1,20 +1,26 @@
 export type eternityId = "blog" | "post" | "user" | "comment"
 export type sortingDirection = "asc" | "desc"
-export interface tokenPair {
+export interface TokenPair {
     accessToken: string
     refreshToken: string
 }
 
-export type createTokenClientMeta = {
+export type CreateTokenClientMeta = {
     userId: string
     ip: string
     title: string
 }
 
-export type clientMeta = {
+export type ClientMeta = {
     deviceId: string
     ip?: string
     deviceInfo?: string
     userId: string
     updateDate: string
 }
+
+export type IdCreatorFunction = (param: eternityId) => string
+export type HashFunction = (data: string | Buffer, saltOrRounds: string | number) => Promise<string>
+export type SaltFunction = (rounds?: number, minor?: "a" | "b") => Promise<string>
+export type AddFunction = (date: Date | number, duration: Duration) => Date
+export type IsAfterFunction = (date: Date | number, dateToCompare: Date | number) => boolean

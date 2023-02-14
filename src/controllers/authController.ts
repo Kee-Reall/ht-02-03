@@ -1,11 +1,11 @@
+import {inject, injectable} from "inversify";
 import {Request, Response} from "express"
 import {httpStatus} from "../enums/httpEnum"
 import {AuthService} from "../services/auth-Service";
 import {JwtService} from "../services/jwt-service";
-import {clientMeta, createTokenClientMeta, tokenPair} from "../models/mixedModels";
-import {refreshTokenPayload} from "../models/refreshTokensMeta";
+import {ClientMeta, CreateTokenClientMeta, TokenPair} from "../models/mixedModels";
+import {RefreshTokenPayload} from "../models/refreshTokensMeta";
 import {UsersService} from "../services/users-service";
-import {inject, injectable} from "inversify";
 
 @injectable()
 export class AuthController {
@@ -21,7 +21,7 @@ export class AuthController {
         if (!user || !user.confirmation.isConfirmed) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const meta: createTokenClientMeta = {
+        const meta: CreateTokenClientMeta = {
             userId: user.id,
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
             title: req.headers['user-agent'] as string
@@ -68,17 +68,17 @@ export class AuthController {
 
     async refresh(req: Request, res: Response) {
         const {cookies: {refreshToken}} = req
-        const payload: refreshTokenPayload | null = await this.jwtService.verifyRefreshToken(refreshToken)
+        const payload: RefreshTokenPayload | null = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        const meta: clientMeta = {
+        const meta: ClientMeta = {
             userId: payload.userId,
             ip: `${req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip}`,
             updateDate: payload.updateDate,
             deviceId: payload.deviceId,
         }
-        const pair: tokenPair | null = await this.jwtService.updateTokenPair(meta)
+        const pair: TokenPair | null = await this.jwtService.updateTokenPair(meta)
         if (!pair) {
             return res.sendStatus(httpStatus.notAuthorized)
         }

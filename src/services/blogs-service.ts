@@ -1,24 +1,25 @@
-import {blogInputModel, blog, blogViewModel} from "../models/blogModel";
-import generateId from "../helpers/generateId";
+import {BlogInputModel, Blog, BlogViewModel} from "../models/blogModel";
 import {CommandRepository} from "../repositories/commandRepository";
-import {blogFilters} from "../models/filtersModel";
-import {getOutput} from "../models/ResponseModel";
+import {BlogFilters} from "../models/filtersModel";
+import {GetOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {postInputThrowBlog, postInputModel, postViewModel} from "../models/postsModel";
+import {PostInputThroughBlog, PostInputModel, PostViewModel} from "../models/postsModel";
 import {PostsService} from "./posts-service";
 import {QueryRepository} from "../repositories/queryRepository";
 import {injectable,inject} from "inversify";
+import {IdCreatorFunction} from "../models/mixedModels";
 
 @injectable()
 export class BlogsService {
     constructor(
         @inject(QueryRepository)protected queryRepository: QueryRepository,
         @inject(CommandRepository)protected commandRepository: CommandRepository,
-        @inject(PostsService)protected postsService: PostsService
+        @inject(PostsService)protected postsService: PostsService,
+        @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction
     ) {}
 
-        async getBlogs(params: blogFilters): Promise<getOutput> {
-        const searchConfig:SearchConfiguration<blogViewModel> = {
+        async getBlogs(params: BlogFilters): Promise<GetOutput> {
+        const searchConfig:SearchConfiguration<BlogViewModel> = {
             filter: {
                 name: params.searchNameTerm!
             },
@@ -39,12 +40,12 @@ export class BlogsService {
         }
     }
 
-    async getBlog(id: string): Promise<blog> {
+    async getBlog(id: string): Promise<Blog> {
         return await this.queryRepository.getBlogById(id)
     }
 
     async getBlogPosts(blogId: string, params: any) {
-        const config:SearchConfiguration<postViewModel> = {
+        const config:SearchConfiguration<PostViewModel> = {
             filter: {blogId},
             sortBy: params.sortBy,
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
@@ -62,8 +63,8 @@ export class BlogsService {
         }
     }
 
-    async createPostForBlog(id:string,inputData: postInputThrowBlog) {
-        const post: postInputModel = {
+    async createPostForBlog(id:string,inputData: PostInputThroughBlog) {
+        const post: PostInputModel = {
             title: inputData.title,
             shortDescription: inputData.shortDescription,
             content: inputData.content,
@@ -72,9 +73,9 @@ export class BlogsService {
         return this.postsService.createPost(post)
     }
 
-    async createBlog(blogInput: blogInputModel): Promise<blog> {
+    async createBlog(blogInput: BlogInputModel): Promise<Blog> {
         const {description, websiteUrl, name} = blogInput
-        const id = generateId('blog')
+        const id = this.generateId('blog')
         const blogToPush = {
             id, description, websiteUrl, name,
             createdAt: new Date(Date.now()).toISOString()
@@ -86,7 +87,7 @@ export class BlogsService {
         return null
     }
 
-    async updateBlog(id: string, blogInput: blogInputModel): Promise<boolean> {
+    async updateBlog(id: string, blogInput: BlogInputModel): Promise<boolean> {
         const {description, websiteUrl, name} = blogInput
         const updatesField = {description,websiteUrl,name}
         const result = await this.commandRepository.updateBlog(id, updatesField)

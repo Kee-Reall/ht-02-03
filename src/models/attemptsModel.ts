@@ -1,4 +1,4 @@
-export interface attemptsModel {
+export interface AttemptsModel {
     endpointAndIp: string
     date: string
 }

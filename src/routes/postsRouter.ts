@@ -4,14 +4,14 @@ import {jwtAuth} from "../middleware/jwtAuth";
 import { createCommentMiddlewares } from "../middleware/createCommentMiddleware";
 import {basicAuth} from "../middleware/basicAuth";
 import {getCommentsMiddleware} from "../middleware/getCommentsMiddleware";
-import {postContainer} from "../containers/postContainer";
+import {iocContainer} from "../containers/iocContainer";
 import {PostsController} from "../controllers/postsController";
 export const postsRouter = Router()
 const root = '/'
 const param = root + ':id'
 const comments = param + '/comments'
 
-const postsController = postContainer.resolve(PostsController)
+const postsController = iocContainer.resolve(PostsController)
 
 postsRouter.get(root, postsController.getPosts.bind(postsController))
 postsRouter.get(param, postsController.getOne.bind(postsController))

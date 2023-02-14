@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import {commentsDbModel} from "../commentsModel";
+import {CommentsDbModel} from "../commentsModel";
 
 
-export const CommentSchema = new mongoose.Schema<commentsDbModel>({
+export const CommentSchema = new mongoose.Schema<CommentsDbModel>({
     id: {
         type: String,
         required: true,

@@ -1,6 +1,6 @@
 import {JwtPayload} from "jsonwebtoken";
 
-export interface refreshTokensMeta {
+export interface RefreshTokensMeta {
     userId: string
     deviceId: string
     updateDate: Date
@@ -8,23 +8,23 @@ export interface refreshTokensMeta {
     title: string | null
 }
 
-export interface refreshTokenPayload extends JwtPayload {
+export interface RefreshTokenPayload extends JwtPayload {
     userId: string
     deviceId: string
     updateDate: string
 }
 
-export interface sessionFilter {
+export interface SessionFilter {
     userId: string
     deviceId: string
 }
 
-export interface refreshTokenDbResponse {
+export interface RefreshTokenDbResponse {
     deviceId: string
     updateDate: Date
 }
 
-export interface updateRefreshTokenMeta {
+export interface UpdateRefreshTokenMeta {
     userId: string
     deviceId: string
     ip: string | null

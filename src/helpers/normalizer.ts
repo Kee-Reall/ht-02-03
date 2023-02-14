@@ -1,4 +1,4 @@
-import {blogFilters, commentsFilter, usersFilters} from "../models/filtersModel";
+import {BlogFilters, CommentsFilter, UsersFilters} from "../models/filtersModel";
 import {sortingDirection} from "../models/mixedModels";
 import {injectable} from "inversify";
 
@@ -7,7 +7,7 @@ export class Normalizer {
     public normalizeSortDirection (argument?: any): sortingDirection {
         return argument === 'asc' ? argument : 'desc'
     }
-    public normalizeBlogsQuery(query: blogFilters):blogFilters {
+    public normalizeBlogsQuery(query: BlogFilters):BlogFilters {
             const sortDirection = this.normalizeSortDirection(query.sortDirection)
             return {
                 searchNameTerm: query.searchNameTerm ?? '[*]*',
@@ -17,7 +17,7 @@ export class Normalizer {
                 sortDirection
             }
     }
-    public normalizeCommentQuery(query: commentsFilter):commentsFilter {
+    public normalizeCommentQuery(query: CommentsFilter):CommentsFilter {
         const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return {
             pageNumber: +query.pageNumber! || 1,
@@ -26,7 +26,7 @@ export class Normalizer {
             sortDirection
         }
     }
-    public normalizePostsQuery(query: blogFilters):blogFilters {
+    public normalizePostsQuery(query: BlogFilters):BlogFilters {
         const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return {
             pageNumber: +query.pageNumber! || 1,
@@ -35,7 +35,7 @@ export class Normalizer {
             sortDirection
         }
     }
-    public normalizeUsersQuery(query: usersFilters):usersFilters {
+    public normalizeUsersQuery(query: UsersFilters):UsersFilters {
         const sortDirection = this.normalizeSortDirection(query.sortDirection)
         return  {
             pageNumber: +query.pageNumber! || 1,

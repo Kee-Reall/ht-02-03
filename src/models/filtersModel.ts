@@ -1,23 +1,23 @@
-import {blogViewModel} from "./blogModel";
-import { commentsViewModel } from "./commentsModel";
-import {userViewModel} from "./userModel";
+import {BlogViewModel} from "./blogModel";
+import { CommentsViewModel } from "./commentsModel";
+import {UserViewModel} from "./userModel";
 
-interface abstractFilter<T> {
+interface AbstractFilter<T> {
     pageNumber?: number
     pageSize?: number
     sortBy?: keyof T
     sortDirection?: 'asc' | 'desc'
 }
 
-export interface blogFilters extends abstractFilter<blogViewModel> {
+export interface BlogFilters extends AbstractFilter<BlogViewModel> {
     searchNameTerm?:string
 }
 
-export interface usersFilters extends abstractFilter<userViewModel> {
+export interface UsersFilters extends AbstractFilter<UserViewModel> {
     searchLoginTerm?: string
     searchEmailTerm?: string
 }
 
-export interface commentsFilter extends abstractFilter<commentsViewModel> {
+export interface CommentsFilter extends AbstractFilter<CommentsViewModel> {
     searchId?:string
 }

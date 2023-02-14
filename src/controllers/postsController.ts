@@ -2,8 +2,8 @@ import {inject, injectable} from "inversify";
 import {Request, Response} from "express";
 import {httpStatus} from "../enums/httpEnum";
 import {PostsService} from "../services/posts-service";
-import {post} from "../models/postsModel";
-import {commentsFilter} from "../models/filtersModel";
+import {Post} from "../models/postsModel";
+import {CommentsFilter} from "../models/filtersModel";
 import {Normalizer} from "../helpers/normalizer";
 
 @injectable()
@@ -31,7 +31,7 @@ export class PostsController {
     }
 
     async createPost(req: Request, res: Response) {
-        const result: post = await this.postsService.createPost(req.body)
+        const result: Post = await this.postsService.createPost(req.body)
         if (!result) {
             return res.sendStatus(httpStatus.teapot)
         }
@@ -51,7 +51,7 @@ export class PostsController {
     }
 
     async getCommentsForPost(req: Request, res: Response) {
-        const query: commentsFilter = {
+        const query: CommentsFilter = {
             ...this.normalizer.normalizeCommentQuery(req.query),
             searchId: req.params.id as string
         }

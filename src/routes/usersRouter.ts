@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {createUserMiddleware} from "../middleware/createUserMiddleware";
-import {userContainer} from "../containers/userContainer";
+import {iocContainer} from "../containers/iocContainer";
 import {UsersController} from "../controllers/usersController";
 
-const usersController = userContainer.resolve(UsersController)
+const usersController = iocContainer.resolve(UsersController)
 
 export const usersRouter = Router()
 const root = '/'

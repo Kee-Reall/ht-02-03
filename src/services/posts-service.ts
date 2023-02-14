@@ -1,15 +1,15 @@
 import {inject, injectable} from "inversify";
 import {QueryRepository} from "../repositories/queryRepository";
-import {post, postInputModel, postViewModel} from "../models/postsModel";
-import { blog } from "../models/blogModel";
-import generateId from "../helpers/generateId";
+import {Post, PostInputModel, PostViewModel} from "../models/postsModel";
+import { Blog } from "../models/blogModel";
 import {CommandRepository} from "../repositories/commandRepository";
-import {blogFilters} from "../models/filtersModel";
+import {BlogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {commentCreationModel} from "../models/commentsModel";
+import {CommentCreationModel} from "../models/commentsModel";
 import {CommentsService} from "./comments-service";
-import { commentsFilter } from "../models/filtersModel"
-import {getOutput} from "../models/ResponseModel";
+import { CommentsFilter } from "../models/filtersModel"
+import {GetOutput} from "../models/ResponseModel";
+import {IdCreatorFunction} from "../models/mixedModels";
 
 
 @injectable()
@@ -18,15 +18,16 @@ export class PostsService {
     constructor(
         @inject(QueryRepository)protected queryRepository: QueryRepository,
         @inject(CommandRepository)protected commandRepository: CommandRepository,
-        @inject(CommentsService)protected commentsService: CommentsService
+        @inject(CommentsService)protected commentsService: CommentsService,
+        @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction
     ) {}
 
-    async getPost(id:string): Promise<post> {
+    async getPost(id:string): Promise<Post> {
         return await this.queryRepository.getPost(id)
     }
 
-    async getPostsWithPagination(params: blogFilters) {
-        const searchConfig: SearchConfiguration<postViewModel> = {
+    async getPostsWithPagination(params: BlogFilters) {
+        const searchConfig: SearchConfiguration<PostViewModel> = {
             sortBy: params.sortBy!,
             sortDirection: params.sortDirection!,
             shouldSkip: params.pageSize! * (params.pageNumber! - 1),
@@ -45,10 +46,10 @@ export class PostsService {
 
     }
 
-    async createPost(postInput: postInputModel): Promise<post> {
+    async createPost(postInput: PostInputModel): Promise<Post> {
         const {blogId, content, shortDescription, title} = postInput
-        const id = generateId("post")
-        const blog: blog = await this.queryRepository.getBlogById(blogId)
+        const id = this.generateId("post")
+        const blog: Blog = await this.queryRepository.getBlogById(blogId)
         if(!blog) return null
         const toPut = {
             id, blogId, content, shortDescription , title,
@@ -62,22 +63,22 @@ export class PostsService {
         return await this.queryRepository.getPost(id)
     }
 
-    async updatePost(id: string, postInput: postInputModel): Promise<boolean> {
+    async updatePost(id: string, postInput: PostInputModel): Promise<boolean> {
         const {blogId, content, shortDescription, title} = postInput
         const blog = await this.queryRepository.getBlogById(blogId)
         if(!blog) {
             return false
         }
         const {name: blogName} = blog
-        const toUpdate: postInputModel & {blogName?: string} = {blogId,content,shortDescription,title,blogName}
+        const toUpdate: PostInputModel & {blogName?: string} = {blogId,content,shortDescription,title,blogName}
         return this.commandRepository.updatePost(id,toUpdate)
     }
 
-    async createComment(input: commentCreationModel) {
+    async createComment(input: CommentCreationModel) {
         return  await this.commentsService.createComment(input)
     }
 
-    async getCommentForPost(configuration: commentsFilter): Promise<getOutput> {
+    async getCommentForPost(configuration: CommentsFilter): Promise<GetOutput> {
         return await this.commentsService.getCommentsByPost(configuration)
     }
 

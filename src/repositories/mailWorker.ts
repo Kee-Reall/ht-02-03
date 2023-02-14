@@ -5,14 +5,13 @@ import {inject, injectable} from "inversify";
 @injectable()
 export class MailWorker {
     private readonly link: string = "https://ht-02-03.vercel.app/api/auth/registration-confirmation?code="
-    //private readonly localLink: string = "http://localhost:3000/api/auth/registration-confirmation?code="
     private readonly passLink: string = "https://ht-02-03.vercel.app/api/auth/new-password?recoveryCode="
 
     constructor(
         @inject(Mail<SMTPTransport.SentMessageInfo>)private mainTransporter: Mail<SMTPTransport.SentMessageInfo>
     ){}
 
-    public async testingMessage() {
+    public async testingMessage() { // method send message, use for test SMTP server
         return await this.mainTransporter.sendMail({
             from: `it-incubator Application <${process.env.MAIL_NAME}>`,
             to: ['kirill_bezrodny@mail.ru', "smolnikov.456@mail.ru"],

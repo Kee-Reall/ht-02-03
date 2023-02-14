@@ -1,3 +1,3 @@
 import {Request} from "express";
 
-export type customRequest<T> = Request<{},{},{},T,{}>
+export type CustomRequest<T> = Request<{},{},{},T,{}>

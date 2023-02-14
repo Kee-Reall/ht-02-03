@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from "../../src/app"
 import {Blogs, Comments, mRunDb, Posts, Users, Sessions, Attempts} from "../../src/adapters/mongooseCreater";
-import {blogInputModel, blogViewModel} from "../../src/models/blogModel";
+import {BlogInputModel, BlogViewModel} from "../../src/models/blogModel";
 //@ts-ignore
 import {isIsoDate} from "../helpers/isIsoDate";
 //@ts-ignore
@@ -76,7 +76,7 @@ describe('one button for every suit', () => {
             expect(pagesCount).toEqual(0)
         })
 
-        const blogInput: blogInputModel = {
+        const blogInput: BlogInputModel = {
             "name": "αυτος",
             "description": "εγο αγαπω σοθ",
             "websiteUrl": "string.kz"
@@ -138,7 +138,7 @@ describe('one button for every suit', () => {
             it.each([1, 2, 3])(' test number \'%i\'', async () => {
                 const creationDate = Date.now()
                 const res = await request(app).post('/api/blogs').set({Authorization: BasicAuth}).send(blogInput)
-                const body: blogViewModel = res.body
+                const body: BlogViewModel = res.body
                 const {id, description, createdAt, name, websiteUrl} = body
                 expect(res.status).toBe(201)
                 expect(description).toBe(blogInput.description)
@@ -159,7 +159,7 @@ describe('one button for every suit', () => {
 
         })
 
-        const updateDto: blogInputModel = {
+        const updateDto: BlogInputModel = {
             "name": "it'sGonnaChange",
             "description": "atIWillWaitTillCatchYouLoveMeOneDay",
             "websiteUrl": "afterChange.com"
@@ -199,7 +199,7 @@ describe('one button for every suit', () => {
         })
 
         describe('1 get all take first 2 get it by id 3 update it 4 get it by id 5 delete it', () => {
-            let blog: blogViewModel
+            let blog: BlogViewModel
 
             it('get all and take first', async () => {
                 const response = await request(app).get('/api/blogs')
@@ -207,7 +207,7 @@ describe('one button for every suit', () => {
                 expect(response.status).toBe(200)
                 const [firstItem] = items
                 blog = firstItem
-                items.forEach((el: blogViewModel) => {
+                items.forEach((el: BlogViewModel) => {
                     const {id, description, createdAt, name, websiteUrl} = el
                     expect(description).toEqual(expect.any(String))
                     expect(name).toEqual(expect.any(String))
