@@ -14,7 +14,7 @@ import {Normalizer} from "../helpers/normalizer";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {mailAdapter} from "../adapters/mailAdapter";
-import {Attempts, Blogs, Comments, Posts, Sessions, Users} from "../adapters/mongooseCreater";
+import {Attempts, Blogs, Comments, Likes, Posts, Sessions, Users} from "../adapters/mongooseCreater";
 import {Model} from "mongoose";
 import {TestingController} from "../controllers/testingController";
 import {PostsController} from "../controllers/postsController";
@@ -53,6 +53,7 @@ iocContainer.bind<Model<any>>("UserModel").toConstantValue(Users)
 iocContainer.bind<Model<any>>("CommentModel").toConstantValue(Comments)
 iocContainer.bind<Model<any>>("SessionModel").toConstantValue(Sessions)
 iocContainer.bind<Model<any>>("AttemptModel").toConstantValue(Attempts)
+iocContainer.bind<Model<any>>("LikeModel").toConstantValue(Likes)
 iocContainer.bind<Function>("deviceIdGenerator").toFunction(generateDeviceId)
 iocContainer.bind<HashFunction>('HashFunction').toFunction(hash)
 iocContainer.bind<SaltFunction>('SaltFunction').toFunction(genSalt)
