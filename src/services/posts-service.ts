@@ -5,12 +5,8 @@ import { Blog } from "../models/blogModel";
 import {CommandRepository} from "../repositories/commandRepository";
 import {BlogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {CommentCreationModel} from "../models/commentsModel";
 import {CommentsService} from "./comments-service";
-import { CommentsFilter } from "../models/filtersModel"
-import {GetOutput} from "../models/ResponseModel";
 import {IdCreatorFunction} from "../models/mixedModels";
-
 
 @injectable()
 export class PostsService {
@@ -72,14 +68,6 @@ export class PostsService {
         const {name: blogName} = blog
         const toUpdate: PostInputModel & {blogName?: string} = {blogId,content,shortDescription,title,blogName}
         return this.commandRepository.updatePost(id,toUpdate)
-    }
-
-    async createComment(input: CommentCreationModel) {
-        return  await this.commentsService.createComment(input)
-    }
-
-    async getCommentForPost(configuration: CommentsFilter): Promise<GetOutput> {
-        return await this.commentsService.getCommentsByPost(configuration)
     }
 
     async deletePost(id:string): Promise<boolean> {

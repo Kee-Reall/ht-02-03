@@ -77,8 +77,8 @@ describe('one button for every suit', () => {
         })
 
         const blogInput: BlogInputModel = {
-            "name": "αυτος",
-            "description": "εγο αγαπω σοθ",
+            "name": "Ο χρυμας",
+            "description": "πιάσε αν μπορείς",
             "websiteUrl": "string.kz"
         }
 
@@ -90,7 +90,7 @@ describe('one button for every suit', () => {
                 expect(res2.status).toBe(401)
             })
 
-            it('updatong', async () => {
+            it('updating', async () => {
                 const res = await request(app).put('/api/blogs/bgrandom').send(blogInput)
                 const res2 = await request(app).put('/api/blogs/bgrandom').send({})
                 expect(res.status).toBe(401)

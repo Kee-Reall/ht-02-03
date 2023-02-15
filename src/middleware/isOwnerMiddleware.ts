@@ -10,7 +10,7 @@ export const isOwnerMiddleware: RequestHandler = async (req: Request,res: Respon
     if (!commentShouldChange) {
         return res.sendStatus(httpStatus.notFound)
     }
-    if (user.id === commentShouldChange.userId) {
+    if (user.id === commentShouldChange.commentatorInfo.userId) {
         req.comment = commentShouldChange
         return next()
     }

@@ -2,6 +2,17 @@ import mongoose from "mongoose";
 import {CommentsDbModel} from "../commentsModel";
 
 
+
+const CommentatorInfoSchema = new mongoose.Schema({
+    userId:{
+        type: String,
+        required: true,
+    },
+    userLogin:{
+        type: String,
+        required: true
+    }
+},{versionKey: false, _id: false})
 export const CommentSchema = new mongoose.Schema<CommentsDbModel>({
     id: {
         type: String,
@@ -16,14 +27,7 @@ export const CommentSchema = new mongoose.Schema<CommentsDbModel>({
         maxLength:300,
         minLength:3
     },
-    userId:{
-        type: String,
-        required: true,
-    },
-    userLogin:{
-        type: String,
-        required: true
-    },
+    commentatorInfo: CommentatorInfoSchema,
     postId:{
         type: String,
         required: true,

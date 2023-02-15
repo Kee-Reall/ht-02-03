@@ -8,24 +8,24 @@ import {
     SessionFilter,
     UpdateRefreshTokenMeta
 } from "../models/refreshTokensMeta";
-import {CreateTokenClientMeta} from "../models/mixedModels";
+import {CreateTokenClientMeta, ModelWithSchema} from "../models/mixedModels";
 import {inject, injectable} from "inversify";
 import {Model} from "mongoose";
-
+import {LikeModel, LikeStatus} from "../models/LikeModel";
 @injectable()
 export class CommandRepository {
 
     private readonly emptyObject = {}
 
     constructor(
-
-        @inject<Model<any>>('BlogModel')private Blogs:  Model<any>,
-        @inject<Model<any>>('PostModel') private Posts:  Model<any>,
-        @inject<Model<any>>('UserModel') private Users:  Model<any>,
-        @inject<Model<any>>('CommentModel') private Comments:  Model<any>,
-        @inject<Model<any>>('SessionModel') private Sessions:  Model<any>,
-        @inject<Model<any>>('AttemptModel')private Attempts: Model<any>,
-        @inject<Function>("deviceIdGenerator") private generateDeviceId: Function
+        @inject<Model<any>>('BlogModel') private Blogs: Model<any>,
+        @inject<Model<any>>('PostModel') private Posts: Model<any>,
+        @inject<Model<any>>('UserModel') private Users: Model<any>,
+        @inject<ModelWithSchema<CommentsDbModel>>('CommentModel') private Comments: ModelWithSchema<CommentsDbModel>,
+        @inject<Model<any>>('SessionModel') private Sessions: Model<any>,
+        @inject<Model<any>>('AttemptModel') private Attempts: Model<any>,
+        @inject<ModelWithSchema<LikeModel>>("LikeModel") private Likes: ModelWithSchema<LikeModel>,
+        @inject<Function>("deviceIdGenerator") private generateDeviceId: Function,
     ) {
     }
 
@@ -138,7 +138,8 @@ export class CommandRepository {
             this.Users.deleteMany(this.emptyObject),
             this.Comments.deleteMany(this.emptyObject),
             this.Sessions.deleteMany(this.emptyObject),
-            this.Attempts.deleteMany(this.emptyObject)
+            this.Attempts.deleteMany(this.emptyObject),
+            this.Likes.deleteMany(this.emptyObject)
         ])
     }
 
@@ -236,6 +237,23 @@ export class CommandRepository {
         try {
             await this.Users.findOneAndUpdate({id}, {"recovery.recoveryCode": ''})
             return true
+        } catch (e) {
+            return false
+        }
+    }
+
+    public async createLike(dto: LikeModel): Promise<boolean> {
+        try {
+            const res = this.Likes.create(dto)
+            return !!res
+        } catch (e) {
+            return false
+        }
+    }
+
+    public async updateLike(target: string, userId: string, likeStatus: LikeStatus): Promise<boolean> {
+        try {
+            return !!await this.Likes.findOneAndUpdate({target, userId}, {likeStatus}, {returnDocument: "after"})
         } catch (e) {
             return false
         }

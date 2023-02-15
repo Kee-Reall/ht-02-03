@@ -1,4 +1,6 @@
-export type eternityId = "blog" | "post" | "user" | "comment"
+import {Model} from "mongoose";
+
+export type eternityId = "blog" | "post" | "user" | "comment" | "like"
 export type sortingDirection = "asc" | "desc"
 export interface TokenPair {
     accessToken: string
@@ -18,6 +20,8 @@ export type ClientMeta = {
     userId: string
     updateDate: string
 }
+
+export type ModelWithSchema<SchemaType> = Model<any,{},{},{},SchemaType>
 
 export type IdCreatorFunction = (param: eternityId) => string
 export type HashFunction = (data: string | Buffer, saltOrRounds: string | number) => Promise<string>

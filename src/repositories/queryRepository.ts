@@ -7,11 +7,14 @@ import {UserLogicModel, UserViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
 import {SecurityViewModel} from "../models/SecurityModel";
+import {LikeModel, LikesInfo, LikeStatus} from "../models/LikeModel";
+import {WithId} from "mongodb"
+import {likeEnum} from "../enums/likeEnum";
 
 @injectable()
 export class QueryRepository {
 
-    /* Projections objects for native mongodriver now its deprecated*/
+    /* Projections objects for native mongo driver now its deprecated*/
     //private readonly noHiddenId = {projection: {_id: false}}; deprecated projection for mongo driver
     // private readonly commentProjection = {projection: {_id: false, postId: false}}
     // private readonly userProjection = {
@@ -19,18 +22,19 @@ export class QueryRepository {
     //         _id: false, hash: false, salt: false, confirmation: false
     //     }
     //}
-    /*end of prohjections*/
+    /*end of projections*/
     private readonly all = {};
     private readonly viewSelector = '-_id -__v'
     private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation -recovery'
     private readonly commentSelector = this.viewSelector + ' ' + '-postId'
 
     constructor(
-        @inject<Model<any>>('BlogModel') private Blogs:  Model<any>,
-        @inject<Model<any>>('PostModel') private Posts:  Model<any>,
-        @inject<Model<any>>('UserModel') private Users:  Model<any>,
-        @inject<Model<any>>('CommentModel') private Comments:  Model<any>,
-        @inject<Model<any>>('SessionModel') private Sessions:  Model<any>
+        @inject<Model<any>>('BlogModel') private Blogs: Model<any>,
+        @inject<Model<any>>('PostModel') private Posts: Model<any>,
+        @inject<Model<any>>('UserModel') private Users: Model<any>,
+        @inject<Model<any>>('CommentModel') private Comments: Model<any>,
+        @inject<Model<any>>('SessionModel') private Sessions: Model<any>,
+        @inject<Model<any>>("LikeModel") private Likes: Model<any>
     ) {
     }
 
@@ -190,15 +194,26 @@ export class QueryRepository {
         }
     }
 
-    async getCommentById(id: string): Promise<CommentsOutputModel | null> {
+    private async _commentMutator(comment: any): Promise<CommentsOutputModel> {
+        return{
+            id: comment.id,
+            content: comment.content,
+            commentatorInfo: comment.commentatorInfo,
+            createdAt: comment.createdAt
+        }
+    }
+
+    public async getCommentById(id: string): Promise<CommentsOutputModel | null> {
         try {
-            return await this.Comments.findOne({id}).select(this.commentSelector)
+            const comment = await this.Comments.findOne({id}).select(this.commentSelector)
+            if (!comment) return null
+            return await this._commentMutator(comment)
         } catch (e) {
             return null
         }
     }
 
-    async countCommentsByPostId(postId: string): Promise<number> {
+    public async countCommentsByPostId(postId: string): Promise<number> {
         try {
             return await this.Comments.count({postId})
         } catch (e) {
@@ -206,28 +221,34 @@ export class QueryRepository {
         }
     }
 
-    async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>): Promise<CommentsOutputModel[] | null> {
+    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): Promise<CommentsOutputModel[] | null> {
         try {
-            return await this.Comments.find({postId: config.filter!.postId})
+            const comments =  await this.Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
                 .select(this.commentSelector)
+            return await Promise.all(comments.map( async (comment) => {
+                return {
+                    ...await this._commentMutator(comment),
+                    likeStatus: await this.getLikeStatus(comment.id,userId)
+                }
+            }))
         } catch (e) {
             return null
         }
     }
 
-    async getMetaToken(data: SessionFilter): Promise<RefreshTokensMeta | null> {
+    public async getMetaToken(data: SessionFilter): Promise<RefreshTokensMeta | null> {
         const {userId, deviceId} = data
         return await this.Sessions.findOne({userId, deviceId})
     }
 
-    async getSession(deviceId: string): Promise<RefreshTokensMeta | null> {
+    public async getSession(deviceId: string): Promise<RefreshTokensMeta | null> {
         return await this.Sessions.findOne({deviceId})
     }
 
-    async getTokensForUser(userId: string): Promise<Array<SecurityViewModel>> {
+    public async getTokensForUser(userId: string): Promise<Array<SecurityViewModel>> {
         const arrayFromDb = await this.Sessions.find({userId})
         return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
             return {
@@ -237,5 +258,58 @@ export class QueryRepository {
                 title: title as string
             }
         })
+    }
+
+    public async getLikeByUserToTarget(userId: string,target: string): Promise<WithId<LikeModel> | null> {
+        return await this.Likes.findOne({userId,target})
+    }
+
+    public async getLikeById(id: string): Promise<LikeModel | null> {
+        return await this.Likes.findOne({id})
+    }
+
+    public async getLikeCount(target: string): Promise<number> {
+        try {
+            return await this.Likes.countDocuments({
+                target, likeStatus: likeEnum.like
+            })
+        } catch (e) {
+            return 0
+        }
+    }
+
+    public async getDislikeCount(target: string): Promise<number> {
+        try {
+            return await this.Likes.countDocuments({
+                target, likeStatus: likeEnum.dislike
+            })
+        } catch (e) {
+            return 0
+        }
+    }
+
+    public async getUserLikeStatus(target: string, userId: string | null): Promise<LikeStatus> {
+        try {
+            if (!userId) return likeEnum.none
+            const like = await this.Likes.findOne({target,userId})
+            if(!like) return likeEnum.none
+            return like.likeStatus
+        } catch (e){
+            return likeEnum.none
+        }
+    }
+
+    public async getLikeStatus(target: string, userId: string | null): Promise<LikesInfo> {
+        try {
+            const [likesCount,dislikesCount,myStatus] = await Promise.all([
+                this.getLikeCount(target),
+                this.getDislikeCount(target),
+                this.getUserLikeStatus(target,userId)
+            ])
+            return {likesCount, dislikesCount,myStatus}
+        } catch (e) {
+            const [likesCount,dislikesCount,myStatus] = [0,0,likeEnum.none]
+            return {likesCount,dislikesCount, myStatus}
+        }
     }
 }

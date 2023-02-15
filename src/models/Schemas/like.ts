@@ -28,7 +28,7 @@ export const LikeSchema = new mongoose.Schema<LikeModel>({
     },
     likeStatus:{
         type: String,
-        required: true,
-        enum:['Like','Dislike']
+        default: "None",
+        enum:['Like','Dislike','None']
     }
 })

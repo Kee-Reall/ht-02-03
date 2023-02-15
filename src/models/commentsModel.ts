@@ -5,22 +5,23 @@ export interface CommentsInputModel {
     content: string
 }
 
-export interface CommentsViewModel extends UserForCommentsModel {
+export interface CommentsLogicModel {
     content: string,
-    userId: string,
-    userLogin: string
+    commentatorInfo: UserForCommentsModel
     createdAt: string
 }
 
-export interface CommentsOutputModel extends CommentsViewModel {
+export interface CommentsOutputModel extends CommentsLogicModel {
     id: string
 }
 
 export interface CommentsDbModel {
     id: string
-    content: string,
-    userId: string,
-    userLogin: string
+    content: string
+    commentatorInfo: {
+        userId: string
+        userLogin: string
+    }
     createdAt: string
     postId: string
     _id?: ObjectId

@@ -6,6 +6,7 @@ import {basicAuth} from "../middleware/basicAuth";
 import {getCommentsMiddleware} from "../middleware/getCommentsMiddleware";
 import {iocContainer} from "../containers/iocContainer";
 import {PostsController} from "../controllers/postsController";
+import {jwtAuthWithoutBlock} from "../middleware/jwtAuthWithoutBlock";
 export const postsRouter = Router()
 const root = '/'
 const param = root + ':id'
@@ -20,5 +21,5 @@ postsRouter.put(param, basicAuth, ...postMiddlewares, postsController.updatePost
 postsRouter.delete(param, basicAuth,postsController.deletePostUsingId.bind(postsController))
 postsRouter.patch(root  ,postsController.deprecated.bind(postsController))
 postsRouter.patch(param, postsController.deprecated.bind(postsController))
-postsRouter.get(comments, ...getCommentsMiddleware ,postsController.getCommentsForPost.bind(postsController))
+postsRouter.get(comments,jwtAuthWithoutBlock, ...getCommentsMiddleware ,postsController.getCommentsForPost.bind(postsController))
 postsRouter.post(comments, jwtAuth, ...createCommentMiddlewares, postsController.createCommentForPost.bind(postsController))

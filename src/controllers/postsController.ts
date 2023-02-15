@@ -5,12 +5,14 @@ import {PostsService} from "../services/posts-service";
 import {Post} from "../models/postsModel";
 import {CommentsFilter} from "../models/filtersModel";
 import {Normalizer} from "../helpers/normalizer";
+import {CommentsService} from "../services/comments-service";
 
 @injectable()
 export class PostsController {
 
     constructor(
         @inject(PostsService) protected postsService: PostsService,
+        @inject(CommentsService) protected commentService: CommentsService,
         @inject(Normalizer) protected normalizer: Normalizer
     ) {}
 
@@ -55,12 +57,13 @@ export class PostsController {
             ...this.normalizer.normalizeCommentQuery(req.query),
             searchId: req.params.id as string
         }
-        res.status(httpStatus.ok).json(await this.postsService.getCommentForPost(query))
+        const userId = req.unauthorized ? null : req.user.id
+        res.status(httpStatus.ok).json(await this.commentService.getCommentsByPost(query,userId))
     }
 
     async createCommentForPost(req: Request, res: Response) {
         const {body: {content}, params: {id: postId}, user} = req
-        const result = await this.postsService.createComment({content, postId, user})
+        const result = await this.commentService.createComment({content, postId, user})
         if (result === null) {
             return res.sendStatus(httpStatus.teapot)
         }
