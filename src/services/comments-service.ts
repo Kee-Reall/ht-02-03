@@ -32,7 +32,7 @@ export class CommentsService {
     public async getCommentById(id: string,userId: string | null): Promise<WithLike<CommentsLogicModel> | null> {
         const comment = await this.queryRepository.getCommentById(id)
         if (!comment) return null
-        const likesInfo = await this.queryRepository.getLikeStatus(id,userId)
+        const likesInfo = await this.queryRepository.getLikeInfo(id,userId)
         return {
             ...comment,
             likesInfo

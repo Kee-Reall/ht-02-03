@@ -231,7 +231,7 @@ export class QueryRepository {
             return await Promise.all(comments.map( async (comment) => {
                 return {
                     ...await this._commentMutator(comment),
-                    likeStatus: await this.getLikeStatus(comment.id,userId)
+                    likesInfo: await this.getLikeInfo(comment.id,userId)
                 }
             }))
         } catch (e) {
@@ -299,7 +299,7 @@ export class QueryRepository {
         }
     }
 
-    public async getLikeStatus(target: string, userId: string | null): Promise<LikesInfo> {
+    public async getLikeInfo(target: string, userId: string | null): Promise<LikesInfo> {
         try {
             const [likesCount,dislikesCount,myStatus] = await Promise.all([
                 this.getLikeCount(target),
