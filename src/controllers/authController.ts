@@ -32,7 +32,7 @@ export class AuthController {
         }
         const {refreshToken, accessToken} = tokenPair
         res.status(httpStatus.ok)
-            .cookie('refreshToken', refreshToken, {httpOnly: true, /*secure: true,*/ sameSite: 'none'})
+            .cookie('refreshToken', refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
             .json({accessToken})
     }
 
@@ -83,7 +83,7 @@ export class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair.refreshToken, {httpOnly: true, /*secure: true,*/ sameSite: 'none'})
+            .cookie('refreshToken', pair.refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
             .json({accessToken: pair.accessToken})
     }
 
@@ -99,7 +99,7 @@ export class AuthController {
         }
         res.cookie('refreshToken', '', {
             httpOnly: true,
-            /*secure: true,*/
+            secure: true,
             sameSite: 'none'
         }).sendStatus(httpStatus.noContent)
     }
