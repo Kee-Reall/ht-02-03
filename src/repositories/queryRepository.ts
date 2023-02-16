@@ -7,7 +7,7 @@ import {UserLogicModel, UserViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
 import {SecurityViewModel} from "../models/SecurityModel";
-import {LikeModel, LikesInfo, LikeStatus} from "../models/LikeModel";
+import {LikeModel, LikesInfo, LikeStatus, WithLike} from "../models/LikeModel";
 import {WithId} from "mongodb"
 import {likeEnum} from "../enums/likeEnum";
 
@@ -194,13 +194,22 @@ export class QueryRepository {
         }
     }
 
-    private async _commentMutator(comment: any): Promise<CommentsOutputModel> {
+    private async _commentMutator<T extends CommentsDbModel >(comment: T): Promise<CommentsOutputModel> {
         return{
             id: comment.id,
             content: comment.content,
             commentatorInfo: comment.commentatorInfo,
             createdAt: comment.createdAt
         }
+    }
+
+    private async _viewMutator<T extends K, K extends object>(item: T, example: K): Promise<K> { //universal function
+        const keys = Object.keys(example) as Array<keyof K>
+        const result = {} as K
+        for(let i = 0; i < keys.length;i++) {
+            result[keys[i]] = item[keys[i]]
+        }
+        return result
     }
 
     public async getCommentById(id: string): Promise<CommentsOutputModel | null> {
@@ -221,7 +230,7 @@ export class QueryRepository {
         }
     }
 
-    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): Promise<CommentsOutputModel[] | null> {
+    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): Promise<WithLike<CommentsOutputModel>[] | null> {
         try {
             const comments =  await this.Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
@@ -260,12 +269,20 @@ export class QueryRepository {
         })
     }
 
-    public async getLikeByUserToTarget(userId: string,target: string): Promise<WithId<LikeModel> | null> {
-        return await this.Likes.findOne({userId,target})
+    public async getLikeByUserToTarget(userId: string, target: string): Promise<WithId<LikeModel> | null> {
+        try {
+            return await this.Likes.findOne({userId, target})
+        } catch (e) {
+            return null
+        }
     }
 
     public async getLikeById(id: string): Promise<LikeModel | null> {
-        return await this.Likes.findOne({id})
+        try {
+            return await this.Likes.findOne({id})
+        } catch (e) {
+            return null
+        }
     }
 
     public async getLikeCount(target: string): Promise<number> {

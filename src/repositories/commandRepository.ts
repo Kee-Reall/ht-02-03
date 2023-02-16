@@ -145,8 +145,8 @@ export class CommandRepository {
 
     async createComment(commentDb: CommentsDbModel): Promise<boolean> {
         try {
-            await this.Comments.create(commentDb)
-            return true
+            const res = await this.Comments.create(commentDb)
+            return !!res
         } catch (e) {
             return false
         }

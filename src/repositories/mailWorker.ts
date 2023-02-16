@@ -20,7 +20,7 @@ export class MailWorker {
         })
     }
 
-    private message(code: any) {
+    private message(code: string) {
         return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
     }
 
@@ -28,7 +28,7 @@ export class MailWorker {
         return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${this.passLink}${code}">recovery password</a></p>`
     }
 
-    public async sendConfirmationAfterRegistration(email: string, code: any): Promise<boolean> {
+    public async sendConfirmationAfterRegistration(email: string, code: string): Promise<boolean> {
         try {
             const {accepted} = await this.mainTransporter.sendMail({
                 from: `it-incubator Application <${process.env.MAIL_NAME}>`,
