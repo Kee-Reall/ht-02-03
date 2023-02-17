@@ -7,7 +7,7 @@ import {PostInputThroughBlog, PostInputModel, PostViewModel} from "../models/pos
 import {PostsService} from "./posts-service";
 import {QueryRepository} from "../repositories/queryRepository";
 import {injectable,inject} from "inversify";
-import {IdCreatorFunction, Nullable} from "../models/mixedModels";
+import {Entire, IdCreatorFunction, Nullable} from "../models/mixedModels";
 
 @injectable()
 export class BlogsService {
@@ -44,7 +44,7 @@ export class BlogsService {
         return await this.queryRepository.getBlogById(id)
     }
 
-    async getBlogPosts(blogId: string, params: any,userId: Nullable<string> = null) {
+    async getBlogPosts(blogId: string, params: Entire<BlogFilters>, userId: Nullable<string> = null) {
         const config:SearchConfiguration<PostViewModel> = {
             filter: {blogId},
             sortBy: params.sortBy,
