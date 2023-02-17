@@ -1,33 +1,35 @@
 import {inject, injectable} from "inversify";
 import {QueryRepository} from "../repositories/queryRepository";
 import {PostInputModel, PostViewModel} from "../models/postsModel";
-import { Blog } from "../models/blogModel";
+import {Blog} from "../models/blogModel";
 import {CommandRepository} from "../repositories/commandRepository";
 import {BlogFilters} from "../models/filtersModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
 import {CommentsService} from "./comments-service";
-import {IdCreatorFunction, NullablePromise} from "../models/mixedModels";
+import {IdCreatorFunction, Nullable, NullablePromise} from "../models/mixedModels";
 import {LikeDTO, LikeModel, WithExtendedLike} from "../models/LikeModel";
 import {SearchError} from "../helpers/extendedErrors";
 import {message} from "../enums/messageEnum";
+
 @injectable()
 export class PostsService {
 
     constructor(
-        @inject(QueryRepository)protected queryRepository: QueryRepository,
-        @inject(CommandRepository)protected commandRepository: CommandRepository,
-        @inject(CommentsService)protected commentsService: CommentsService,
+        @inject(QueryRepository) protected queryRepository: QueryRepository,
+        @inject(CommandRepository) protected commandRepository: CommandRepository,
+        @inject(CommentsService) protected commentsService: CommentsService,
         @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction
-    ) {}
+    ) {
+    }
 
-    async getPostById(postId:string,userId: string | null = null): NullablePromise<WithExtendedLike<PostViewModel>> {
+    async getPostById(postId: string, userId: Nullable<string> = null): NullablePromise<WithExtendedLike<PostViewModel>> {
         const post = await this.queryRepository.getPost(postId)
         if (!post) return null
-        const extendedLikesInfo = await this.queryRepository.getExtendedLikeInfo(postId,userId)
+        const extendedLikesInfo = await this.queryRepository.getExtendedLikeInfo(postId, userId)
         return {...post, extendedLikesInfo}
     }
 
-    async getPostsWithPagination(params: BlogFilters,userId: string | null) {
+    async getPostsWithPagination(params: BlogFilters, userId: Nullable<string>) {
         const searchConfig: SearchConfiguration<PostViewModel> = {
             sortBy: params.sortBy!,
             sortDirection: params.sortDirection!,
@@ -36,7 +38,7 @@ export class PostsService {
         }
         const totalCount = await this.queryRepository.getPostsCount()
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
-        const items = await this.queryRepository.getPostsWithPagination(searchConfig,userId) || []
+        const items = await this.queryRepository.getPostsWithPagination(searchConfig, userId) || []
         return {
             pagesCount,
             page: params.pageNumber!,
@@ -51,32 +53,32 @@ export class PostsService {
         const {blogId, content, shortDescription, title} = postInput
         const id = this.generateId("post")
         const blog: Blog = await this.queryRepository.getBlogById(blogId)
-        if(!blog) return null
+        if (!blog) return null
         const toPut = {
-            id, blogId, content, shortDescription , title,
+            id, blogId, content, shortDescription, title,
             blogName: blog.name,
             createdAt: new Date(Date.now()).toISOString()
         }
         const result = await this.commandRepository.createPost(toPut)
-        if(!result) {
+        if (!result) {
             return null
         }
         const post = await this.queryRepository.getPost(id)
-        if(!post) {
+        if (!post) {
             return null
         }
-        return {...post,extendedLikesInfo: await this.queryRepository.getExtendedLikeInfo(id) }
+        return {...post, extendedLikesInfo: await this.queryRepository.getExtendedLikeInfo(id)}
     }
 
     async updatePost(id: string, postInput: PostInputModel): Promise<boolean> {
         const {blogId, content, shortDescription, title} = postInput
         const blog = await this.queryRepository.getBlogById(blogId)
-        if(!blog) {
+        if (!blog) {
             return false
         }
         const {name: blogName} = blog
-        const toUpdate: PostInputModel & {blogName?: string} = {blogId,content,shortDescription,title,blogName}
-        return this.commandRepository.updatePost(id,toUpdate)
+        const toUpdate: PostInputModel & { blogName?: string } = {blogId, content, shortDescription, title, blogName}
+        return this.commandRepository.updatePost(id, toUpdate)
     }
 
     private async createLikeEntity(target: string, {likeStatus, userId}: LikeDTO): Promise<LikeModel> {
@@ -96,15 +98,15 @@ export class PostsService {
         }
         const like = await this.queryRepository.getLikeByUserToTarget(dto.userId, postId)
         if (!like) {
-            return  await this.commandRepository.createLike(await this.createLikeEntity(postId, dto))
+            return await this.commandRepository.createLike(await this.createLikeEntity(postId, dto))
         }
         if (dto.likeStatus === like.likeStatus) {
             return true
         }
-        return await this.commandRepository.updateLike(postId,dto.userId,dto.likeStatus)
+        return await this.commandRepository.updateLike(postId, dto.userId, dto.likeStatus)
     }
 
-    async deletePost(id:string): Promise<boolean> {
+    async deletePost(id: string): Promise<boolean> {
         return await this.commandRepository.deletePost(id)
     }
 }

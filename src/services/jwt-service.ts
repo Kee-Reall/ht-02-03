@@ -1,7 +1,7 @@
 import jwt, {SignOptions} from 'jsonwebtoken'
 import {UserLogicModel} from "../models/userModel";
 import {UsersService} from "./users-service";
-import {ClientMeta, CreateTokenClientMeta, TokenPair} from "../models/mixedModels";
+import {ClientMeta, CreateTokenClientMeta, NullablePromise, TokenPair} from "../models/mixedModels";
 import {CommandRepository} from "../repositories/commandRepository";
 import {QueryRepository} from "../repositories/queryRepository";
 import {RefreshTokenPayload} from "../models/refreshTokensMeta";
@@ -38,7 +38,7 @@ export class JwtService {
         return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(10 * 60));
     }
 
-    private async createRefreshToken(clientInfo: CreateTokenClientMeta): Promise<string | null>{
+    private async createRefreshToken(clientInfo: CreateTokenClientMeta): NullablePromise<string>{
         const metaDataAfterCreation = await this.commandRepository.createMetaToken(clientInfo)
         if(!metaDataAfterCreation) {
             return null
@@ -51,7 +51,7 @@ export class JwtService {
         return jwt.sign(payload, this.getJwtSecret(),this.generateExpireIn15Days())
     }
 
-    public async createTokenPair(clientInfo: CreateTokenClientMeta): Promise<TokenPair | null> {
+    public async createTokenPair(clientInfo: CreateTokenClientMeta): NullablePromise<TokenPair> {
         const refreshToken = await this.createRefreshToken(clientInfo)
         if(!refreshToken) {
             return null
@@ -60,7 +60,7 @@ export class JwtService {
         return { accessToken, refreshToken }
     }
 
-    public async updateTokenPair(clientInfo: ClientMeta): Promise<TokenPair | null> {
+    public async updateTokenPair(clientInfo: ClientMeta): NullablePromise<TokenPair> {
         const {deviceId,updateDate,userId,ip} = clientInfo
         const refreshToken = await this.updateRefreshToken({deviceId,updateDate,userId},ip as string)
         if(!refreshToken) {
@@ -70,7 +70,7 @@ export class JwtService {
         return { accessToken, refreshToken }
     }
 
-    private async updateRefreshToken(tokenMeta: RefreshTokenPayload, ip: string): Promise<string | null> {
+    private async updateRefreshToken(tokenMeta: RefreshTokenPayload, ip: string): NullablePromise<string> {
         const{ updateDate, userId, deviceId} = tokenMeta
         const dbToken = await this.queryRepository.getMetaToken(tokenMeta)
         if(!dbToken || ( dbToken.updateDate.toISOString() !== updateDate)){
@@ -84,7 +84,7 @@ export class JwtService {
     }
 
 
-    private async _verify(token: string): Promise<string | null> {
+    private async _verify(token: string): NullablePromise<string> {
         try {
             const payload: any = jwt.verify(token, this.getJwtSecret())
             return payload.userId as string
@@ -93,12 +93,12 @@ export class JwtService {
         }
     }
 
-    public async getUserByToken(token: string): Promise< UserLogicModel | null> {
+    public async getUserByToken(token: string): NullablePromise<UserLogicModel> {
         const userId: string | null = await this._verify(token)
         return userId ? await this.usersService.getUserById(userId) : userId as null
     }
 
-    public async verifyRefreshToken(token: string): Promise<RefreshTokenPayload | null> {
+    public async verifyRefreshToken(token: string): NullablePromise<RefreshTokenPayload> {
         try {
             return  jwt.verify(token,this.getJwtSecret()) as RefreshTokenPayload
         } catch (e) {

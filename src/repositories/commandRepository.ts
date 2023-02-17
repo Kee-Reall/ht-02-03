@@ -8,7 +8,7 @@ import {
     SessionFilter,
     UpdateRefreshTokenMeta
 } from "../models/refreshTokensMeta";
-import {CreateTokenClientMeta, ModelWithSchema} from "../models/mixedModels";
+import {CreateTokenClientMeta, ModelWithSchema, NullablePromise} from "../models/mixedModels";
 import {inject, injectable} from "inversify";
 import {Model} from "mongoose";
 import {LikeModel, LikeStatus} from "../models/LikeModel";
@@ -170,7 +170,7 @@ export class CommandRepository {
         }
     }
 
-    async createMetaToken(input: CreateTokenClientMeta): Promise<RefreshTokenDbResponse | null> {
+    async createMetaToken(input: CreateTokenClientMeta): NullablePromise<RefreshTokenDbResponse> {
         try {
             const {title, ip: initialIp, userId} = input
             const ip = [(initialIp ?? 'undetected')]
@@ -182,7 +182,7 @@ export class CommandRepository {
         }
     }
 
-    async updateMetaToken(input: UpdateRefreshTokenMeta): Promise<Partial<RefreshTokenPayload> | null> {
+    async updateMetaToken(input: UpdateRefreshTokenMeta): NullablePromise<Partial<RefreshTokenPayload>> {
         try {
             const {deviceId, userId} = input
             const updateDate = new Date(Date.now())

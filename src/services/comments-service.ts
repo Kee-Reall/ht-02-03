@@ -3,7 +3,7 @@ import {CommentsLogicModel, CommentCreationModel, CommentsDbModel, CommentsOutpu
 import {QueryRepository} from "../repositories/queryRepository";
 import {CommandRepository} from "../repositories/commandRepository";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {IdCreatorFunction, sortingDirection} from "../models/mixedModels";
+import {IdCreatorFunction, Nullable, sortingDirection} from "../models/mixedModels";
 import {CommentsFilter} from "../models/filtersModel";
 import {GetOutput} from "../models/ResponseModel";
 import {LikeDTO, LikeModel, WithLike} from "../models/LikeModel";
@@ -29,7 +29,7 @@ export class CommentsService {
         return result ? await this.getCommentById(id,userId) : null
     }
 
-    public async getCommentById(id: string,userId: string | null): Promise<WithLike<CommentsLogicModel> | null> {
+    public async getCommentById(id: string,userId: Nullable<string>): Promise<WithLike<CommentsLogicModel> | null> {
         const comment = await this.queryRepository.getCommentById(id)
         if (!comment) return null
         const likesInfo = await this.queryRepository.getLikeInfo(id,userId)
@@ -47,7 +47,7 @@ export class CommentsService {
         return await this.commandRepository.deleteComment(id)
     }
 
-    public async getCommentsByPost(params: CommentsFilter,userId: string | null): Promise<GetOutput> {
+    public async getCommentsByPost(params: CommentsFilter,userId: Nullable<string>): Promise<GetOutput> {
         const searchConfig: SearchConfiguration<CommentsDbModel> = {
             filter: {
                 postId: params.searchId

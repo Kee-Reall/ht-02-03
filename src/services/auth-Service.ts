@@ -3,7 +3,7 @@ import {QueryRepository} from "../repositories/queryRepository";
 import {UserInputModel, UserLogicModel, UserViewModel} from "../models/userModel";
 import {UsersService} from "./users-service";
 import {JwtService} from "./jwt-service";
-import {ClientMeta, HashFunction} from "../models/mixedModels";
+import {ClientMeta, HashFunction, NullablePromise} from "../models/mixedModels";
 import {RefreshTokenPayload, SessionFilter} from "../models/refreshTokensMeta";
 import {CommandRepository} from "../repositories/commandRepository";
 
@@ -18,7 +18,7 @@ export class AuthService {
     ) {
     }
 
-    async login(loginOrEmail: string, password: string): Promise< UserLogicModel | null> {
+    async login(loginOrEmail: string, password: string): NullablePromise<UserLogicModel> {
         const user: UserLogicModel | null = await this.queryRepository.getUserByLoginOrEmail(loginOrEmail)
         if(!user) {
             return null

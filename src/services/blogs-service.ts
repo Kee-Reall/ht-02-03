@@ -7,7 +7,7 @@ import {PostInputThroughBlog, PostInputModel, PostViewModel} from "../models/pos
 import {PostsService} from "./posts-service";
 import {QueryRepository} from "../repositories/queryRepository";
 import {injectable,inject} from "inversify";
-import {IdCreatorFunction} from "../models/mixedModels";
+import {IdCreatorFunction, Nullable} from "../models/mixedModels";
 
 @injectable()
 export class BlogsService {
@@ -44,7 +44,7 @@ export class BlogsService {
         return await this.queryRepository.getBlogById(id)
     }
 
-    async getBlogPosts(blogId: string, params: any) {
+    async getBlogPosts(blogId: string, params: any,userId: Nullable<string> = null) {
         const config:SearchConfiguration<PostViewModel> = {
             filter: {blogId},
             sortBy: params.sortBy,
@@ -52,7 +52,7 @@ export class BlogsService {
             limit: params.pageSize,
             sortDirection: params.sortDirection
         }
-        const blogGot = await this.queryRepository.getPostsByFilter(config)
+        const blogGot = await this.queryRepository.getPostsByFilter(config, userId)
         const totalCount = await this.queryRepository.getPostsCount(config.filter)
         return {
             pagesCount: Math.ceil(totalCount / params.pageSize!),

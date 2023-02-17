@@ -2,7 +2,7 @@ import {Model,FilterQuery} from "mongoose";
 import {inject, injectable} from "inversify";
 import {BlogViewModel} from "../models/blogModel";
 import {PostViewModel} from "../models/postsModel";
-import {SearchConfiguration} from "../models/searchConfiguration";
+import {DirectionNum, SearchConfiguration} from "../models/searchConfiguration";
 import {UserLogicModel, UserViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
@@ -11,7 +11,7 @@ import {ExtendedLikesInfo, LikeModel, LikesInfo, LikeStatus, WithExtendedLike, W
 import {WithId} from "mongodb"
 import {likeEnum} from "../enums/likeEnum";
 import {Likes} from "../adapters/mongooseCreater";
-import {NullablePromise} from "../models/mixedModels";
+import {Nullable, NullablePromise} from "../models/mixedModels";
 
 @injectable()
 export class QueryRepository {
@@ -89,9 +89,9 @@ export class QueryRepository {
         }
     }
 
-    public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>, userId: string | null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
+    public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>, userId: Nullable<string>): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
-            const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
+            const direction: DirectionNum = config.sortDirection! === 'asc' ? 1 : -1
             const posts = await this.Posts.find(this.all)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
@@ -109,14 +109,21 @@ export class QueryRepository {
         }
     }
 
-    async getPostsByFilter(config: SearchConfiguration<PostViewModel>): NullablePromise<PostViewModel[]> {
+    async getPostsByFilter(config: SearchConfiguration<PostViewModel>,userId: Nullable<string> = null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            return await this.Posts.find(config.filter as FilterQuery<PostViewModel>)
+            const posts = await this.Posts.find(config.filter as FilterQuery<PostViewModel>)
                 .sort(sorter)
                 .skip(config.shouldSkip)
                 .limit(config.limit)
                 .select(this.viewSelector)
+                .lean()
+            return await Promise.all(posts.map(async (post) => {
+                return {
+                    ...post as PostViewModel,
+                    extendedLikesInfo: await this.getExtendedLikeInfo(post.id, userId)
+                }
+            }))
         } catch (e) {
             return null
         }
@@ -231,7 +238,7 @@ export class QueryRepository {
         }
     }
 
-    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): NullablePromise<WithLike<CommentsOutputModel>[]> {
+    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: Nullable<string>): NullablePromise<WithLike<CommentsOutputModel>[]> {
         try {
             const comments =  await this.Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
@@ -314,7 +321,7 @@ export class QueryRepository {
         }
     }
 
-    public async getUserLikeStatus(target: string, userId: string | null): Promise<LikeStatus> {
+    public async getUserLikeStatus(target: string, userId: Nullable<string>): Promise<LikeStatus> {
         try {
             if (!userId) return likeEnum.none
             const like = await this.Likes.findOne({target,userId})
@@ -325,7 +332,7 @@ export class QueryRepository {
         }
     }
 
-    public async getLikeInfo(target: string, userId: string | null): Promise<LikesInfo> {
+    public async getLikeInfo(target: string, userId: Nullable<string>): Promise<LikesInfo> {
         try {
             const [likesCount, dislikesCount, myStatus] = await Promise.all([
                 this.getLikeCount(target),
@@ -339,7 +346,7 @@ export class QueryRepository {
         }
     }
 
-    private async getLastLikes(target: string,limit = 3): Promise<Array<Pick<LikeModel, 'login' | 'addedAt' | 'userId'>>> {
+    private async getLastLikes(target: string,limit: number = 3): Promise<Array<Pick<LikeModel, 'login' | 'addedAt' | 'userId'>>> {
         try {
             return await Likes.find({target,likeStatus: likeEnum.like}).sort({addedAt: -1}).limit(limit).select(this.lastLikesSelector).lean()
         }catch (e) {

@@ -59,8 +59,9 @@ export class BlogsController {
     }
 
     async getBlogsPost(req: Request, res: Response) {
+        const unauthorized = req.unauthorized
         const query = this.normalizer.normalizePostsQuery(req.query)
-        const result = await (this.blogsService.getBlogPosts(req.params.id, query))
+        const result = await (this.blogsService.getBlogPosts(req.params.id, query, unauthorized ? null : req.user.id))
         res.json(result)
     }
 

@@ -8,3 +8,5 @@ export interface SearchConfiguration<T> {
     limit: number
     sortDirection: sortingDirection
 }
+
+export type DirectionNum = 1 | -1
