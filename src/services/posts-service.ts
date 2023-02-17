@@ -47,7 +47,7 @@ export class PostsService {
 
     }
 
-    async createPost(postInput: PostInputModel): NullablePromise<PostViewModel> {
+    async createPost(postInput: PostInputModel): NullablePromise<WithExtendedLike<PostViewModel>> {
         const {blogId, content, shortDescription, title} = postInput
         const id = this.generateId("post")
         const blog: Blog = await this.queryRepository.getBlogById(blogId)
@@ -61,7 +61,11 @@ export class PostsService {
         if(!result) {
             return null
         }
-        return await this.queryRepository.getPost(id)
+        const post = await this.queryRepository.getPost(id)
+        if(!post) {
+            return null
+        }
+        return {...post,extendedLikesInfo: await this.queryRepository.getExtendedLikeInfo(id) }
     }
 
     async updatePost(id: string, postInput: PostInputModel): Promise<boolean> {

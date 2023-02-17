@@ -89,7 +89,7 @@ export class QueryRepository {
         }
     }
 
-    public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>,userId: string | null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
+    public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>, userId: string | null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
             const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
             const posts = await this.Posts.find(this.all)
@@ -98,10 +98,10 @@ export class QueryRepository {
                 .limit(config.limit)
                 .select(this.viewSelector)
                 .lean()
-            return await Promise.all(posts.map( async (el) => {
+            return await Promise.all(posts.map(async(post) => {
                 return {
-                    ...el,
-                    extendedLikesInfo : await this.getExtendedLikeInfo(el.id,userId)
+                    ...post as PostViewModel,
+                    extendedLikesInfo: await this.getExtendedLikeInfo(post.id, userId)
                 }
             }))
         } catch (e) {
