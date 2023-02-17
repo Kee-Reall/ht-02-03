@@ -34,7 +34,7 @@ export class CommentsController {
         }
     }
 
-    public async setLike(req: LikeRequest, res: Response) {
+    public async LikeComment(req: LikeRequest, res: Response) {
         const {body: {likeStatus}, user} = req
         const userId = user.id
         try {

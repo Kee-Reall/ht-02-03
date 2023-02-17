@@ -72,7 +72,7 @@ export class CommentsService {
         const user = await this.queryRepository.getUserById(userId)
         return {
             login: user!.login, likeStatus, userId, target,
-            addAt: new Date(),
+            addedAt: new Date(),
             id: this.generateId('like'),
         }
     }

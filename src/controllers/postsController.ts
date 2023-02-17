@@ -2,10 +2,11 @@ import {inject, injectable} from "inversify";
 import {Request, Response} from "express";
 import {httpStatus} from "../enums/httpEnum";
 import {PostsService} from "../services/posts-service";
-import {Post} from "../models/postsModel";
 import {CommentsFilter} from "../models/filtersModel";
 import {Normalizer} from "../helpers/normalizer";
 import {CommentsService} from "../services/comments-service";
+import {LikeRequest} from "../models/RequestModel";
+import {SearchError} from "../helpers/extendedErrors";
 
 @injectable()
 export class PostsController {
@@ -17,8 +18,9 @@ export class PostsController {
     ) {}
 
     async getOne(req: Request, res: Response) {
+        const unauthorized = req.unauthorized
         const {params: {id}} = req
-        const result = await this.postsService.getPost(id)
+        const result = await this.postsService.getPostById(id,unauthorized ? null : req.user.id)
         if (result) {
             res.status(httpStatus.ok).json(result)
             return
@@ -27,13 +29,14 @@ export class PostsController {
     }
 
     async getPosts(req: Request, res: Response) {
+        const unauthorized = req.unauthorized
         const query = this.normalizer.normalizePostsQuery(req.query)
-        const result = await (this.postsService.getPostsWithPagination(query))
+        const result = await (this.postsService.getPostsWithPagination(query,unauthorized ? null : req.user.id))
         res.status(httpStatus.ok).json(result)
     }
 
     async createPost(req: Request, res: Response) {
-        const result: Post = await this.postsService.createPost(req.body)
+        const result = await this.postsService.createPost(req.body)
         if (!result) {
             return res.sendStatus(httpStatus.teapot)
         }
@@ -68,6 +71,16 @@ export class PostsController {
             return res.sendStatus(httpStatus.teapot)
         }
         res.status(httpStatus.created).json(result)
+    }
+
+    public async likePost(req: LikeRequest, res: Response) {
+        const {body: {likeStatus}, user} = req
+        const userId = user.id
+        try {
+            res.sendStatus(await this.postsService.likePost(req.params.id, {likeStatus,userId}) ? httpStatus.noContent : httpStatus.teapot)
+        } catch (e) {
+            res.sendStatus(e instanceof SearchError ? httpStatus.notFound : httpStatus.teapot)
+        }
     }
 
     async deprecated(_: Request, res: Response) {

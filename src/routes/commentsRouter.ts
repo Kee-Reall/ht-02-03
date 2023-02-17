@@ -15,4 +15,4 @@ const like: string = param + '/like-status'
 commentsRouter.put(param, jwtAuth, updateCommentMiddleware, isOwnerMiddleware, commentsController.updateComment.bind(commentsController))
 commentsRouter.delete(param, jwtAuth, isOwnerMiddleware,commentsController.deleteComment.bind(commentsController))
 commentsRouter.get(param,jwtAuthWithoutBlock,commentsController.getCommentById.bind(commentsController))
-commentsRouter.put(like,jwtAuth,...likeMiddleWare,commentsController.setLike.bind(commentsController))
+commentsRouter.put(like,jwtAuth,...likeMiddleWare,commentsController.LikeComment.bind(commentsController))

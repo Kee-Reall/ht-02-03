@@ -7,9 +7,11 @@ import {UserLogicModel, UserViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
 import {SecurityViewModel} from "../models/SecurityModel";
-import {LikeModel, LikesInfo, LikeStatus, WithLike} from "../models/LikeModel";
+import {ExtendedLikesInfo, LikeModel, LikesInfo, LikeStatus, WithExtendedLike, WithLike} from "../models/LikeModel";
 import {WithId} from "mongodb"
 import {likeEnum} from "../enums/likeEnum";
+import {Likes} from "../adapters/mongooseCreater";
+import {NullablePromise} from "../models/mixedModels";
 
 @injectable()
 export class QueryRepository {
@@ -25,6 +27,7 @@ export class QueryRepository {
     /*end of projections*/
     private readonly all = {};
     private readonly viewSelector = '-_id -__v'
+    private readonly lastLikesSelector = 'addedAt login userId -_id'
     private readonly userViewSelector = this.viewSelector + ' ' + '-hash -salt -confirmation -recovery'
     private readonly commentSelector = this.viewSelector + ' ' + '-postId'
 
@@ -56,7 +59,7 @@ export class QueryRepository {
         }
     }
 
-    async getBlogWithPagination(config: SearchConfiguration<BlogViewModel>): Promise<BlogViewModel[] | null> {
+    async getBlogWithPagination(config: SearchConfiguration<BlogViewModel>): NullablePromise<BlogViewModel[]> {
         try {
             const filter = config.filter!.name ? {name: new RegExp(config.filter!.name as string, 'i')} : {} //if filter.name does not exist set all
             const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
@@ -70,7 +73,7 @@ export class QueryRepository {
         }
     }
 
-    async getBlogById(id: string): Promise<BlogViewModel | null> {
+    async getBlogById(id: string): NullablePromise<BlogViewModel> {
         try {
             return await this.Blogs.findOne({id}).select(this.viewSelector)
         } catch (e) {
@@ -78,28 +81,35 @@ export class QueryRepository {
         }
     }
 
-    async getPost(id: string): Promise<PostViewModel | null> {
+    async getPost(id: string): NullablePromise<PostViewModel> {
         try {
-            return await this.Posts.findOne({id}).select(this.viewSelector)
+            return await this.Posts.findOne({id}).select(this.viewSelector).lean()
         } catch (e) {
             return null
         }
     }
 
-    async getPostsWithPagination(config: SearchConfiguration<PostViewModel>) {
-        const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
+    public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>,userId: string | null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
-            return await this.Posts.find(this.all)
+            const direction: 1 | -1 = config.sortDirection! === 'asc' ? 1 : -1
+            const posts = await this.Posts.find(this.all)
                 .sort({[config.sortBy]: direction})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
                 .select(this.viewSelector)
+                .lean()
+            return await Promise.all(posts.map( async (el) => {
+                return {
+                    ...el,
+                    extendedLikesInfo : await this.getExtendedLikeInfo(el.id,userId)
+                }
+            }))
         } catch (e) {
             return null
         }
     }
 
-    async getPostsByFilter(config: SearchConfiguration<PostViewModel>): Promise<PostViewModel[] | null> {
+    async getPostsByFilter(config: SearchConfiguration<PostViewModel>): NullablePromise<PostViewModel[]> {
         try {
             const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
             return await this.Posts.find(config.filter as FilterQuery<PostViewModel>)
@@ -120,7 +130,7 @@ export class QueryRepository {
         }
     }
 
-    async getUsers(config: any): Promise<UserViewModel[] | null> {
+    async getUsers(config: any): NullablePromise<UserViewModel[]> {
         try {
             const direction: 1 | -1 = config.sortDirection === 'asc' ? 1 : -1
             return await this.Users.find(config.filter)
@@ -133,7 +143,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserById(id: string): Promise<UserViewModel | null> {
+    async getUserById(id: string): NullablePromise<UserViewModel> {
         try {
             return await this.Users.findOne({id}).select(this.userViewSelector)
         } catch (e) {
@@ -141,7 +151,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByIdWithLogic(id: string): Promise<UserLogicModel | null> {
+    async getUserByIdWithLogic(id: string): NullablePromise<UserLogicModel> {
         try {
             return await this.Users.findOne({id}).select(this.viewSelector)
         } catch (e) {
@@ -149,7 +159,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByLogin(login: string): Promise<UserViewModel | null> {
+    async getUserByLogin(login: string): NullablePromise<UserViewModel> {
         try {
             return await this.Users.findOne({login}).select(this.userViewSelector)
         } catch (e) {
@@ -157,7 +167,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByEmail(email: string): Promise<UserLogicModel | null> {
+    async getUserByEmail(email: string): NullablePromise<UserLogicModel> {
         try {
             return await this.Users.findOne({email}).select(this.viewSelector)
         } catch (e) {
@@ -165,7 +175,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByLoginOrEmail(loginOrEmail: string): Promise<UserLogicModel | null> {
+    async getUserByLoginOrEmail(loginOrEmail: string): NullablePromise<UserLogicModel> {
         try {
             return await this.Users.findOne({
                 $or: [
@@ -178,7 +188,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByConfirm(code: string): Promise<UserLogicModel | null> {
+    async getUserByConfirm(code: string): NullablePromise<UserLogicModel> {
         try {
             return await this.Users.findOne({"confirmation.code": code}).select(this.viewSelector)
         } catch (e) {
@@ -186,7 +196,7 @@ export class QueryRepository {
         }
     }
 
-    async getUserByRecoveryCode(recoveryCode: string): Promise<UserLogicModel | null> {
+    async getUserByRecoveryCode(recoveryCode: string): NullablePromise<UserLogicModel> {
         try {
             return await this.Users.findOne({"recovery.recoveryCode": recoveryCode})
         } catch (e) {
@@ -203,16 +213,7 @@ export class QueryRepository {
         }
     }
 
-    private async _viewMutator<T extends K, K extends object>(item: T, example: K): Promise<K> { //universal function
-        const keys = Object.keys(example) as Array<keyof K>
-        const result = {} as K
-        for(let i = 0; i < keys.length;i++) {
-            result[keys[i]] = item[keys[i]]
-        }
-        return result
-    }
-
-    public async getCommentById(id: string): Promise<CommentsOutputModel | null> {
+    public async getCommentById(id: string): NullablePromise<CommentsOutputModel> {
         try {
             const comment = await this.Comments.findOne({id}).select(this.commentSelector)
             if (!comment) return null
@@ -230,7 +231,7 @@ export class QueryRepository {
         }
     }
 
-    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): Promise<WithLike<CommentsOutputModel>[] | null> {
+    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: string | null): NullablePromise<WithLike<CommentsOutputModel>[]> {
         try {
             const comments =  await this.Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
@@ -248,28 +249,36 @@ export class QueryRepository {
         }
     }
 
-    public async getMetaToken(data: SessionFilter): Promise<RefreshTokensMeta | null> {
+    public async getMetaToken(data: SessionFilter): NullablePromise<RefreshTokensMeta> {
         const {userId, deviceId} = data
         return await this.Sessions.findOne({userId, deviceId})
     }
 
-    public async getSession(deviceId: string): Promise<RefreshTokensMeta | null> {
-        return await this.Sessions.findOne({deviceId})
+    public async getSession(deviceId: string): NullablePromise<RefreshTokensMeta> {
+        try {
+            return await this.Sessions.findOne({deviceId})
+        } catch (e) {
+            return null
+        }
     }
 
-    public async getTokensForUser(userId: string): Promise<Array<SecurityViewModel>> {
-        const arrayFromDb = await this.Sessions.find({userId})
-        return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
-            return {
-                ip: ip[ip.length - 1] as string,
-                lastActiveDate: updateDate.toISOString(),
-                deviceId,
-                title: title as string
-            }
-        })
+    public async getTokensForUser(userId: string): NullablePromise<Array<SecurityViewModel>> {
+        try {
+            const arrayFromDb = await this.Sessions.find({userId})
+            return arrayFromDb.map(({ip, deviceId, title, updateDate,}) => {
+                return {
+                    ip: ip[ip.length - 1] as string,
+                    lastActiveDate: updateDate.toISOString(),
+                    deviceId,
+                    title: title as string
+                }
+            })
+        } catch (e) {
+            return null
+        }
     }
 
-    public async getLikeByUserToTarget(userId: string, target: string): Promise<WithId<LikeModel> | null> {
+    public async getLikeByUserToTarget(userId: string, target: string): NullablePromise<WithId<LikeModel>> {
         try {
             return await this.Likes.findOne({userId, target})
         } catch (e) {
@@ -277,7 +286,7 @@ export class QueryRepository {
         }
     }
 
-    public async getLikeById(id: string): Promise<LikeModel | null> {
+    public async getLikeById(id: string): NullablePromise<LikeModel> { // Nothing use this for this moment
         try {
             return await this.Likes.findOne({id})
         } catch (e) {
@@ -318,15 +327,35 @@ export class QueryRepository {
 
     public async getLikeInfo(target: string, userId: string | null): Promise<LikesInfo> {
         try {
-            const [likesCount,dislikesCount,myStatus] = await Promise.all([
+            const [likesCount, dislikesCount, myStatus] = await Promise.all([
                 this.getLikeCount(target),
                 this.getDislikeCount(target),
-                this.getUserLikeStatus(target,userId)
+                this.getUserLikeStatus(target, userId)
             ])
-            return {likesCount, dislikesCount,myStatus}
+            return {likesCount, dislikesCount, myStatus}
         } catch (e) {
-            const [likesCount,dislikesCount,myStatus] = [0,0,likeEnum.none]
-            return {likesCount,dislikesCount, myStatus}
+            const [likesCount, dislikesCount, myStatus] = [0, 0, likeEnum.none]
+            return {likesCount, dislikesCount, myStatus}
+        }
+    }
+
+    private async getLastLikes(target: string,limit = 3): Promise<Array<Pick<LikeModel, 'login' | 'addedAt' | 'userId'>>> {
+        try {
+            return await Likes.find({target,likeStatus: likeEnum.like}).sort({addedAt: -1}).limit(limit).select(this.lastLikesSelector).lean()
+        }catch (e) {
+            return []
+        }
+    }
+
+    public async getExtendedLikeInfo(target: string, userId: string | null = null): Promise<ExtendedLikesInfo> {
+        try {
+            return {
+                ...await this.getLikeInfo(target, userId),
+                newestLikes: await this.getLastLikes(target)
+            }
+        } catch (e) {
+            const [likesCount, dislikesCount, myStatus, newestLikes] = [0, 0, likeEnum.none, []]
+            return {likesCount, dislikesCount, myStatus, newestLikes}
         }
     }
 }

@@ -5,7 +5,6 @@ import {Blog} from "../models/blogModel";
 import {CustomRequest} from "../models/RequestModel";
 import {GetItemsResponse} from "../models/ResponseModel";
 import {BlogFilters} from "../models/filtersModel";
-import {Post} from "../models/postsModel";
 import {BlogsService} from "../services/blogs-service";
 import {Normalizer} from "../helpers/normalizer";
 
@@ -39,7 +38,7 @@ export class BlogsController {
     }
 
     async createPostForThisBlog(req: Request, res: Response) {
-        const result: Post = await this.blogsService.createPostForBlog(req.params.id, req.body)
+        const result = await this.blogsService.createPostForBlog(req.params.id, req.body)
         if (result) {
             res.status(httpStatus.created).json(result)
             return

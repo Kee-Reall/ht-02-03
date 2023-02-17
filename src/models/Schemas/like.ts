@@ -22,7 +22,7 @@ export const LikeSchema = new mongoose.Schema<LikeModel>({
         type: String,
         required: true
     },
-    addAt:{
+    addedAt:{
         type: Date,
         default: new Date()
     },

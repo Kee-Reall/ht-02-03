@@ -4,7 +4,7 @@ export type LikeStatus = "Like" | "Dislike" | "None"
 
 export interface LikeModel {
     id: string
-    addAt: Date
+    addedAt: Date
     target: string
     userId: string
     login: string
@@ -29,6 +29,12 @@ export type LikesInfo = {
     myStatus: LikeStatus
 }
 
+export type ExtendedLikesInfo = LikesInfo & {newestLikes: Array<Pick<LikeModel,'login' | 'addedAt'| 'userId'>>}
+
 export  type WithLike<T> = T & {
     likesInfo: LikesInfo
+}
+
+export type WithExtendedLike<T> = T & {
+    extendedLikesInfo: ExtendedLikesInfo
 }

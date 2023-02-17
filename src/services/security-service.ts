@@ -3,6 +3,7 @@ import {QueryRepository} from "../repositories/queryRepository";
 import {RefreshTokenPayload, SessionFilter} from "../models/refreshTokensMeta";
 import {CommandRepository} from "../repositories/commandRepository";
 import {inject, injectable} from "inversify";
+import {NullablePromise} from "../models/mixedModels";
 
 @injectable()
 export class SecurityService {
@@ -12,7 +13,7 @@ export class SecurityService {
         @inject(CommandRepository) protected commandRepository: CommandRepository,
     ) {
     }
-    public async getAllSessionsByToken(userId: string): Promise< Array<SecurityViewModel> | null> {
+    public async getAllSessionsByToken(userId: string): NullablePromise<Array<SecurityViewModel>> {
         return await this.queryRepository.getTokensForUser(userId)
     }
 
