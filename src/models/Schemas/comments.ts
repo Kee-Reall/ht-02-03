@@ -1,8 +1,19 @@
 import mongoose from "mongoose";
-import {commentsDbModel} from "../commentsModel";
+import {CommentsDbModel} from "../commentsModel";
 
 
-export const CommentsSchema = new mongoose.Schema<commentsDbModel>({
+
+const CommentatorInfoSchema = new mongoose.Schema({
+    userId:{
+        type: String,
+        required: true,
+    },
+    userLogin:{
+        type: String,
+        required: true
+    }
+},{versionKey: false, _id: false})
+export const CommentSchema = new mongoose.Schema<CommentsDbModel>({
     id: {
         type: String,
         required: true,
@@ -16,14 +27,7 @@ export const CommentsSchema = new mongoose.Schema<commentsDbModel>({
         maxLength:300,
         minLength:3
     },
-    userId:{
-        type: String,
-        required: true,
-    },
-    userLogin:{
-        type: String,
-        required: true
-    },
+    commentatorInfo: CommentatorInfoSchema,
     postId:{
         type: String,
         required: true,

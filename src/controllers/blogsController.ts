@@ -1,24 +1,28 @@
-import { Request, Response } from "express";
-import { httpStatus } from "../enums/httpEnum";
-import { blogsService } from "../services/blogs-service";
-import {blog} from "../models/blogModel";
-import {customRequest} from "../models/RequestModel";
-import {getItemsResponse} from "../models/ResponseModel";
-import {blogFilters} from "../models/filtersModel";
-import {normalizeBlogsQuery} from "../helpers/normalizeBlogsQuery";
-import {normalizePostsQuery} from "../helpers/normalizePostsQuery";
-import { post } from "../models/postsModel";
+import {Request, Response} from "express";
+import {injectable, inject} from 'inversify'
+import {httpStatus} from "../enums/httpEnum";
+import {Blog} from "../models/blogModel";
+import {CustomRequest} from "../models/RequestModel";
+import {GetItemsResponse} from "../models/ResponseModel";
+import {BlogFilters} from "../models/filtersModel";
+import {BlogsService} from "../services/blogs-service";
+import {Normalizer} from "../helpers/normalizer";
 
-class BlogsController {
+@injectable()
+export class BlogsController {
+    constructor(
+        @inject(BlogsService) protected blogsService: BlogsService,
+        @inject(Normalizer) protected normalizer: Normalizer
+    ) {}
 
-    async getBlogs(req: customRequest<blogFilters>, res: getItemsResponse) {
-        const result = await blogsService.getBlogs(normalizeBlogsQuery(req.query))
+    async getBlogs(req: CustomRequest<BlogFilters>, res: GetItemsResponse) {
+        const result = await this.blogsService.getBlogs(this.normalizer.normalizeBlogsQuery(req.query))
         res.status(httpStatus.ok).json(result)
     }
 
     async getOne(req: Request, res: Response) {
-        const result: blog = await blogsService.getBlog(req.params.id)
-        if(result) {
+        const result: Blog = await this.blogsService.getBlog(req.params.id)
+        if (result) {
             res.status(httpStatus.ok).json(result)
             return
         }
@@ -26,43 +30,42 @@ class BlogsController {
     }
 
     async createBlog(req: Request, res: Response) {
-        const result: blog = await blogsService.createBlog(req.body)
-        if(result) {
+        const result: Blog = await this.blogsService.createBlog(req.body)
+        if (result) {
             return res.status(httpStatus.created).json(result)
         }
         res.sendStatus(httpStatus.teapot)
     }
 
     async createPostForThisBlog(req: Request, res: Response) {
-        const result: post = await blogsService.createPostForBlog(req.params.id,req.body)
-        if(result) {
+        const result = await this.blogsService.createPostForBlog(req.params.id, req.body)
+        if (result) {
             res.status(httpStatus.created).json(result)
             return
         }
         res.sendStatus(httpStatus.teapot)
     }
 
-    async updateBlogUsingId(req: Request,res: Response) {
-        const result: boolean = await blogsService.updateBlog(req.params.id,req.body)
+    async updateBlogUsingId(req: Request, res: Response) {
+        const result: boolean = await this.blogsService.updateBlog(req.params.id, req.body)
         const status: number = result ? httpStatus.noContent : httpStatus.notFound
         res.sendStatus(status)
     }
 
     async deleteBlogUsingId(req: Request, res: Response) {
-        const result: boolean = await blogsService.deleteBlog(req.params.id)
+        const result: boolean = await this.blogsService.deleteBlog(req.params.id)
         const status: number = result ? httpStatus.noContent : httpStatus.notFound
         res.sendStatus(status)
     }
 
     async getBlogsPost(req: Request, res: Response) {
-        const query = normalizePostsQuery(req.query)
-        const result = await(blogsService.getBlogPosts(req.params.id, query))
+        const unauthorized = req.unauthorized
+        const query = this.normalizer.normalizePostsQuery(req.query)
+        const result = await (this.blogsService.getBlogPosts(req.params.id, query, unauthorized ? null : req.user.id))
         res.json(result)
     }
 
-    deprecated(_: Request, res:Response) {
+    deprecated(_: Request, res: Response) {
         res.sendStatus(httpStatus.deprecated)
     }
 }
-
-export default new BlogsController()

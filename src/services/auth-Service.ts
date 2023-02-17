@@ -1,52 +1,59 @@
-import {queryRepository} from "../repositories/queryRepository";
-import {hash as toHash} from "bcrypt";
-import {userInputModel, userLogicModel, userViewModel} from "../models/userModel";
-import {usersService} from "./users-service";
-import {jwtService} from "./jwt-service";
-import {clientMeta} from "../models/mixedModels";
-import {refreshTokenPayload, sessionFilter} from "../models/refreshTokensMeta";
-import {commandRepository} from "../repositories/commandRepository";
+import {inject, injectable} from "inversify";
+import {QueryRepository} from "../repositories/queryRepository";
+import {UserInputModel, UserLogicModel, UserViewModel} from "../models/userModel";
+import {UsersService} from "./users-service";
+import {JwtService} from "./jwt-service";
+import {ClientMeta, HashFunction, NullablePromise} from "../models/mixedModels";
+import {RefreshTokenPayload, SessionFilter} from "../models/refreshTokensMeta";
+import {CommandRepository} from "../repositories/commandRepository";
 
-class AuthService {
+@injectable()
+export class AuthService {
+    constructor(
+        @inject(UsersService) protected usersService: UsersService,
+        @inject(JwtService) protected jwtService: JwtService,
+        @inject(QueryRepository) protected queryRepository: QueryRepository,
+        @inject(CommandRepository) protected commandRepository: CommandRepository,
+        @inject<HashFunction>("HashFunction") protected hash: HashFunction
+    ) {
+    }
 
-    async login(loginOrEmail: string, password: string): Promise< userLogicModel | null> {
-        const user: userLogicModel | null = await queryRepository.getUserByLoginOrEmail(loginOrEmail)
+    async login(loginOrEmail: string, password: string): NullablePromise<UserLogicModel> {
+        const user: UserLogicModel | null = await this.queryRepository.getUserByLoginOrEmail(loginOrEmail)
         if(!user) {
             return null
         }
         const {hash, salt} = user
-        return  await toHash(password, salt) === hash ? user : null
+        return  await this.hash(password, salt) === hash ? user : null
     }
 
-    async getUser(userId: string): Promise<userViewModel| null> { // no usage
-        return await usersService.getUserById(userId)
+    async getUser(userId: string): Promise<UserViewModel| null> { // no usage
+        return await this.usersService.getUserById(userId)
     }
 
-    async registration (input: userInputModel) {
-        return await usersService.createUser(input)
+    async registration (input: UserInputModel) {
+        return await this.usersService.createUser(input)
     }
 
     async conformation (code: string): Promise<boolean> {
-        return await usersService.confirm(code)
+        return await this.usersService.confirm(code)
     }
 
     async resendEmail(email: string) {
-        return await usersService.resend(email)
+        return await this.usersService.resend(email)
     }
 
-    async refresh(meta: clientMeta) {
-        return await jwtService.updateTokenPair(meta)
+    async refresh(meta: ClientMeta) {
+        return await this.jwtService.updateTokenPair(meta)
     }
 
-    async logout(tokensInfo: refreshTokenPayload): Promise<boolean> {
+    async logout(tokensInfo: RefreshTokenPayload): Promise<boolean> {
         const {updateDate, userId, deviceId} = tokensInfo
-        const filter: sessionFilter = {userId,deviceId}
-        const sessionData = await queryRepository.getMetaToken(filter)
+        const filter: SessionFilter = {userId,deviceId}
+        const sessionData = await this.queryRepository.getMetaToken(filter)
         if(!sessionData || updateDate !== sessionData.updateDate.toISOString()) {
             return false
         }
-        return await commandRepository.killMetaToken(filter)
+        return await this.commandRepository.killMetaToken(filter)
     }
 }
-
-export const authService = new AuthService()

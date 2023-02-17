@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import {postDbModel} from "../postsModel";
+import {PostDbModel} from "../postsModel";
 
 
-export const PostSchema = new mongoose.Schema<postDbModel>({
+export const PostSchema = new mongoose.Schema<PostDbModel>({
     id: {
         type: String,
         required: true,

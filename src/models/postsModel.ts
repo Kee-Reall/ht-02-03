@@ -1,6 +1,6 @@
 import {ObjectId} from "mongodb";
 
-export interface postViewModel {
+export interface PostViewModel {
     id: string
     title: string
     shortDescription: string
@@ -10,22 +10,19 @@ export interface postViewModel {
     createdAt: string
 }
 
-export interface postDbModel extends postViewModel{
+export interface PostDbModel extends PostViewModel{
     _id: ObjectId
 }
 
-export interface postInputThrowBlog {
+export interface PostInputThroughBlog {
     title: string
     shortDescription: string
     content: string
 }
 
-export interface postInputModel {
+export interface PostInputModel {
     title: string
     shortDescription: string
     content: string
     blogId: string
 }
-
-export type post = postViewModel | null
-export type posts = Array<postViewModel> | null

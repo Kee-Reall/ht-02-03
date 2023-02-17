@@ -5,5 +5,7 @@ export enum message {
     requireField = 'A field is required',
     notExist = 'A field does not exist',
     expired = "A field expired or not exist",
-    symbols = 'field has prohibited symbols'
+    symbols = 'field has prohibited symbols',
+    forbiddenValue = 'field has forbidden value'
+
 }

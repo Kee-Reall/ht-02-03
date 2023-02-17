@@ -1,9 +1,11 @@
 import {body} from "express-validator";
+import {RequestHandler} from "express";
 import {message} from "../enums/messageEnum";
 import {hasError} from "./hasError";
-import {queryRepository} from "../repositories/queryRepository";
 import {httpStatus} from "../enums/httpEnum";
-import {RequestHandler} from "express";
+import {iocContainer} from "../containers/iocContainer";
+import {QueryRepository} from "../repositories/queryRepository";
+
 
 export const createUserMiddleware: RequestHandler[] = [
     body('login').exists()
@@ -16,6 +18,7 @@ export const createUserMiddleware: RequestHandler[] = [
         .matches(/^[a-zA-Z0-9_-]*$/)
         .withMessage(message.symbols)
         .custom(async (value: string)=>{
+            const queryRepository = iocContainer.resolve(QueryRepository)
             const checker = await queryRepository.getUserByLogin(value)
             if(checker){
                 throw new Error('Login already exists')
@@ -40,6 +43,7 @@ export const createUserMiddleware: RequestHandler[] = [
         .isEmail()
         .withMessage(message.invalidType)
         .custom(async (value: string)=>{
+            const queryRepository = iocContainer.resolve(QueryRepository)
             const checker = await queryRepository.getUserByEmail(value)
             if(checker){
                 throw new Error('email already in use')

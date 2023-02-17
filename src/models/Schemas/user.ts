@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import {confirmation, userDbModel,recovery} from "../userModel";
+import {Confirmation, UserDbModel,Recovery} from "../userModel";
 
 
-const ConfirmationScheme = new mongoose.Schema<confirmation>({
+const ConfirmationScheme = new mongoose.Schema<Confirmation>({
     isConfirmed:{
         type: Boolean,
         default: false
@@ -17,7 +17,7 @@ const ConfirmationScheme = new mongoose.Schema<confirmation>({
     }
 },{_id: false})
 
-const RecoveryScheme = new mongoose.Schema<recovery>({
+const RecoveryScheme = new mongoose.Schema<Recovery>({
     recoveryCode:{
         type: String,
         default: ''
@@ -28,7 +28,7 @@ const RecoveryScheme = new mongoose.Schema<recovery>({
     }
 },{_id: false})
 
-export const UserSchema = new mongoose.Schema<userDbModel>({
+export const UserSchema = new mongoose.Schema<UserDbModel>({
     id: {
         type: String,
         required: true,

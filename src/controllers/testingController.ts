@@ -1,13 +1,16 @@
-import { commandRepository } from "../repositories/commandRepository";
+import {CommandRepository} from "../repositories/commandRepository";
 import { Request, Response } from "express";
 import { httpStatus } from "../enums/httpEnum";
+import {injectable, inject} from "inversify";
 
-class TestingController {
+@injectable()
+export class TestingController {
+
+    constructor(
+        @inject(CommandRepository) protected commandRepository: CommandRepository
+    ) {}
 
     async clearAll(req: Request, res: Response){
-        commandRepository.clearStore().finally(() => res.sendStatus(httpStatus.noContent))
+        this.commandRepository.clearStore().finally(() => res.sendStatus(httpStatus.noContent))
     }
 }
-
-const testingController = new TestingController()
-export { testingController }

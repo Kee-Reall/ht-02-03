@@ -1,18 +1,26 @@
 import {Request, Response} from "express";
+import {injectable,inject} from "inversify";
 import {httpStatus} from "../enums/httpEnum";
-import {normalizeUsersQuery} from "../helpers/normalizeUsersQuery";
-import {getOutput} from "../models/ResponseModel";
-import {usersService} from "../services/users-service";
+import {GetOutput} from "../models/ResponseModel";
+import {UsersService} from "../services/users-service";
+import {Normalizer} from "../helpers/normalizer";
 
-class UsersController {
+
+@injectable()
+export class UsersController {
+    constructor(
+        @inject(UsersService) protected  usersService: UsersService,
+        @inject(Normalizer) protected normalizer: Normalizer
+    ) {}
+
     async getUsers(req: Request, res: Response) {
-        const params = normalizeUsersQuery(req.query)
-        const result: getOutput = await usersService.getUsers(params)
+        const params = this.normalizer.normalizeUsersQuery(req.query)
+        const result: GetOutput = await this.usersService.getUsers(params)
         res.status(httpStatus.ok).json(result)
     }
 
     async createUser({body}: Request, res: Response) {
-        const result = await usersService.adminCreatingUser(body)
+        const result = await this.usersService.adminCreatingUser(body)
         if(result) {
             return res.status(httpStatus.created).json(result)
         }
@@ -21,10 +29,7 @@ class UsersController {
 
     async deleteUser(req: Request, res: Response) {
         const { params: { id }} = req
-        const result = await usersService.deleteUser(id)
+        const result = await this.usersService.deleteUser(id)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.notFound)
     }
-
 }
-
-export const usersController = new UsersController()

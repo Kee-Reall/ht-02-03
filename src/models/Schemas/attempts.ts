@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import {attemptsModel} from "../attemptsModel";
+import {AttemptsModel} from "../attemptsModel";
 
-export const AttemptsSchema = new mongoose.Schema<attemptsModel>({
+export const AttemptSchema = new mongoose.Schema<AttemptsModel>({
     endpointAndIp:{
         type: String,
         required: true

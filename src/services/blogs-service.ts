@@ -1,17 +1,25 @@
-import { queryRepository } from "../repositories/queryRepository";
-import {blogInputModel, blog, blogViewModel} from "../models/blogModel";
-import generateId from "../helpers/generateId";
-import { commandRepository } from "../repositories/commandRepository";
-import {blogFilters} from "../models/filtersModel";
-import {getOutput} from "../models/ResponseModel";
+import {BlogInputModel, Blog, BlogViewModel} from "../models/blogModel";
+import {CommandRepository} from "../repositories/commandRepository";
+import {BlogFilters} from "../models/filtersModel";
+import {GetOutput} from "../models/ResponseModel";
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {postInputThrowBlog, postInputModel, postViewModel} from "../models/postsModel";
-import { postsService } from "./posts-service";
+import {PostInputThroughBlog, PostInputModel, PostViewModel} from "../models/postsModel";
+import {PostsService} from "./posts-service";
+import {QueryRepository} from "../repositories/queryRepository";
+import {injectable,inject} from "inversify";
+import {IdCreatorFunction, Nullable} from "../models/mixedModels";
 
-class BlogsService {
+@injectable()
+export class BlogsService {
+    constructor(
+        @inject(QueryRepository)protected queryRepository: QueryRepository,
+        @inject(CommandRepository)protected commandRepository: CommandRepository,
+        @inject(PostsService)protected postsService: PostsService,
+        @inject<IdCreatorFunction>('idGenerator') protected generateId: IdCreatorFunction
+    ) {}
 
-    async getBlogs(params: blogFilters): Promise<getOutput> {
-        const searchConfig:SearchConfiguration<blogViewModel> = {
+        async getBlogs(params: BlogFilters): Promise<GetOutput> {
+        const searchConfig:SearchConfiguration<BlogViewModel> = {
             filter: {
                 name: params.searchNameTerm!
             },
@@ -20,9 +28,9 @@ class BlogsService {
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize!
         }
-        const totalCount = await queryRepository.getBlogsCount(searchConfig.filter!.name as string)
+        const totalCount = await this.queryRepository.getBlogsCount(searchConfig.filter!.name as string)
         const pagesCount = Math.ceil(totalCount / params.pageSize!)
-        const items = await queryRepository.getBlogWithPagination(searchConfig) || []
+        const items = await this.queryRepository.getBlogWithPagination(searchConfig) || []
         return {
             pagesCount,
             page: params.pageNumber!,
@@ -32,20 +40,20 @@ class BlogsService {
         }
     }
 
-    async getBlog(id: string): Promise<blog> {
-        return await queryRepository.getBlogById(id)
+    async getBlog(id: string): Promise<Blog> {
+        return await this.queryRepository.getBlogById(id)
     }
 
-    async getBlogPosts(blogId: string, params: any) {
-        const config:SearchConfiguration<postViewModel> = {
+    async getBlogPosts(blogId: string, params: any,userId: Nullable<string> = null) {
+        const config:SearchConfiguration<PostViewModel> = {
             filter: {blogId},
             sortBy: params.sortBy,
             shouldSkip: params.pageSize! * (params.pageNumber! - 1 ),
             limit: params.pageSize,
             sortDirection: params.sortDirection
         }
-        const blogGot = await queryRepository.getPostsByFilter(config)
-        const totalCount = await queryRepository.getPostsCount(config.filter)
+        const blogGot = await this.queryRepository.getPostsByFilter(config, userId)
+        const totalCount = await this.queryRepository.getPostsCount(config.filter)
         return {
             pagesCount: Math.ceil(totalCount / params.pageSize!),
             page: params.pageNumber,
@@ -55,43 +63,41 @@ class BlogsService {
         }
     }
 
-    async createPostForBlog(id:string,inputData: postInputThrowBlog) {
-        const post: postInputModel = {
+    async createPostForBlog(id:string,inputData: PostInputThroughBlog) {
+        const post: PostInputModel = {
             title: inputData.title,
             shortDescription: inputData.shortDescription,
             content: inputData.content,
             blogId: id,
         }
-        return postsService.createPost(post)
+        return this.postsService.createPost(post)
     }
 
-    async createBlog(blogInput: blogInputModel): Promise<blog> {
+    async createBlog(blogInput: BlogInputModel): Promise<Blog> {
         const {description, websiteUrl, name} = blogInput
-        const id = generateId('blog')
+        const id = this.generateId('blog')
         const blogToPush = {
             id, description, websiteUrl, name,
             createdAt: new Date(Date.now()).toISOString()
         }
-        const result = await commandRepository.createBlog(blogToPush)
+        const result = await this.commandRepository.createBlog(blogToPush)
         if (result) {
-            return queryRepository.getBlogById(id)
+            return this.queryRepository.getBlogById(id)
         }
         return null
     }
 
-    async updateBlog(id: string, blogInput: blogInputModel): Promise<boolean> {
+    async updateBlog(id: string, blogInput: BlogInputModel): Promise<boolean> {
         const {description, websiteUrl, name} = blogInput
         const updatesField = {description,websiteUrl,name}
-        const result = await commandRepository.updateBlog(id, updatesField)
+        const result = await this.commandRepository.updateBlog(id, updatesField)
         if(result) {
-            await commandRepository.updateManyPostsByBlogId(id)
+            await this.commandRepository.updateManyPostsByBlogId(id)
         }
         return result
     }
 
     async deleteBlog(id: string): Promise<boolean> {
-        return await commandRepository.deleteBlog(id)
+        return await this.commandRepository.deleteBlog(id)
     }
 }
-
-export const blogsService = new BlogsService()

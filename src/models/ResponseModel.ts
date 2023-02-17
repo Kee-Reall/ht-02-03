@@ -1,17 +1,17 @@
 import { Response } from "express";
-import { blogViewModel } from "./blogModel";
-import { commentsOutputModel } from "./commentsModel";
-import { postViewModel } from "./postsModel";
-import { userViewModel } from "./userModel";
+import { BlogViewModel } from "./blogModel";
+import { CommentsOutputModel } from "./commentsModel";
+import { PostViewModel } from "./postsModel";
+import { UserViewModel } from "./userModel";
 
-export type getOutput = {
+export type GetOutput = {
     pagesCount: number,
     page: number,
     pageSize: number,
     totalCount: number,
-    items: Array<blogViewModel | postViewModel | userViewModel | commentsOutputModel>
+    items: Array<BlogViewModel | PostViewModel | UserViewModel | CommentsOutputModel>
 }
 
-export type customResponse<T> = Response<T>
+export type CustomResponse<T> = Response<T>
 
-export type getItemsResponse = customResponse<getOutput>
+export type GetItemsResponse = CustomResponse<GetOutput>

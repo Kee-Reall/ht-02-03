@@ -1,45 +1,45 @@
 import {ObjectId} from "mongodb";
 
-export interface userViewModel {
+export interface UserViewModel {
     id: string
     login: string
     email: string
     createdAt: string
 }
 
-export interface userInputModel {
+export interface UserInputModel {
     login: string
     email: string
     password: string
 }
 
-export interface userLogicModel {
+export interface UserLogicModel {
     id: string
     login: string
     email: string
     createdAt: string
     hash:string
     salt: string
-    confirmation:confirmation
-    recovery: recovery
+    confirmation:Confirmation
+    recovery: Recovery
 }
 
-export type recovery = {
+export type Recovery = {
     recoveryCode: string,
     expirationDate: Date
 }
 
-export type confirmation = {
+export type Confirmation = {
     isConfirmed: boolean
     code: string
     confirmationDate: Date
 }
 
-export interface userDbModel extends userLogicModel {
+export interface UserDbModel extends UserLogicModel {
     _id?: ObjectId
 }
 
-export interface userForCommentsModel {
+export interface UserForCommentsModel {
     userLogin: string,
     userId: string
 }

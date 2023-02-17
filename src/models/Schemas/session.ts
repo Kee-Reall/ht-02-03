@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import {refreshTokensMeta} from "../refreshTokensMeta";
+import {RefreshTokensMeta} from "../refreshTokensMeta";
 import {generateDeviceId} from "../../helpers/generateDeviceId";
 
-export const SessionSchema = new mongoose.Schema<refreshTokensMeta>({
+export const SessionSchema = new mongoose.Schema<RefreshTokensMeta>({
     userId: {
         type: String,
         required: true,

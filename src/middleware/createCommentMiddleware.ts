@@ -1,8 +1,8 @@
-import { body, param } from "express-validator";
-import { httpStatus } from "../enums/httpEnum";
-import { message } from "../enums/messageEnum";
-import { checkForExistingPost } from "../helpers/checkForExistingPost";
-import { hasError } from "./hasError";
+import {body, param} from "express-validator";
+import {httpStatus} from "../enums/httpEnum";
+import {message} from "../enums/messageEnum";
+import {checkForExistingPost} from "../helpers/checkForExistingPost";
+import {hasError} from "./hasError";
 import {RequestHandler} from "express";
 
 export const createCommentMiddlewares: RequestHandler[] = [
@@ -11,7 +11,7 @@ export const createCommentMiddlewares: RequestHandler[] = [
         .isString()
         .withMessage(message.invalidType)
         .trim()
-        .isLength({min:20,max:300})
+        .isLength({min: 20, max: 300})
         .withMessage(message.length),
 
     hasError(httpStatus.badRequest),
