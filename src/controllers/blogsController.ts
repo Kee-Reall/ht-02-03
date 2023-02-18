@@ -7,6 +7,7 @@ import {GetItemsResponse} from "../models/ResponseModel";
 import {BlogFilters} from "../models/filtersModel";
 import {BlogsService} from "../services/blogs-service";
 import {Normalizer} from "../helpers/normalizer";
+import {Entire} from "../models/mixedModels";
 
 @injectable()
 export class BlogsController {
@@ -61,7 +62,7 @@ export class BlogsController {
     async getBlogsPost(req: Request, res: Response) {
         const unauthorized = req.unauthorized
         const query = this.normalizer.normalizePostsQuery(req.query)
-        const result = await (this.blogsService.getBlogPosts(req.params.id, query, unauthorized ? null : req.user.id))
+        const result = await (this.blogsService.getBlogPosts(req.params.id, query as Entire<BlogFilters>, unauthorized ? null : req.user.id))
         res.json(result)
     }
 
