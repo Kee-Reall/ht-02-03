@@ -378,7 +378,6 @@ describe('one button for every suit', () => {
                 })
             })
         })
-
         // describe('testing queryParams and pagination',()=>{
         //
         // })
