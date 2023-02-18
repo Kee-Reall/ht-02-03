@@ -9,10 +9,9 @@ import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
 import {SecurityViewModel} from "../models/SecurityModel";
 import {
     ExtendedLikesInfo,
-    LastLikes,
     LikeModel,
     LikesInfo,
-    LikeStatus, NewestLikeArray, NewestLikeArrayWithTarget,
+    LikeStatus,
     WithExtendedLike,
     WithLike
 } from "../models/LikeModel";
@@ -108,15 +107,13 @@ export class QueryRepository {
                 .lean()
             const idArray = posts.map(el => el.id)
             const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
-            const lastLikes: Array<NewestLikeArray> = await this.getLastLikesArray(idArray)
             return await Promise.all(posts.map(async (post, i) => {
                 return {
                     ...post as PostViewModel,
                     extendedLikesInfo: {
                         ...likeStatuses[i],
-                        newestLikes: lastLikes[i]
+                        newestLikes: await this.getLastLikes(post.id)
                     }
-                    //await this.getExtendedLikeInfo(post.id, userId)
                 }
             }))
         } catch (e) {
@@ -124,37 +121,35 @@ export class QueryRepository {
         }
     }
 
-    private async getLastLikesArray(targetIds: string[]): Promise<Array<NewestLikeArray>> {
-        try {
-            const herb: Array<NewestLikeArrayWithTarget> = await this.Likes
-                .find({target: {$in: targetIds}, likeStatus: likeEnum.like})
-                .sort({addedAt: -1})
-                .select(this.lastLikesSelector + ' target')
-                .lean()
-            const starter: Array<NewestLikeArray> = new Array(targetIds.length).fill([])
-            console.log(starter)
-            const finisher: Array<NewestLikeArray> = starter.map((_, i) => {
-                const lastLikes: NewestLikeArray = []
-                    for (let j = 0; j < herb.length; j++) {
-                        //@ts-ignore
-                        console.log(herb[j].target === targetIds[i])
-                        if(lastLikes.length === 3) break
-                        //@ts-ignore
-                        if (herb[j].target === targetIds[i]) {
-                            //@ts-ignore
-                            lastLikes.push({userId: herb[j].userId, login: herb[j].login, addedAt: herb[j].addedAt})
-                            herb.splice(j,1)
-                            j--
-                        }
-                    }
-                    return lastLikes
-                })
-            console.log(finisher)
-            return finisher
-        } catch (e) {
-            return []
-        }
-    }
+    // private async getLastLikesArray(targetIds: string[]): Promise<Array<NewestLikeArray>> { // it blows my mind. fix this later
+    //     try {
+    //         const herb: Array<NewestLikeArrayWithTarget> = await this.Likes
+    //             .find({target: {$in: targetIds}, likeStatus: likeEnum.like})
+    //             .sort({addedAt: -1})
+    //             .select(this.lastLikesSelector + ' target')
+    //             .lean()
+    //         const starter: Array<NewestLikeArray> = new Array(targetIds.length).fill([])
+    //         console.log(starter)
+    //         const finisher: Array<NewestLikeArray> = await Promise.all(starter.map(async (_, i) => {
+    //             const lastLikes: NewestLikeArray = []
+    //                 for (let j = 0; j < herb.length; j++) {
+    //                     console.log(herb[j].target === targetIds[i])
+    //                     if(lastLikes.length === 3) break
+    //                     if (herb[j].target === targetIds[i]) {
+    //                             lastLikes.push({userId: herb[j].userId, login: herb[j].login, addedAt: herb[j].addedAt})
+    //                             herb.splice(j,1)
+    //                             j--
+    //
+    //                     }
+    //                 }
+    //                 return lastLikes
+    //             }))
+    //         console.log(finisher)
+    //         return finisher
+    //     } catch (e) {
+    //         return []
+    //     }
+    // }
 
     async getPostsByFilter(config: SearchConfiguration<PostViewModel>, userId: Nullable<string> = null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
@@ -165,10 +160,15 @@ export class QueryRepository {
                 .limit(config.limit)
                 .select(this.viewSelector)
                 .lean()
-            return await Promise.all(posts.map(async (post) => {
+            const idArray = posts.map(el => el.id)
+            const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
+            return await Promise.all(posts.map(async (post, i) => {
                 return {
                     ...post as PostViewModel,
-                    extendedLikesInfo: await this.getExtendedLikeInfo(post.id, userId)
+                    extendedLikesInfo: {
+                        ...likeStatuses[i],
+                        newestLikes: await this.getLastLikes(post.id)
+                    }
                 }
             }))
         } catch (e) {
