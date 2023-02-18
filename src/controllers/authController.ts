@@ -1,5 +1,5 @@
 import {inject, injectable} from "inversify";
-import {Request, Response} from "express"
+import {Request, Response, CookieOptions} from "express"
 import {httpStatus} from "../enums/httpEnum"
 import {AuthService} from "../services/auth-Service";
 import {JwtService} from "../services/jwt-service";
@@ -9,13 +9,21 @@ import {UsersService} from "../services/users-service";
 
 @injectable()
 export class AuthController {
+    private cookiesOptions: CookieOptions = {
+        domain: 'ht-02-03.vercel.app',
+        sameSite: 'none',
+        secure: true,
+        httpOnly: true
+    }
+
     constructor(
         @inject(UsersService) protected usersService: UsersService,
         @inject(AuthService) protected authService: AuthService,
         @inject(JwtService) protected jwtService: JwtService
     ) {
     }
-    async login(req: Request, res: Response) {
+
+    public async login(req: Request, res: Response) {
         const {body: {loginOrEmail, password}} = req
         const user = await this.authService.login(loginOrEmail, password)
         if (!user || !user.confirmation.isConfirmed) {
@@ -32,21 +40,21 @@ export class AuthController {
         }
         const {refreshToken, accessToken} = tokenPair
         res.status(httpStatus.ok)
-            .cookie('refreshToken', refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
+            .cookie('refreshToken', refreshToken, this.cookiesOptions)
             .json({accessToken})
     }
 
-    async getUserFromRequest(req: Request, res: Response) { // required jwt middleware
+    public async getUserFromRequest(req: Request, res: Response) { // required jwt middleware
         const {user: {login, email, id: userId}} = req
         res.status(httpStatus.ok).json({login, email, userId})
     }
 
-    async registration(req: Request, res: Response) {
+    public async registration(req: Request, res: Response) {
         const result = await this.authService.registration(req.body)
         res.sendStatus(result ? httpStatus.noContent : httpStatus.teapot)
     }
 
-    async conformation(req: Request, res: Response) {
+    public async conformation(req: Request, res: Response) {
         const confirmSuccess = await this.authService.conformation(req.body.code)
         if (!confirmSuccess) {
             return res.status(httpStatus.badRequest).json({
@@ -61,12 +69,12 @@ export class AuthController {
         res.sendStatus(httpStatus.noContent)
     }
 
-    async resending(req: Request, res: Response) {
+    public async resending(req: Request, res: Response) {
         const isResent = await this.authService.resendEmail(req.body.email)
         res.sendStatus(isResent ? httpStatus.noContent : httpStatus.teapot)
     }
 
-    async refresh(req: Request, res: Response) {
+    public async refresh(req: Request, res: Response) {
         const {cookies: {refreshToken}} = req
         const payload: RefreshTokenPayload | null = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!payload) {
@@ -83,11 +91,11 @@ export class AuthController {
             return res.sendStatus(httpStatus.notAuthorized)
         }
         res.status(httpStatus.ok)
-            .cookie('refreshToken', pair.refreshToken, {httpOnly: true, secure: true, sameSite: 'none'})
+            .cookie('refreshToken', pair.refreshToken, this.cookiesOptions)
             .json({accessToken: pair.accessToken})
     }
 
-    async logout(req: Request, res: Response) {
+    public async logout(req: Request, res: Response) {
         const {cookies: {refreshToken}} = req
         const meta = await this.jwtService.verifyRefreshToken(refreshToken)
         if (!meta) {
@@ -97,20 +105,16 @@ export class AuthController {
         if (!result) {
             return res.sendStatus(httpStatus.notAuthorized)
         }
-        res.cookie('refreshToken', '', {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        }).sendStatus(httpStatus.noContent)
+        res.cookie('refreshToken', '', this.cookiesOptions).sendStatus(httpStatus.noContent)
     }
 
-    async recoverPassword(req: Request, res: Response) {
+    public async recoverPassword(req: Request, res: Response) {
         const {body: {email}} = req
         await this.usersService.recoverPassword(email)
         res.sendStatus(httpStatus.noContent)
     }
 
-    async confirmPasswordChange(req: Request, res: Response) {
+    public async confirmPasswordChange(req: Request, res: Response) {
         const {body: {newPassword, recoveryCode}} = req
         const isPasswordChanged: boolean = await this.usersService.confirmRecovery(recoveryCode, newPassword)
         if (isPasswordChanged) {
