@@ -18,6 +18,9 @@ export async function mRunDb(testMod: boolean = false, link?: string) {
             return false
         }
         await mongoose.connect(dbUri)
+        setInterval(()=>{
+            Attempts.deleteMany({})
+        },3.5e8)
         return true
     } catch (e) {
         console.log('unable to connect')

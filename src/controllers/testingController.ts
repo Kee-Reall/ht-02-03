@@ -11,6 +11,7 @@ export class TestingController {
     ) {}
 
     async clearAll(req: Request, res: Response){
-        this.commandRepository.clearStore().finally(() => res.sendStatus(httpStatus.noContent))
+        res.sendStatus(httpStatus.noContent)
+        await this.commandRepository.clearStore()
     }
 }
