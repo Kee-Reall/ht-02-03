@@ -29,7 +29,12 @@ export type LikesInfo = {
     myStatus: LikeStatus
 }
 
-export type ExtendedLikesInfo = LikesInfo & {newestLikes: Array<Pick<LikeModel,'login' | 'addedAt'| 'userId'>>}
+export type NewestLikeArray = Array<Pick<LikeModel,'login' | 'addedAt'| 'userId'>>
+export type NewestLikeArrayWithTarget = Array<Pick<LikeModel,'login' | 'addedAt'| 'userId' | 'target'>>
+
+export type LastLikes = {newestLikes: NewestLikeArray}
+
+export type ExtendedLikesInfo = LikesInfo & LastLikes
 
 export  type WithLike<T> = T & {
     likesInfo: LikesInfo
