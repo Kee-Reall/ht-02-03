@@ -1,4 +1,4 @@
-import {Model,FilterQuery} from "mongoose";
+import {Model,FilterQuery, LeanDocument} from "mongoose";
 import {inject, injectable} from "inversify";
 import {BlogViewModel} from "../models/blogModel";
 import {PostViewModel} from "../models/postsModel";
@@ -238,22 +238,62 @@ export class QueryRepository {
         }
     }
 
-    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>,userId: Nullable<string>): NullablePromise<WithLike<CommentsOutputModel>[]> {
+    public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>, userId: Nullable<string>): NullablePromise<WithLike<CommentsOutputModel>[]> {
         try {
-            const comments =  await this.Comments.find({postId: config.filter!.postId})
+            const comments: LeanDocument<CommentsOutputModel>[] = await this.Comments.find({postId: config.filter!.postId})
                 .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
                 .skip(config.shouldSkip)
                 .limit(config.limit)
                 .select(this.commentSelector)
-            return await Promise.all(comments.map( async (comment) => {
+                .lean()
+            const result = await this.getLikesInfoForMany(comments.map(comment => comment.id), userId)
+            return comments.map((comment, i) => {
                 return {
-                    ...await this._commentMutator(comment),
-                    likesInfo: await this.getLikeInfo(comment.id,userId)
+                    ...comment,
+                    likesInfo: result[i] as LikesInfo
                 }
-            }))
+            })
         } catch (e) {
             return null
         }
+    }
+
+    private async incrementLikeReducer(reducer: LikesInfo): Promise<void> {
+        reducer.likesCount += 1
+    }
+
+    private async incrementDislikeReducer(reducer: LikesInfo): Promise<void> {
+        reducer.dislikesCount += 1
+    }
+
+    private async setStatusForLikesInfoReducer(reducer: LikesInfo, status: LikeStatus): Promise<void> {
+        reducer.myStatus = status
+    }
+
+    private async getLikesInfoForMany(targetIds: string[], userId: Nullable<string> = null): Promise<LikesInfo[]> {
+        const likes: Pick<LikeModel, 'likeStatus' | 'target' | 'userId'>[] = await this.Likes.find({
+            target: {$in: targetIds}
+        }).select('likeStatus target userId -_id').lean()
+        return Promise.all(targetIds.map(async (id) => {
+            const reducer: LikesInfo = {
+                likesCount: 0,
+                dislikesCount: 0,
+                myStatus: likeEnum.none
+            }
+            for (let like of likes) {
+                if (id === like.target) {
+                    if (like.likeStatus === likeEnum.like) {
+                        await this.incrementLikeReducer(reducer)
+                    } else if (like.likeStatus === likeEnum.dislike) {
+                        await this.incrementDislikeReducer(reducer)
+                    }
+                    if (like.userId === userId) {
+                        await this.setStatusForLikesInfoReducer(reducer, like.likeStatus)
+                    }
+                }
+            }
+            return reducer
+        }))
     }
 
     public async getMetaToken(data: SessionFilter): NullablePromise<RefreshTokensMeta> {
