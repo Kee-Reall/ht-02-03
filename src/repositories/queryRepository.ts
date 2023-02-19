@@ -19,6 +19,7 @@ import {WithId} from "mongodb"
 import {likeEnum} from "../enums/likeEnum";
 import {Likes} from "../adapters/mongooseCreater";
 import {Nullable, NullablePromise} from "../models/mixedModels";
+import {likesInfo} from "../helpers/mongoPipelineStorage";
 
 @injectable()
 export class QueryRepository {
@@ -98,25 +99,30 @@ export class QueryRepository {
 
     public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>, userId: Nullable<string>): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
-            const direction: DirectionNum = config.sortDirection! === 'asc' ? 1 : -1
-            const posts = await this.Posts.find(this.all)
-                .sort({[config.sortBy]: direction})
-                .skip(config.shouldSkip)
-                .limit(config.limit)
-                .select(this.viewSelector)
-                .lean()
-            const idArray = posts.map(el => el.id)
-            const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
-            return await Promise.all(posts.map(async (post, i) => {
-                return {
-                    ...post as PostViewModel,
-                    extendedLikesInfo: {
-                        ...likeStatuses[i],
-                        newestLikes: await this.getLastLikes(post.id)
-                    }
-                }
-            }))
+            const posts = await this.Posts.aggregate(likesInfo(config,userId))
+            return posts
+            // const posts = await this.Posts.find(this.all)
+            //     .sort({[config.sortBy]: direction})
+            //     .skip(config.shouldSkip)
+            //     .limit(config.limit)
+            //     .select(this.viewSelector)
+            //     .lean()
+            // const idArray = posts.map(el => el.id)
+            // const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
+            // return await Promise.all(posts.map(async (post, i) => {
+            //     return {
+            //         ...post as PostViewModel,
+            //         extendedLikesInfo: {
+            //             ...likeStatuses[i],
+            //             newestLikes: await this.getLastLikes(post.id)
+            //         }
+            //     }
+            // }))
         } catch (e) {
+            console.log(e)
+            //@ts-ignore
+            console.log(e.message)
+            console.log("inside catch")
             return null
         }
     }
@@ -287,19 +293,20 @@ export class QueryRepository {
 
     public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>, userId: Nullable<string>): NullablePromise<WithLike<CommentsOutputModel>[]> {
         try {
-            const comments: LeanDocument<CommentsOutputModel>[] = await this.Comments.find({postId: config.filter!.postId})
-                .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
-                .skip(config.shouldSkip)
-                .limit(config.limit)
-                .select(this.commentSelector)
-                .lean()
-            const result = await this.getLikesInfoForMany(comments.map(comment => comment.id), userId)
-            return comments.map((comment, i) => {
-                return {
-                    ...comment,
-                    likesInfo: result[i] as LikesInfo
-                }
-            })
+            return await this.Comments.aggregate(likesInfo(config,userId))
+            // const comments: LeanDocument<CommentsOutputModel>[] = await this.Comments.find({postId: config.filter!.postId})
+            //     .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
+            //     .skip(config.shouldSkip)
+            //     .limit(config.limit)
+            //     .select(this.commentSelector)
+            //     .lean()
+            // const result = await this.getLikesInfoForMany(comments.map(comment => comment.id), userId)
+            // return comments.map((comment, i) => {
+            //     return {
+            //         ...comment,
+            //         likesInfo: result[i] as LikesInfo
+            //     }
+            // })
         } catch (e) {
             return null
         }
