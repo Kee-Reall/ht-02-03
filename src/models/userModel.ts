@@ -1,4 +1,5 @@
 import {ObjectId} from "mongodb";
+import {Nullable} from "./mixedModels";
 
 export interface UserViewModel {
     id: string
@@ -11,6 +12,10 @@ export interface UserInputModel {
     login: string
     email: string
     password: string
+}
+
+export interface UserInputModelFromFront extends UserInputModel{
+    customDomain: Nullable<string>
 }
 
 export interface UserLogicModel {

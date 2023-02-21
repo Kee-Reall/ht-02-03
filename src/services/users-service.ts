@@ -2,10 +2,24 @@ import {inject, injectable} from "inversify"
 import {GetOutput} from "../models/ResponseModel"
 import {UsersFilters} from "../models/filtersModel"
 import {QueryRepository} from "../repositories/queryRepository"
-import {Confirmation, Recovery, UserInputModel, UserLogicModel, UserViewModel} from "../models/userModel"
+import {
+    Confirmation,
+    Recovery,
+    UserInputModel,
+    UserInputModelFromFront,
+    UserLogicModel,
+    UserViewModel
+} from "../models/userModel"
 import {CommandRepository} from "../repositories/commandRepository"
 import {MailWorker} from "../repositories/mailWorker"
-import {AddFunction, HashFunction, IdCreatorFunction, IsAfterFunction, SaltFunction} from "../models/mixedModels";
+import {
+    AddFunction,
+    HashFunction,
+    IdCreatorFunction,
+    IsAfterFunction,
+    Nullable,
+    SaltFunction
+} from "../models/mixedModels";
 
 
 @injectable()
@@ -64,7 +78,7 @@ export class UsersService {
         return await this.queryRepository.getUserById(id)
     }
 
-    public async createUser(input: UserInputModel): Promise<boolean> {
+    public async createUser(input: UserInputModelFromFront): Promise<boolean> {
         const {password, email, login} = input
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await this.genSalt(10)
@@ -80,7 +94,7 @@ export class UsersService {
         if (!isUserCreated) {
             return false
         }
-        const isMailSent: boolean = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        const isMailSent: boolean = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code, input.customDomain)
         if (!isMailSent) {
             await this.commandRepository.deleteUser(id)
         }
@@ -112,10 +126,10 @@ export class UsersService {
         return await this.commandRepository.confirmUser(user.id)
     }
 
-    public async resend(email: string): Promise<boolean> {
+    public async resend(email: string, customDomain: Nullable<string> = null): Promise<boolean> {
         const user = await this.queryRepository.getUserByEmail(email)
         const confirmation = await this.generateConfirmData()
-        const mailSent = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code)
+        const mailSent = await this.mailWorker.sendConfirmationAfterRegistration(email, confirmation.code, customDomain)
         if (!mailSent) return false
         return await this.commandRepository.changeConfirm(user!.id, confirmation)
     }
