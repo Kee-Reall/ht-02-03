@@ -1,4 +1,5 @@
-import {Model} from "mongoose";
+import {Model, PipelineStage} from "mongoose";
+import {SearchConfiguration} from "./searchConfiguration";
 
 export type eternityId = "blog" | "post" | "user" | "comment" | "like"
 export type sortingDirection = "asc" | "desc"
@@ -31,3 +32,4 @@ export type HashFunction = (data: string | Buffer, saltOrRounds: string | number
 export type SaltFunction = (rounds?: number, minor?: "a" | "b") => Promise<string>
 export type AddFunction = (date: Date | number, duration: Duration) => Date
 export type IsAfterFunction = (date: Date | number, dateToCompare: Date | number) => boolean
+export type LikeInfoFabric<T = any> = (config: SearchConfiguration<T>, userId: Nullable<string>) => PipelineStage[]

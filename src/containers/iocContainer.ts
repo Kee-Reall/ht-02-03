@@ -24,10 +24,18 @@ import {BlogsController} from "../controllers/blogsController";
 import {BlogsService} from "../services/blogs-service";
 import {generateDeviceId} from "../helpers/generateDeviceId";
 import {hash,genSalt} from "bcrypt";
-import {AddFunction, HashFunction, IdCreatorFunction, IsAfterFunction, SaltFunction} from "../models/mixedModels";
+import {
+    AddFunction,
+    HashFunction,
+    IdCreatorFunction,
+    IsAfterFunction,
+    LikeInfoFabric,
+    SaltFunction
+} from "../models/mixedModels";
 import generateId from "../helpers/generateId";
 import {v4} from "uuid";
 import {add, isAfter} from "date-fns"
+import {likesInfo} from "../helpers/mongoPipelineStorage";
 
 export const iocContainer = new Container()
 iocContainer.bind(BlogsController).to(BlogsController)
@@ -62,3 +70,4 @@ iocContainer.bind<IdCreatorFunction>("idGenerator").toFunction(generateId)
 iocContainer.bind<Function>("UniqueCode").toFunction(v4)
 iocContainer.bind<AddFunction>("AddFunction").toFunction(add)
 iocContainer.bind<IsAfterFunction>("IsAfterFunction").toFunction(isAfter)
+iocContainer.bind<LikeInfoFabric>('LikeInfo').toFunction(likesInfo)

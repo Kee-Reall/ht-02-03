@@ -1,8 +1,8 @@
-import {Model, FilterQuery, LeanDocument} from "mongoose";
+import {Model} from "mongoose";
 import {inject, injectable} from "inversify";
 import {BlogViewModel} from "../models/blogModel";
 import {PostViewModel} from "../models/postsModel";
-import {DirectionNum, SearchConfiguration} from "../models/searchConfiguration";
+import {SearchConfiguration} from "../models/searchConfiguration";
 import {UserLogicModel, UserViewModel} from "../models/userModel";
 import {CommentsDbModel, CommentsOutputModel} from "../models/commentsModel";
 import {RefreshTokensMeta, SessionFilter} from "../models/refreshTokensMeta";
@@ -18,8 +18,7 @@ import {
 import {WithId} from "mongodb"
 import {likeEnum} from "../enums/likeEnum";
 import {Likes} from "../adapters/mongooseCreater";
-import {Nullable, NullablePromise} from "../models/mixedModels";
-import {likesInfo} from "../helpers/mongoPipelineStorage";
+import {LikeInfoFabric, Nullable, NullablePromise} from "../models/mixedModels";
 
 @injectable()
 export class QueryRepository {
@@ -45,7 +44,8 @@ export class QueryRepository {
         @inject<Model<any>>('UserModel') private Users: Model<any>,
         @inject<Model<any>>('CommentModel') private Comments: Model<any>,
         @inject<Model<any>>('SessionModel') private Sessions: Model<any>,
-        @inject<Model<any>>("LikeModel") private Likes: Model<any>
+        @inject<Model<any>>("LikeModel") private Likes: Model<any>,
+        @inject<LikeInfoFabric>("LikeInfo") private likeInfoPipeline: LikeInfoFabric
     ) {
     }
 
@@ -99,7 +99,8 @@ export class QueryRepository {
 
     public async getPostsWithPagination(config: SearchConfiguration<PostViewModel>, userId: Nullable<string>): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
-            const posts = await this.Posts.aggregate(likesInfo(config,userId))
+            const posts = await this.Posts.aggregate(this.likeInfoPipeline(config,userId))
+            console.log(posts)
             return posts
             // const posts = await this.Posts.find(this.all)
             //     .sort({[config.sortBy]: direction})
@@ -159,24 +160,27 @@ export class QueryRepository {
 
     async getPostsByFilter(config: SearchConfiguration<PostViewModel>, userId: Nullable<string> = null): NullablePromise<WithExtendedLike<PostViewModel>[]> {
         try {
-            const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
-            const posts = await this.Posts.find(config.filter as FilterQuery<PostViewModel>)
-                .sort(sorter)
-                .skip(config.shouldSkip)
-                .limit(config.limit)
-                .select(this.viewSelector)
-                .lean()
-            const idArray = posts.map(el => el.id)
-            const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
-            return await Promise.all(posts.map(async (post, i) => {
-                return {
-                    ...post as PostViewModel,
-                    extendedLikesInfo: {
-                        ...likeStatuses[i],
-                        newestLikes: await this.getLastLikes(post.id)
-                    }
-                }
-            }))
+            const posts = await this.Posts.aggregate(this.likeInfoPipeline(config,userId))
+            console.log(posts)
+            return posts
+            // const sorter: any = {[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1}
+            // const posts = await this.Posts.find(config.filter as FilterQuery<PostViewModel>)
+            //     .sort(sorter)
+            //     .skip(config.shouldSkip)
+            //     .limit(config.limit)
+            //     .select(this.viewSelector)
+            //     .lean()
+            // const idArray = posts.map(el => el.id)
+            // const likeStatuses: LikesInfo[] = await this.getLikesInfoForMany(idArray, userId)
+            // return await Promise.all(posts.map(async (post, i) => {
+            //     return {
+            //         ...post as PostViewModel,
+            //         extendedLikesInfo: {
+            //             ...likeStatuses[i],
+            //             newestLikes: await this.getLastLikes(post.id)
+            //         }
+            //     }
+            // }))
         } catch (e) {
             return null
         }
@@ -293,7 +297,7 @@ export class QueryRepository {
 
     public async getCommentsByPostId(config: SearchConfiguration<CommentsDbModel>, userId: Nullable<string>): NullablePromise<WithLike<CommentsOutputModel>[]> {
         try {
-            return await this.Comments.aggregate(likesInfo(config,userId))
+            return await this.Comments.aggregate(this.likeInfoPipeline(config,userId))
             // const comments: LeanDocument<CommentsOutputModel>[] = await this.Comments.find({postId: config.filter!.postId})
             //     .sort({[config.sortBy]: config.sortDirection === 'asc' ? 1 : -1})
             //     .skip(config.shouldSkip)

@@ -1,10 +1,24 @@
 import {SearchConfiguration} from "../models/searchConfiguration";
-import {PostViewModel} from "../models/postsModel";
 import {Nullable} from "../models/mixedModels";
 import {PipelineStage} from "mongoose"
 
 export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<string>): PipelineStage[] {
+    const filter = config.filter || {}
     return [
+        {
+            $match: filter
+        },
+        {
+            $sort: {[config.sortBy]: config.sortDirection! === 'asc' ? 1 : -1}
+        },
+        // Пропускаем нужное количество записей
+        {
+            $skip: config.shouldSkip
+        },
+        // Ограничиваем количество записей
+        {
+            $limit: config.limit
+        },
         {
             $lookup: {
                 from: "likes",
@@ -29,12 +43,9 @@ export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<st
                                 ]
                             }
                         }
-                    },
-                    {
-                        $sort: {addedAt: -1}
-                    },
+                    }
                 ],
-                as: "likes"
+                as: "newestLikes"
             }
         },
         {
@@ -42,7 +53,7 @@ export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<st
                 likesInfo: {
                     likeCount: {
                         $reduce: {
-                            input: "$likes",
+                            input: "$newestLikes",
                             initialValue: 0,
                             in: {
                                 $cond: [
@@ -60,16 +71,15 @@ export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<st
                     },
                     dislikeCount: {
                         $reduce: {
-                            input: "$likes",
+                            input: "$newestLikes",
                             initialValue: 0,
                             in: {
-                                $cond: [
-                                    {
-                                        $and: [
-                                            {$eq: ["$$this.likeStatus", "Dislike"]},
-                                            {$ne: ["$$this.likeStatus", null]}
-                                        ]
-                                    },
+                                $cond: [{
+                                    $and: [
+                                        {$eq: ["$$this.likeStatus", "Dislike"]},
+                                        {$ne: ["$$this.likeStatus", null]}
+                                    ]
+                                },
                                     {$add: ["$$value", 1]},
                                     "$$value"
                                 ]
@@ -78,7 +88,7 @@ export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<st
                     },
                     MyStatus: {
                         $reduce: {
-                            input: "$likes",
+                            input: "$newestLikes",
                             initialValue: "None",
                             in: {
                                 $cond: [
@@ -101,19 +111,8 @@ export function likesInfo<T>(config: SearchConfiguration<T>, userId: Nullable<st
             $project: {
                 _id: 0,
                 __v: 0,
-                likes: 0
+                newestLikes: 0
             }
-        },
-        {
-            $sort: {[config.sortBy]: config.sortDirection! === 'asc' ? 1 : -1}
-        },
-        // Пропускаем нужное количество записей
-        {
-            $skip: config.shouldSkip
-        },
-        // Ограничиваем количество записей
-        {
-            $limit: config.limit
         }
     ]
 }
