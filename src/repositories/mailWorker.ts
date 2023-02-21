@@ -25,7 +25,7 @@ export class MailWorker {
         if(!customLink) {
             return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
         }
-        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${customLink}?recoveryCode=${code}">complete registration</a></p>`
+        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${customLink}/${code}">complete registration</a></p>`
     }
 
     private changePassMessage(code: string) {
