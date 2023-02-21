@@ -1,6 +1,7 @@
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {inject, injectable} from "inversify";
+import {Nullable} from "../models/mixedModels";
 
 @injectable()
 export class MailWorker {
@@ -20,21 +21,24 @@ export class MailWorker {
         })
     }
 
-    private message(code: string) {
-        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
+    private message(code: string, customLink: Nullable<string> = null) {
+        if(!customLink) {
+            return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${this.link}${code}">complete registration</a></p>`
+        }
+        return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${customLink}?recoveryCode=${code}">complete registration</a></p>`
     }
 
     private changePassMessage(code: string) {
         return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${this.passLink}${code}">recovery password</a></p>`
     }
 
-    public async sendConfirmationAfterRegistration(email: string, code: string): Promise<boolean> {
+    public async sendConfirmationAfterRegistration(email: string, code: string, customDomain: Nullable<string> = null): Promise<boolean> {
         try {
             const {accepted} = await this.mainTransporter.sendMail({
                 from: `it-incubator Application <${process.env.MAIL_NAME}>`,
                 to: email,
                 subject: 'Registration conformation',
-                html: this.message(code),
+                html: this.message(code, customDomain),
             })
             return accepted.length > 0
         } catch (e) {

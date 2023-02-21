@@ -1,9 +1,9 @@
 import {inject, injectable} from "inversify";
 import {QueryRepository} from "../repositories/queryRepository";
-import {UserInputModel, UserLogicModel, UserViewModel} from "../models/userModel";
+import {UserInputModelFromFront, UserLogicModel, UserViewModel} from "../models/userModel";
 import {UsersService} from "./users-service";
 import {JwtService} from "./jwt-service";
-import {ClientMeta, HashFunction, NullablePromise} from "../models/mixedModels";
+import {ClientMeta, HashFunction, Nullable, NullablePromise} from "../models/mixedModels";
 import {RefreshTokenPayload, SessionFilter} from "../models/refreshTokensMeta";
 import {CommandRepository} from "../repositories/commandRepository";
 
@@ -31,7 +31,7 @@ export class AuthService {
         return await this.usersService.getUserById(userId)
     }
 
-    async registration (input: UserInputModel) {
+    async registration (input: UserInputModelFromFront) {
         return await this.usersService.createUser(input)
     }
 
@@ -39,8 +39,8 @@ export class AuthService {
         return await this.usersService.confirm(code)
     }
 
-    async resendEmail(email: string) {
-        return await this.usersService.resend(email)
+    async resendEmail(email: string, customDomain: Nullable<string> = null) {
+        return await this.usersService.resend(email,customDomain)
     }
 
     async refresh(meta: ClientMeta) {
