@@ -109,8 +109,8 @@ export class AuthController {
     }
 
     public async recoverPassword(req: Request, res: Response) {
-        const {body: {email}} = req
-        await this.usersService.recoverPassword(email)
+        const {body: {email, customDomain}} = req
+        await this.usersService.recoverPassword(email,customDomain)
         res.sendStatus(httpStatus.noContent)
     }
 

@@ -141,12 +141,12 @@ export class UsersService {
         }
     }
 
-    public async recoverPassword(email: string): Promise<void> {
+    public async recoverPassword(email: string, customDomain: Nullable<string> = null): Promise<void> {
         const recovery = await this.generateRecovery()
         const user = await this.queryRepository.getUserByEmail(email)
         if(!user) return
         await this.commandRepository.recoverAttempt(email, recovery)
-        await this.mailWorker.changePassword(user.email,recovery.recoveryCode)
+        await this.mailWorker.changePassword(user.email,recovery.recoveryCode, customDomain)
     }
 
     public async confirmRecovery(recoveryCode: string, newPassword: string): Promise<boolean> {

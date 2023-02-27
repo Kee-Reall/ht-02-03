@@ -28,8 +28,11 @@ export class MailWorker {
         return `<h1>Thank for your registration</h1><p>To finish registration please follow the link below: <a href="${customLink}/code=${code}">complete registration</a></p>`
     }
 
-    private changePassMessage(code: string) {
-        return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${this.passLink}${code}">recovery password</a></p>`
+    private changePassMessage(code: string, link: Nullable<string>) {
+        if (!link) {
+            return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${this.passLink}${code}">recovery password</a></p>`
+        }
+        return `<h1>Password recovery</h1><p>To finish password recovery please follow the link below:<a href="${link}/recoveryCode=${code}">recovery password</a></p>`
     }
 
     public async sendConfirmationAfterRegistration(email: string, code: string, customDomain: Nullable<string> = null): Promise<boolean> {
@@ -46,13 +49,13 @@ export class MailWorker {
         }
     }
 
-    public async changePassword(email: string, code: string) {
+    public async changePassword(email: string, code: string,customDomain: Nullable<string> = null) {
         try {
             const {accepted} = await this.mainTransporter.sendMail({
                 from: `it-incubator Application <${process.env.MAIL_NAME}>`,
                 to: email,
                 subject: 'Password Changing',
-                html: this.changePassMessage(code),
+                html: this.changePassMessage(code, customDomain),
             })
             return accepted.length > 0
         } catch (e) {
