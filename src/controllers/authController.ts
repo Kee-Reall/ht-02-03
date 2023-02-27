@@ -9,7 +9,7 @@ import {UsersService} from "../services/users-service";
 
 @injectable()
 export class AuthController {
-    private cookiesOptions: CookieOptions = {
+    private readonly cookiesOptions: CookieOptions = {
         domain: 'ht-02-03.vercel.app',
         sameSite: 'none',
         secure: true,
