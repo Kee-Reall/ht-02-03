@@ -24,13 +24,13 @@ export class JwtService {
 
     private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
-            expiresIn: `${time}s`
+            expiresIn: `15s` //`${time}s`
         }
     }
 
     private generateExpireIn15Days(): SignOptions {
         return {
-            expiresIn: `15d`
+            expiresIn: `15s` //`15d`
         }
     }
 
