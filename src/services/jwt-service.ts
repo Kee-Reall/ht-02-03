@@ -24,18 +24,18 @@ export class JwtService {
 
     private generateExpire(time: number = this.normalTimeExpire): SignOptions {
         return {
-            expiresIn: `15s` //`${time}s`
+            expiresIn:`${time}s`
         }
     }
 
     private generateExpireIn15Days(): SignOptions {
         return {
-            expiresIn: `30s` //`15d`
+            expiresIn: `5d`
         }
     }
 
     public async createAccessToken(userId: string): Promise<string> {
-        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(10 * 60));
+        return jwt.sign({userId}, this.getJwtSecret(), this.generateExpire(20 * 60));
     }
 
     private async createRefreshToken(clientInfo: CreateTokenClientMeta): NullablePromise<string>{
