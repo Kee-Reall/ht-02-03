@@ -30,7 +30,7 @@ export class JwtService {
 
     private generateExpireIn15Days(): SignOptions {
         return {
-            expiresIn: `15s` //`15d`
+            expiresIn: `30s` //`15d`
         }
     }
 
