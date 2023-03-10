@@ -79,7 +79,7 @@ export class UsersService {
     }
 
     public async createUser(input: UserInputModelFromFront): Promise<boolean> {
-        const {password, email, login} = input
+        const {password, email, login} = input //comment
         const createdAt: string = new Date(Date.now()).toISOString()
         const salt = await this.genSalt(10)
         const hash = await this.hash(password, salt)
